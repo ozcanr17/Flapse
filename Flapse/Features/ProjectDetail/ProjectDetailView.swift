@@ -621,18 +621,7 @@ struct ProjectDetailView: View {
                     .font(Theme.headline(18))
                     .foregroundStyle(theme.ink)
                 Spacer()
-                if isSelectingEntries {
-                    Button(areAllDisplayedEntriesSelected ? "Temizle" : "Tümü") {
-                        toggleAllDisplayedEntries()
-                    }
-                    .font(Theme.headline(14))
-                    .foregroundStyle(accent)
-                    Button("Bitti") {
-                        finishSelection()
-                    }
-                    .font(Theme.headline(14))
-                    .foregroundStyle(accent)
-                } else {
+                if !isSelectingEntries {
                     Button("Seç") {
                         withAnimation(.easeInOut(duration: 0.2)) { isSelectingEntries = true }
                     }
@@ -731,21 +720,22 @@ struct ProjectDetailView: View {
 
     private var selectionActionBar: some View {
         HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("\(selectedEntryIDs.count) fotoğraf")
-                    .font(Theme.headline(15))
-                    .foregroundStyle(theme.ink)
-                Text("Toplu düzenle")
-                    .font(Theme.caption(11))
-                    .foregroundStyle(theme.inkMuted)
+            Button(areAllDisplayedEntriesSelected ? "Temizle" : "Tümü") {
+                toggleAllDisplayedEntries()
             }
-            Spacer()
+            .font(Theme.headline(15))
+            .foregroundStyle(accent)
+            .accessibilityIdentifier("timelineSelectAllButton")
+
+            Spacer(minLength: 8)
+
             Button {
                 activeSheet = .batchDate
             } label: {
                 Label("Tarih", systemImage: "calendar.badge.clock")
             }
             .buttonStyle(BatchMetadataButtonStyle(accent: accent))
+            .disabled(selectedEntryIDs.isEmpty)
             .accessibilityIdentifier("batchDateButton")
             Button {
                 activeSheet = .batchLocation
@@ -753,9 +743,18 @@ struct ProjectDetailView: View {
                 Label("Konum", systemImage: "mappin.and.ellipse")
             }
             .buttonStyle(BatchMetadataButtonStyle(accent: accent))
+            .disabled(selectedEntryIDs.isEmpty)
             .accessibilityIdentifier("batchLocationButton")
+
+            Spacer(minLength: 8)
+
+            Button("Bitti") {
+                finishSelection()
+            }
+            .font(Theme.headline(15))
+            .foregroundStyle(accent)
+            .accessibilityIdentifier("timelineDoneButton")
         }
-        .disabled(selectedEntryIDs.isEmpty)
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
         .background(.ultraThinMaterial)

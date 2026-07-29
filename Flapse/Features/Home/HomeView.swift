@@ -69,29 +69,31 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ZStack {
+        let live = liveProjects
+        let due = dueProjects
+        return ZStack {
             theme.canvas.ignoresSafeArea()
             ScrollView {
                 VStack(alignment: .leading, spacing: 18) {
                     header
-                    if liveProjects.isEmpty {
+                    if live.isEmpty {
                         emptyState
                     } else {
-                        if let firstDueProject = dueProjects.first {
+                        if let firstDueProject = due.first {
                             DailyCaptureCard(project: firstDueProject) {
                                 onCapture(firstDueProject)
                             }
                         }
                         ActivityHeroCard(
                             totalCaptures: liveEntries.count,
-                            dueCount: dueProjects.count,
+                            dueCount: due.count,
                             entries: liveEntries,
                             isActive: isActive
                         )
-                        if dueProjects.count > 1 {
-                            dueSection
+                        if due.count > 1 {
+                            dueSection(due)
                         }
-                        statsGrid
+                        statsGrid(liveProjectCount: live.count)
                         tipCard
                         if !recentEntries.isEmpty {
                             recentSection
@@ -115,9 +117,9 @@ struct HomeView: View {
         }
     }
 
-    private var statsGrid: some View {
+    private func statsGrid(liveProjectCount: Int) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
-            StatTile(icon: "square.grid.2x2", value: liveProjects.count, label: "Aktif proje")
+            StatTile(icon: "square.grid.2x2", value: liveProjectCount, label: "Aktif proje")
             StatTile(icon: "photo.stack", value: liveEntries.count, label: "Toplam kare")
             StatTile(icon: "flame", value: longestStreak, label: "En uzun seri")
             StatTile(icon: "calendar", value: weekCount, label: "Bu hafta")
@@ -167,16 +169,12 @@ struct HomeView: View {
         .cardStyle()
     }
 
-    private var remainingDueProjects: ArraySlice<Project> {
-        dueProjects.dropFirst()
-    }
-
-    private var dueSection: some View {
+    private func dueSection(_ due: [Project]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Bugün çekim zamanı")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(theme.inkMuted)
-            ForEach(remainingDueProjects) { project in
+            ForEach(due.dropFirst()) { project in
                 Button {
                     onCapture(project)
                 } label: {

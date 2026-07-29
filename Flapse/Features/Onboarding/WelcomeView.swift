@@ -5,6 +5,7 @@ struct WelcomeView: View {
     let onFinish: () -> Void
 
     @Environment(\.theme) private var theme
+    @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var isAnimating = false
 
@@ -74,6 +75,7 @@ struct WelcomeView: View {
         .safeAreaInset(edge: .bottom) {
             Button("Başla") {
                 onFinish()
+                dismiss()
             }
                 .buttonStyle(.flapsePrimary)
                 .padding(.horizontal, 24)

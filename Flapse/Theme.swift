@@ -173,21 +173,23 @@ enum Theme {
 
     static let brand = Color(light: "2E8B57", dark: "5FD98A")
 
+    private static let categoryAccents: [ProjectCategory: Color] = [
+        .selfPortrait: Color(light: "2E8B57", dark: "5FD98A"),
+        .person:       Color(light: "5E5CE6", dark: "9D9BF5"),
+        .child:        Color(light: "B8637A", dark: "E79CAE"),
+        .plant:        Color(light: "4C7A52", dark: "8FC79A"),
+        .hairAndBeard: Color(light: "8A6A4E", dark: "C9A97D"),
+        .pet:          Color(light: "5B7FBF", dark: "94B4F2"),
+        .fitness:      Color(light: "B0722E", dark: "E0A468"),
+        .pregnancy:    Color(light: "9A5BA6", dark: "C99BD6"),
+        .baby:         Color(light: "3E8E9E", dark: "7FC3D1"),
+        .outfit:       Color(light: "B0568A", dark: "D98BB8"),
+        .coupleMode:   Color(light: "C2566B", dark: "F191A6"),
+        .other:        Color(light: "6E675E", dark: "B3ABA0")
+    ]
+
     static func accent(for category: ProjectCategory) -> Color {
-        switch category {
-        case .selfPortrait: Color(light: "2E8B57", dark: "5FD98A")
-        case .person:       Color(light: "5E5CE6", dark: "9D9BF5")
-        case .child:        Color(light: "B8637A", dark: "E79CAE")
-        case .plant:        Color(light: "4C7A52", dark: "8FC79A")
-        case .hairAndBeard: Color(light: "8A6A4E", dark: "C9A97D")
-        case .pet:          Color(light: "5B7FBF", dark: "94B4F2")
-        case .fitness:      Color(light: "B0722E", dark: "E0A468")
-        case .pregnancy:    Color(light: "9A5BA6", dark: "C99BD6")
-        case .baby:         Color(light: "3E8E9E", dark: "7FC3D1")
-        case .outfit:       Color(light: "B0568A", dark: "D98BB8")
-        case .coupleMode:   Color(light: "C2566B", dark: "F191A6")
-        case .other:        Color(light: "6E675E", dark: "B3ABA0")
-        }
+        categoryAccents[category] ?? categoryAccents[.other]!
     }
 
     static func icon(for category: ProjectCategory) -> String {
