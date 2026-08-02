@@ -60,98 +60,78 @@ enum ProjectArchive {
         var errorDescription: String? {
             switch self {
             case .manifestMissing:
-                return "Arşivde manifest.json bulunamadı."
+                return String(localized: "Arşivde manifest.json bulunamadı.")
             case .manifestUnreadable:
-                return "Arşiv dosyası okunamadı ya da bozuk."
+                return String(localized: "Arşiv dosyası okunamadı ya da bozuk.")
             case .unsupportedVersion(let version):
-                return "Bu arşiv (sürüm \(version)) uygulamanın bu sürümüyle desteklenmiyor. Lütfen Flapse'i güncelleyin."
+                return String(localized: "Bu arşiv (sürüm \(version)) uygulamanın bu sürümüyle desteklenmiyor. Lütfen Flapse'i güncelleyin.")
             case .videoMissing:
-                return "Arşivde belirtilen bir video dosyası bulunamadı."
+                return String(localized: "Arşivde belirtilen bir video dosyası bulunamadı.")
             }
         }
     }
 
-    // MARK: - Export: SwiftData'dan düz veri anlık görüntüsü (MainActor)
+    // MARK: - Export
 
-    struct EntrySnapshot: Sendable {
-        let id: UUID
-        let capturedAt: Date
-        let imageData: Data?
-        let videoSourceURL: URL?
-        let videoDuration: Double?
-        let anchorX: Double?
-        let anchorY: Double?
-        let subjectKindRaw: String?
-        let latitude: Double?
-        let longitude: Double?
-        let placeName: String?
-    }
-
-    struct ProjectSnapshot: Sendable {
-        let title: String
-        let category: String
-        let cadence: String
-        let createdAt: Date
-        let entries: [EntrySnapshot]
-    }
-
+    /// Projeyi paketler ve paketin URL'ini döndürür. Çağıran, paylaşım bitince geçici
+    /// dizini silmekten sorumludur.
+    ///
+    /// Kareler TEK TEK işlenir: her fotoğrafın baytları okunur, diske yazılır ve bir
+    /// sonrakine geçmeden serbest bırakılır. Önce hepsini bir diziye toplayan bir sürüm
+    /// vardı; `imageData` `.externalStorage` olduğu ve kameradan gelen JPEG'ler tam
+    /// çözünürlükte saklandığı için bu, yüzlerce kareli bir projede yüz megabaytları
+    /// aynı anda ana aktöre çekiyordu (bkz. HANDOFF'taki `imageData` kuralı).
     @MainActor
-    static func snapshot(of project: Project) -> ProjectSnapshot {
-        let entries = project.sortedEntries.map { entry in
-            EntrySnapshot(
-                id: entry.id,
-                capturedAt: entry.capturedAt,
-                imageData: entry.imageData,
-                videoSourceURL: entry.videoFileURL,
-                videoDuration: entry.videoDuration,
-                anchorX: entry.anchorX,
-                anchorY: entry.anchorY,
-                subjectKindRaw: entry.subjectKindRaw,
-                latitude: entry.latitude,
-                longitude: entry.longitude,
-                placeName: entry.placeName
-            )
-        }
-        return ProjectSnapshot(
-            title: project.title,
-            category: project.category.rawValue,
-            cadence: project.cadence.rawValue,
-            createdAt: project.createdAt,
-            entries: entries
-        )
-    }
-
-    /// Anlık görüntüyü diske paketler ve paketin URL'ini döndürür. SwiftData'ya
-    /// dokunmadığı için arka plan kuyruğunda çalıştırılabilir. Çağıran, paylaşım
-    /// bitince geçici dizini silmekten sorumludur.
-    static func write(_ snapshot: ProjectSnapshot) throws -> URL {
-        let safeTitle = sanitizedFileName(snapshot.title.isEmpty ? "Proje" : snapshot.title)
+    static func write(project: Project) async throws -> URL {
+        let safeTitle = sanitizedFileName(project.title.isEmpty ? "Proje" : project.title)
         let root = FileManager.default.temporaryDirectory
             .appendingPathComponent("\(safeTitle)-\(UUID().uuidString.prefix(8))", isDirectory: true)
             .appendingPathExtension(packageExtension)
+        do {
+            try await writeContents(of: project, to: root)
+        } catch {
+            // Yarım kalan paketi burada silmezsek geçici dizinde kalıcı olur: dışa
+            // aktarma sayfası hiç açılmadığından çağıranın temizlik yolu da işlemez.
+            try? FileManager.default.removeItem(at: root)
+            throw error
+        }
+        return root
+    }
+
+    @MainActor
+    private static func writeContents(of project: Project, to root: URL) async throws {
         let photosDir = root.appendingPathComponent("photos", isDirectory: true)
         let videosDir = root.appendingPathComponent("videos", isDirectory: true)
         try FileManager.default.createDirectory(at: photosDir, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: videosDir, withIntermediateDirectories: true)
 
+        let entries = project.sortedEntries
         var entryPayloads: [Manifest.EntryPayload] = []
-        entryPayloads.reserveCapacity(snapshot.entries.count)
+        entryPayloads.reserveCapacity(entries.count)
 
-        for entry in snapshot.entries {
+        for entry in entries {
+            let id = entry.id
             var hasPhoto = false
+            // Bayt kopyalama ve disk yazımı arka plana veriliyor; `Data` Sendable
+            // olduğu için aktör sınırını güvenle geçer ve tur bitince serbest kalır.
             if let imageData = entry.imageData {
-                let url = photosDir.appendingPathComponent("\(entry.id.uuidString).jpg")
-                try imageData.write(to: url, options: .atomic)
+                let url = photosDir.appendingPathComponent("\(id.uuidString).jpg")
+                try await Task.detached(priority: .userInitiated) {
+                    try imageData.write(to: url, options: .atomic)
+                }.value
                 hasPhoto = true
             }
             var videoFileName: String?
-            if let sourceURL = entry.videoSourceURL, FileManager.default.fileExists(atPath: sourceURL.path) {
-                let name = "\(entry.id.uuidString).mp4"
-                try FileManager.default.copyItem(at: sourceURL, to: videosDir.appendingPathComponent(name))
+            if let sourceURL = entry.videoFileURL, FileManager.default.fileExists(atPath: sourceURL.path) {
+                let name = "\(id.uuidString).mp4"
+                let destination = videosDir.appendingPathComponent(name)
+                try await Task.detached(priority: .userInitiated) {
+                    try FileManager.default.copyItem(at: sourceURL, to: destination)
+                }.value
                 videoFileName = name
             }
             entryPayloads.append(Manifest.EntryPayload(
-                id: entry.id,
+                id: id,
                 capturedAt: entry.capturedAt,
                 hasPhoto: hasPhoto,
                 videoFileName: videoFileName,
@@ -170,26 +150,32 @@ enum ProjectArchive {
             exportedAt: .now,
             project: Manifest.ProjectPayload(
                 id: UUID(),
-                title: snapshot.title,
-                category: snapshot.category,
-                cadence: snapshot.cadence,
-                createdAt: snapshot.createdAt
+                title: project.title,
+                category: project.category.rawValue,
+                cadence: project.cadence.rawValue,
+                createdAt: project.createdAt
             ),
             entries: entryPayloads
         )
         let encoder = JSONEncoder()
         encoder.dateEncodingStrategy = .iso8601
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try encoder.encode(manifest).write(to: root.appendingPathComponent("manifest.json"), options: .atomic)
-
-        return root
+        let manifestData = try encoder.encode(manifest)
+        let manifestURL = root.appendingPathComponent("manifest.json")
+        try await Task.detached(priority: .userInitiated) {
+            try manifestData.write(to: manifestURL, options: .atomic)
+        }.value
     }
 
     // MARK: - Import
 
     struct ImportedEntry: Sendable {
         let capturedAt: Date
-        let imageData: Data?
+        /// Fotoğrafın paket içindeki adı. Baytlar burada TAŞINMAZ; `materialize` her
+        /// kareyi sırası gelince okur. Hepsini önce diziye almak, `materialize`'ın da
+        /// aynı baytları `Entry`'lere kopyalaması yüzünden tepe belleği arşivin iki
+        /// katına çıkarıyordu.
+        let photoFileName: String?
         /// Video klibi, okuma sırasında zaten `VideoEntryStorage`'a kopyalanmıştır —
         /// burada yalnızca dosya adı taşınır, `materialize` ek I/O yapmaz.
         let videoFileName: String?
@@ -207,13 +193,16 @@ enum ProjectArchive {
         let category: String
         let cadence: String
         let createdAt: Date
+        /// `materialize` fotoğrafları buradan okur, bu yüzden çağıran güvenlik kapsamlı
+        /// erişimi `materialize` bitene kadar da açık tutmalıdır.
+        let packageURL: URL
         let entries: [ImportedEntry]
     }
 
-    /// Paketi okur; fotoğraf baytlarını belleğe alır, video klipleri doğrudan
-    /// `VideoEntryStorage`'a kopyalar (SwiftData'ya dokunmadığı için arka planda
-    /// çalıştırılabilir). Çağıran, `url` güvenlik kapsamlı bir URL ise erişimi bu
-    /// çağrı boyunca açık tutmalıdır.
+    /// Paketin manifest'ini okur ve video kliplerini `VideoEntryStorage`'a kopyalar.
+    /// Fotoğraf baytlarına dokunmaz — onları `materialize` tek tek okur. SwiftData'ya
+    /// dokunmadığı için arka planda çalıştırılabilir. Çağıran, `url` güvenlik kapsamlı
+    /// bir URL ise erişimi `materialize` bitene kadar açık tutmalıdır.
     static func read(packageAt url: URL) throws -> ImportedProject {
         let manifestURL = url.appendingPathComponent("manifest.json")
         guard FileManager.default.fileExists(atPath: manifestURL.path) else {
@@ -239,37 +228,49 @@ enum ProjectArchive {
         var entries: [ImportedEntry] = []
         entries.reserveCapacity(manifest.entries.count)
 
-        for payload in manifest.entries {
-            let imageData: Data? = payload.hasPhoto
-                ? try? Data(contentsOf: photosDir.appendingPathComponent("\(payload.id.uuidString).jpg"))
-                : nil
-
-            var newVideoFileName: String?
-            if let videoFileName = payload.videoFileName {
-                let sourceURL = videosDir.appendingPathComponent(videoFileName)
-                guard FileManager.default.fileExists(atPath: sourceURL.path) else {
-                    throw ArchiveError.videoMissing
+        do {
+            for payload in manifest.entries {
+                var photoFileName: String?
+                if payload.hasPhoto {
+                    let name = "\(payload.id.uuidString).jpg"
+                    if FileManager.default.fileExists(atPath: photosDir.appendingPathComponent(name).path) {
+                        photoFileName = name
+                    }
                 }
-                let destName = VideoEntryStorage.fileName(for: UUID())
-                try FileManager.default.copyItem(
-                    at: sourceURL,
-                    to: VideoEntryStorage.directory.appendingPathComponent(destName)
-                )
-                newVideoFileName = destName
-            }
 
-            entries.append(ImportedEntry(
-                capturedAt: payload.capturedAt,
-                imageData: imageData,
-                videoFileName: newVideoFileName,
-                videoDuration: payload.videoDuration,
-                anchorX: payload.anchorX,
-                anchorY: payload.anchorY,
-                subjectKindRaw: payload.subjectKindRaw,
-                latitude: payload.latitude,
-                longitude: payload.longitude,
-                placeName: payload.placeName
-            ))
+                var newVideoFileName: String?
+                if let videoFileName = payload.videoFileName {
+                    let sourceURL = videosDir.appendingPathComponent(videoFileName)
+                    guard FileManager.default.fileExists(atPath: sourceURL.path) else {
+                        throw ArchiveError.videoMissing
+                    }
+                    let destName = VideoEntryStorage.fileName(for: UUID())
+                    try FileManager.default.copyItem(
+                        at: sourceURL,
+                        to: VideoEntryStorage.directory.appendingPathComponent(destName)
+                    )
+                    newVideoFileName = destName
+                }
+
+                entries.append(ImportedEntry(
+                    capturedAt: payload.capturedAt,
+                    photoFileName: photoFileName,
+                    videoFileName: newVideoFileName,
+                    videoDuration: payload.videoDuration,
+                    anchorX: payload.anchorX,
+                    anchorY: payload.anchorY,
+                    subjectKindRaw: payload.subjectKindRaw,
+                    latitude: payload.latitude,
+                    longitude: payload.longitude,
+                    placeName: payload.placeName
+                ))
+            }
+        } catch {
+            // Klipler VideoEntryStorage'a, yani SwiftData'nın dışına kopyalanıyor;
+            // okuma yarıda kalırsa onları hiçbir kayıt işaret etmez ve kalıcı olarak
+            // yer kaplarlar.
+            discardCopiedVideos(in: entries)
+            throw error
         }
 
         return ImportedProject(
@@ -277,6 +278,7 @@ enum ProjectArchive {
             category: manifest.project.category,
             cadence: manifest.project.cadence,
             createdAt: manifest.project.createdAt,
+            packageURL: url,
             entries: entries
         )
     }
@@ -297,10 +299,16 @@ enum ProjectArchive {
         )
         context.insert(project)
 
+        let photosDir = imported.packageURL.appendingPathComponent("photos", isDirectory: true)
+        var inserted: [Entry] = []
+        inserted.reserveCapacity(imported.entries.count)
         for payload in imported.entries {
+            let imageData = payload.photoFileName.flatMap {
+                try? Data(contentsOf: photosDir.appendingPathComponent($0))
+            }
             let entry = Entry(
                 capturedAt: payload.capturedAt,
-                imageData: payload.imageData,
+                imageData: imageData,
                 anchorX: payload.anchorX,
                 anchorY: payload.anchorY,
                 subjectKindRaw: payload.subjectKindRaw,
@@ -312,10 +320,31 @@ enum ProjectArchive {
             entry.placeName = payload.placeName
             entry.project = project
             context.insert(entry)
+            inserted.append(entry)
         }
 
-        try context.save()
+        do {
+            try context.save()
+        } catch {
+            // Kayıt başarısızsa `read` sırasında kopyalanan klipleri kimse sahiplenmez.
+            // Bağlam uygulamanın ana bağlamı olduğu için `rollback()` yerine yalnızca
+            // kendi eklediklerimizi geri alıyoruz; başkasının bekleyen değişikliği varsa
+            // ona dokunmuyoruz.
+            for entry in inserted { context.delete(entry) }
+            context.delete(project)
+            discardCopiedVideos(in: imported.entries)
+            throw error
+        }
         return project
+    }
+
+    /// İçe aktarma yarıda kaldığında `VideoEntryStorage`'a kopyalanmış klipleri siler.
+    private static func discardCopiedVideos(in entries: [ImportedEntry]) {
+        for name in entries.compactMap(\.videoFileName) {
+            try? FileManager.default.removeItem(
+                at: VideoEntryStorage.directory.appendingPathComponent(name)
+            )
+        }
     }
 
     /// `.fileExporter`'a önerilen dosya adı olarak verilir (uzantısız — `contentType`

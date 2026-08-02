@@ -2,13 +2,13 @@
   "sourceLanguage" : "tr",
   "strings" : {
     "·" : {
-
+      "shouldTranslate" : false
     },
     "%lld" : {
-
+      "shouldTranslate" : false
     },
     "%lld " : {
-
+      "shouldTranslate" : false
     },
     "Aktivite" : {
       "localizations" : {
@@ -291,7 +291,7 @@
       }
     },
     "Flapse" : {
-
+      "shouldTranslate" : false
     },
     "Gün serin ve bugünün çekim durumu." : {
       "localizations" : {

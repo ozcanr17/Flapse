@@ -259,7 +259,7 @@ struct SettingsView: View {
                     }
                 }
                 Button {
-                    isImportingArchive = true
+                    importArchiveTapped()
                 } label: {
                     Label {
                         Text("Proje Arşivi İçe Aktar").foregroundStyle(theme.ink)
@@ -461,6 +461,23 @@ struct SettingsView: View {
                 customThemeEnabled = true
             }
         )
+    }
+
+    /// Arşiv içe aktarma her zaman YENİ bir proje yaratır, bu yüzden proje sayısı
+    /// sınırı diğer proje oluşturma yollarıyla aynı şekilde uygulanmalı
+    /// (bkz. `ProjectListView.addProjectTapped` / `importTapped`). Kontrol yokken
+    /// ücretsiz katmandaki kullanıcı sınırı arşiv üzerinden aşabiliyordu; dahası
+    /// içe aktarılan proje kendi eski `createdAt`'ini koruduğu için `unlockedProjectID`
+    /// onu en yeni saymıyor ve kullanıcı "İçe Aktarıldı" mesajının hemen ardından
+    /// kilitli bir proje görüyordu.
+    private func importArchiveTapped() {
+        let descriptor = FetchDescriptor<Project>(predicate: #Predicate { $0.deletedAt == nil })
+        let count = (try? settingsContext.fetchCount(descriptor)) ?? projectCount
+        if FeatureGate.canCreateProject(isPro: store.isPro, currentProjectCount: count) {
+            isImportingArchive = true
+        } else {
+            showPaywall = true
+        }
     }
 
     /// Seçilen `.flapseproject` paketini okur (arka planda; SwiftData'ya dokunmaz)

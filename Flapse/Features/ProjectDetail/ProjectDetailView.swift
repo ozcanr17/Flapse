@@ -219,7 +219,7 @@ struct ProjectDetailView: View {
                     }
                 }
             }
-            Button("Proje Arşivi (Fotoğraflar + Videolar)") {
+            Button("Proje Arşivi (Tüm Kareler)") {
                 exportProjectArchive()
             }
             Button("Vazgeç", role: .cancel) {}
@@ -514,16 +514,13 @@ struct ProjectDetailView: View {
     /// video ağırlıklı büyük projelerde bile arayüz kilitlenmez.
     private func exportProjectArchive() {
         isExportingArchive = true
-        let snapshot = ProjectArchive.snapshot(of: project)
         let filename = ProjectArchive.sanitizedExportName(project.title)
         Task {
             defer { isExportingArchive = false }
             do {
-                let url = try await Task.detached(priority: .userInitiated) {
-                    try ProjectArchive.write(snapshot)
-                }.value
+                let url = try await ProjectArchive.write(project: project)
                 archiveTempURL = url
-                archiveDocument = ProjectArchiveDocument(wrapper: try FileWrapper(url: url))
+                archiveDocument = ProjectArchiveDocument(packageURL: url)
                 archiveExportFilename = filename
                 isPresentingArchiveExporter = true
             } catch {

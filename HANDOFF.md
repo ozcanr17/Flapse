@@ -1,10 +1,12 @@
 # HANDOFF — Flapse iOS App
 
-Last updated: **2026-08-02**. Written for a completely new session with no
-prior context. This replaces the 2026-07-21 version of this file (that phase
-of work — tab performance/Liquid Glass restoration — is finished and its
-commits are on `main`; see "Older, already-finished phases" at the bottom if
-you need that history).
+Last updated: **2026-08-02 (second session that day — release-prep pass)**.
+Written for a completely new session with no prior context.
+
+The first 2026-08-02 session (camera review screen, import/export, dead-code
+sweep) is described below and is on `main`. A second session that same day did
+a release-preparation pass; **read "Release-prep pass" first — it corrects two
+factual errors in the older text below.**
 
 Read this file first, then:
 
@@ -32,7 +34,184 @@ dependencies.
   follow `.claude/skills/tasteskill` — calm native Apple HIG, no neon/glow,
   color is an accent only (see pitfall list below for where this was tested).
 
-## Current task (this session, unfinished thread)
+## Release-prep pass (2026-08-02, second session)
+
+The user asked to skip on-device verification for now, finish the remaining
+planned items, and get the app ready to publish on the App Store.
+
+### Done
+
+1. **Two file leaks in the new import/export feature fixed**
+   (`Flapse/Features/DataTransfer/ProjectArchive.swift`):
+   - Export: `write` body moved into `writeContents(of:to:)`; `write` now wraps
+     it and deletes the half-built `.flapseproject` temp directory if anything
+     throws. Previously the directory leaked, because the exporter sheet never
+     opened and the caller's cleanup path (`ProjectDetailView`) never ran.
+   - Import: `read`'s loop is wrapped — a `videoMissing` throw on the Nth entry
+     used to leave the first N-1 clips orphaned in `VideoEntryStorage`.
+     `materialize` now also undoes its inserts and removes copied clips if
+     `context.save()` throws. Shared helper: `discardCopiedVideos(in:)`.
+     Note it deliberately does NOT call `context.rollback()` — the context is
+     the app's main `@Environment(\.modelContext)` and rollback would discard
+     unrelated pending changes.
+
+2. **Localization completed.** Source language is `tr`, so any key without an
+   entry for a language silently fell back to Turkish. 48 keys had no
+   translations at all (import/export, location picker, custom palette, date
+   editing). All 522 keys in `Localizable.xcstrings` now resolve in all 12
+   languages; format-only keys (`%@`, `16:9`, `·`) are marked
+   `shouldTranslate: false`. `ProjectArchive.ArchiveError.errorDescription`
+   returned hardcoded Turkish and is now `String(localized:)`.
+
+3. **Debug instrumentation gated out of Release** (HANDOFF item 5). Rather than
+   deleting the call sites, the three log handles are bound to `OSLog.disabled`
+   under `#if !DEBUG` — `PerfTrace.swift`, `CameraLaunchTrace.swift`,
+   `CameraService.swift` (`cameraLog`). `os_log` early-outs, so interpolated
+   expressions are never evaluated and nothing is emitted on a user's device.
+   Call sites are untouched, so the tooling still works in Debug. If you want
+   them physically removed instead, that is a separate mechanical change.
+
+4. **Release build is warning-free — measured, not assumed.**
+   `xcodebuild -configuration Release build` → `BUILD SUCCEEDED`, zero warnings.
+   Two warnings were fixed to get there:
+   - `ProjectArchiveDocument` stored a `FileWrapper` (not Sendable) in a
+     Sendable `FileDocument`. It now stores the package URL and builds the
+     wrapper inside `fileWrapper(configuration:)`. It is export-only, so
+     `readableContentTypes` is `[]` and `init(configuration:)` throws.
+   - `Flapse/Info.plist` declared `CFBundleDocumentTypes` for
+     `.flapseproject` with `LSHandlerRank = Owner`, but nothing handled the
+     open — tapping an archive in Files launched Flapse and did nothing.
+     **User's decision: the declaration was removed**, not implemented.
+     `UTExportedTypeDeclarations` stays, so Files still shows the package as a
+     single item and Settings import still works. Cost: an AirDropped archive
+     will not offer Flapse as a target. Implementing an `onOpenURL` file
+     handler is a real future feature, deliberately not done here because it
+     can only be verified on device.
+
+5. **CI does not exist on GitHub at all.** Two separate problems, both of which
+   the old `RELEASE_CHECKLIST.md` had ticked off as done:
+   - `.github/workflows/` is in `.gitignore` (line 25). Commit `23f57c7`
+     untracked it because pushing workflow files failed without the `workflow`
+     token scope. So the workflow file is not in the repo and Actions has never
+     run.
+   - The local file still referenced scheme `Timelapse` and
+     `-only-testing:TimelapseTests`; the project's schemes are `Flapse` /
+     `FlapseTests`. Corrected locally, but that correction is untracked too and
+     is **not** part of any commit.
+   To actually get CI: grant the token `workflow` scope, drop `.gitignore:25`,
+   commit the file.
+
+6. **`RELEASE_CHECKLIST.md` rewritten** against measured reality.
+
+7. **Archive import bypassed the paywall** (`SettingsView.swift`). "Proje Arşivi
+   İçe Aktar" had no gate at all, while every other project-creating path
+   (`ProjectListView.addProjectTapped` and `importTapped`) checks
+   `FeatureGate.canCreateProject`. A free user could exceed
+   `freeProjectLimit = 1` through the archive. Worse for the user than for
+   revenue: `materialize` preserves the archive's original `createdAt`, and
+   `FeatureGate.unlockedProjectID` unlocks only the *newest* project — so a
+   free user importing an older project got an "İçe Aktarıldı" success message
+   followed by a project that was immediately locked. Now gated via
+   `importArchiveTapped()`, showing the paywall like everywhere else.
+   Note: the sign-in gate (`auth.gateSkipped`) is still NOT mirrored in
+   Settings — that machinery lives in `ProjectListView`. Low impact (it is a
+   skippable soft gate) but it is still an inconsistency.
+
+8. **Export menu label was misleading.** "Proje Arşivi (Fotoğraflar +
+   Videolar)" reads as if rendered timelapses are included; they are not (see
+   the first session's note about `SavedTimelapse` having no foreign key).
+   "Videolar" actually meant video-mode capture clips. Renamed to
+   **"Proje Arşivi (Tüm Kareler)"** — "kare" is the app's own word for an
+   entry ("Kare çek", "%lld kare"), so it no longer implies timelapse videos.
+   The old key was removed from the catalog and the new one translated.
+
+9. **Export loaded every photo into memory at once — likely OOM on large
+   projects.** `ProjectArchive.snapshot(of:)` was `@MainActor` and read
+   `entry.imageData` for *every* entry into one array, and
+   `exportProjectArchive()` called it synchronously before the progress
+   overlay could draw. Photos are stored as full-resolution camera JPEGs
+   (`CameraCaptureViewModel.swift:189`, cropped but not downsampled), roughly
+   2-4 MB each, behind `@Attribute(.externalStorage)`. A 365-entry project
+   meant ~1 GB pulled onto the main actor in one go — a direct violation of
+   this file's own `imageData` pitfall, and it only bites projects big enough
+   that the user actually wants a backup.
+   **Fixed by streaming:** `ProjectSnapshot`/`EntrySnapshot` are gone.
+   `write(project:)` is now `@MainActor async` and walks entries one at a time,
+   handing each photo's `Data` (Sendable) to a detached task for the disk
+   write, so memory is bounded to one photo and the main actor is free between
+   entries. Import got the cheap half of the same fix: `read` no longer carries
+   photo bytes, only `photoFileName`, and `materialize` loads each photo just
+   before constructing its `Entry` — this halves import peak memory.
+
+### Two corrections to the older text below — do not trust the old versions
+
+- **"Data Not Collected" is WRONG.** `FeedbackService.swift:57` writes the
+  "Bildir" report to the **public** CloudKit database of
+  `iCloud.rozcan.Flapse`, which the developer reads in CloudKit Dashboard. The
+  record carries free-text message, optional contact e-mail, app version, iOS
+  version, hardware model and locale. `Flapse/PrivacyInfo.xcprivacy` correctly
+  declares Email Address + Other User Content; the App Store Connect privacy
+  questionnaire must match it exactly or App Review will flag the mismatch.
+  The claim "no networking" in the old checklist was also wrong.
+- **Promoting the CloudKit `Feedback` schema to Production is NOT release
+  blocking.** The old text said "Bildir" would silently fail without it.
+  `FeedbackViewModel.swift:45` catches *every* error and falls back to a
+  prefilled support e-mail. Promoting the schema just spares users that path.
+
+### Still unverified / blocked
+
+- **Unit tests have now failed to complete in three separate sessions.** This
+  session's run was started clean with nothing else touching the simulator; the
+  simulator booted, `xctest` never started, and it was stopped (SIGTERM) at the
+  user's request. **There is still no test result for any of the last two
+  sessions' changes.** This is the single biggest open risk — the next session
+  should treat "why does `xcodebuild test` hang after simulator boot" as a task
+  in its own right, not as a step inside another task. Worth trying: a fresh
+  simulator device, `-resultBundlePath` to see where it stalls, or running the
+  tests from the Xcode UI once to see the real error.
+- **An App Store archive cannot be produced on this Mac.** `security
+  find-identity -p codesigning` shows only an *Apple Development* certificate,
+  and `~/Library/MobileDevice/Provisioning Profiles/` is empty. So the
+  `aps-environment` question is unresolved: the entitlements file says
+  `development`, an App Store build needs `production`. After archiving, read
+  the embedded value rather than guessing:
+  `codesign -d --entitlements - <path>/Flapse.app`
+- Everything in the first session's "Where we are stuck" list below is still
+  unverified — the export → Files → import round trip in particular.
+
+### Known limitations left in on purpose (import/export)
+
+Found in a user's-eye review of the feature; none is release blocking, all are
+worth a follow-up:
+
+- **Import peak memory is still ~one archive's worth of photos.** Streaming got
+  it down from ~2× to ~1×, but every `Entry` holds its `imageData` in the
+  context until the single `context.save()` at the end. The real fix is a
+  batched save (say every 25 entries) — deliberately not done here because it
+  would trade away the all-or-nothing rollback that `materialize` now has.
+- **No progress indication.** Export/import show an indeterminate spinner
+  ("Arşiv hazırlanıyor…"). On a several-hundred-entry project this runs long
+  enough that it looks hung. Now cheap to add — `writeContents` already loops
+  per entry, so a `(done, total)` callback would be a small change.
+- **Importing the same archive twice silently creates a duplicate project.**
+  No dedupe is possible across two exports anyway: `Manifest.ProjectPayload.id`
+  is freshly generated on every export rather than carried from the project.
+- **Plural grammar.** Strings like `%lld Fotoğrafın Konumu` have no plural
+  variations, so English renders "Location of 1 Photos". Pre-existing pattern
+  across the catalog, not specific to the new strings; fixing it means adding
+  `variations`/plural rules to the affected keys.
+
+### Deferred by the user this session
+
+- **Directional tab transition** (old item 4) — explicitly postponed to after
+  1.0 so release prep would not destabilise a shippable build. When picked up:
+  use a `UIPageViewController` wrapper, not another `TabView` trick, and the
+  number to beat is the current 10-50 ms per switch (the three reverted
+  attempts measured 45-178 ms).
+- On-device verification of the camera review screen and the import/export
+  round trip (old "Next plan" item 1).
+
+## Current task (first 2026-08-02 session)
 
 One long continuous thread: **camera performance → camera UI redesign →
 video-recording project mode → various UX fixes → project import/export
@@ -154,20 +333,19 @@ and commit.
 2. Run the unit test suite exactly once, with no other `xcodebuild test`
    process alive (see pitfalls) — a stale/duplicate run is the most likely
    reason previous attempts never finished.
-3. If the user confirms it's needed: deploy the CloudKit `Feedback` schema
-   from Development to Production in CloudKit Dashboard before release —
-   without this the in-app "Bildir" feature silently fails in production.
-4. Still not done: directional (left/right by tab position) tab-switch
+3. ~~CloudKit `Feedback` schema~~ — **corrected above**: it is not release
+   blocking and does not silently fail; there is a mail fallback.
+4. ~~Directional tab-switch animation~~ — **deferred to post-1.0 by the user**;
+   see the release-prep section above. Original notes kept for the reasoning:
+   directional (left/right by tab position) tab-switch
    animation. Attempted three times across earlier sessions, reverted every
    time because SwiftUI `TabView` + `.id()`/`.transition()` rebuilds the
    destination pane and adds measurable latency (device logs showed per-tab
    cost rising from ~10-50ms to 45-178ms). The next attempt should be a
    `UIPageViewController` wrapper, not another `TabView` trick.
-5. Debug instrumentation (`LAUNCHTRACE`, `PERFTRACE`, `MODESWITCH`,
-   `MICPREARM`, `FLASH`, `ASPECT` — all via `os.Logger`/`OSSignposter`) is
-   intentionally still in the codebase. The user explicitly said to leave it
-   until the current body of work is done ("İşimiz bittiğinde daha sonra
-   kaldıracağız") — do not proactively remove it.
+5. ~~Debug instrumentation still in the codebase~~ — **done in the release-prep
+   pass**: the call sites remain, but in Release the log handles are bound to
+   `OSLog.disabled`, so nothing is emitted on a user's device.
 6. Not started, mentioned once, no plan yet: video clips and rendered
    timelapses are not covered by CloudKit sync (only entries/projects are,
    when Pro + iCloud backup is on) — this is a known data-loss-on-device-loss
@@ -217,6 +395,25 @@ and commit.
   translation of new strings from this session has not been done — Xcode's
   String Catalog will auto-populate missing keys using the source text as a
   placeholder, which is an acceptable interim state, not a finished one.
+- **Do not declare an `Info.plist` capability nothing implements.** A
+  `CFBundleDocumentTypes` entry with `LSHandlerRank = Owner` makes the app the
+  owner of that file type; without an open handler, tapping the file launches
+  the app into a dead end, and the build warns about
+  `LSSupportsOpeningDocumentsInPlace`.
+- **Do not store a `FileWrapper` in a `FileDocument`.** `FileDocument` must be
+  Sendable and `FileWrapper` is not. Store the URL and build the wrapper inside
+  `fileWrapper(configuration:)`.
+- **Do not copy files into `VideoEntryStorage` before the SwiftData objects
+  that reference them are saved** without a cleanup path — those files live
+  outside the store, so a throw anywhere in between orphans them permanently.
+- **Do not reformat `.xcstrings` with `json.dump(sort_keys=True)`.** Python's
+  code-point ordering differs from Xcode's, which rewrites the whole file and
+  turned a ~3k-line diff into a ~14k-line one. Preserve the loaded key order
+  and use `separators=(",", " : ")` to match Xcode's style; only sort the
+  per-entry `localizations` dict.
+- **Do not assume a string is localized because the app has 12 catalogs.** The
+  source language is `tr`, so a missing entry silently renders Turkish in every
+  other language instead of failing. Check for keys with no `en` localization.
 - **Do not write code comments unless the WHY is non-obvious.** No comments
   explaining what code does; the repo convention is comments only for
   hidden constraints/workarounds. This was followed throughout — keep doing
@@ -266,15 +463,21 @@ destination above is fine. SourceKit's `No such module 'UIKit'` diagnostics
 outside a real `xcodebuild` invocation are noise from the editor's indexer,
 not real errors — only trust `xcodebuild build` output.
 
-## App Store publishing status (unchanged this session)
+## App Store publishing status
 
-Technical signing/export path was previously verified end-to-end (archive,
-provisioning, entitlements, `.ipa` export). GitHub Pages privacy/support
-pages are live. Remaining work is primarily App Store Connect setup by the
-owner (Paid Applications agreement/banking/tax, app record + IAPs, metadata
-from `docs/AppStoreListing.md`, screenshots, **promote CloudKit schema to
-Production** — see "Next plan" item 3 above for the specific schema still
-pending). Product IDs intentionally keep the old domain, do not rename:
+**Superseded by `RELEASE_CHECKLIST.md`, which was rewritten 2026-08-02 against
+measured state — use that file, not this paragraph.**
+
+The old claim that "the technical signing/export path was verified end-to-end"
+does not hold on this machine today: there is no Apple Distribution certificate
+and no provisioning profiles installed, so no App Store archive can be built
+here (see the release-prep section above). GitHub Pages privacy/support pages
+are live — re-verified 2026-08-02, all three URLs return 200. Remaining work is
+App Store Connect setup by the owner (Paid Applications agreement/banking/tax,
+app record + IAPs, metadata from `docs/AppStoreListing.md`, screenshots, and the
+privacy questionnaire — which must declare Email Address + Other User Content,
+**not** "Data Not Collected"). Product IDs intentionally keep the old domain,
+do not rename:
 
 - `com.ridvan.timelapse.pro.monthly`
 - `com.ridvan.timelapse.pro.yearly`
@@ -331,9 +534,19 @@ they are still true constraints, just not this session's active work.
 
 ## Final note for the next session
 
-Start with `git log -3` and `git status`. This session committed everything
-in the working tree (see the commit this file was added in) — if `git
-status` shows anything dirty when you start, it is new, not leftover from
-this handoff. Do not redo the camera-review-screen redesign, the streak
-border, or the import/export feature; verify them on-device instead (see
-"Next plan" above).
+Start with `git log -3` and `git status`. Both 2026-08-02 sessions committed
+everything in the working tree — if `git status` shows anything dirty when you
+start, it is new, not leftover. `.agents/` and `.codex/` stay untracked.
+
+Do not redo: the camera-review-screen redesign, the streak border, the
+import/export feature, the localization pass, the instrumentation gating, or
+the release-checklist rewrite.
+
+The two things actually worth doing next, in order:
+
+1. **Work out why `xcodebuild test` never finishes.** Three sessions, zero test
+   results. Treat it as its own task.
+2. **On-device verification** of the export → Files → import round trip and the
+   camera review screen (the user has deferred this twice; it needs them).
+
+Then the owner-side App Store Connect work in `RELEASE_CHECKLIST.md`.

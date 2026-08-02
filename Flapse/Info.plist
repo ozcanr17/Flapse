@@ -49,18 +49,5 @@
 			</dict>
 		</dict>
 	</array>
-	<key>CFBundleDocumentTypes</key>
-	<array>
-		<dict>
-			<key>CFBundleTypeName</key>
-			<string>Flapse Proje Arşivi</string>
-			<key>LSItemContentTypes</key>
-			<array>
-				<string>rozcan.flapse.projectarchive</string>
-			</array>
-			<key>LSHandlerRank</key>
-			<string>Owner</string>
-		</dict>
-	</array>
 </dict>
 </plist>

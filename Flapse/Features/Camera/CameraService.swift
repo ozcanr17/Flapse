@@ -4,7 +4,15 @@ import os
 /// Kamera açılış/mod geçişi zamanlamasını görünür kılmak için: `log stream --predicate
 /// 'subsystem == "rozcan.Flapse"'` ile canlı izlenebilir. Gerçek cihazda ya da
 /// Instruments'ta darboğaz ararken kalıcı olarak burada kalması amaçlanır.
+///
+/// Yayınlanan derlemede `OSLog.disabled`'a bağlanır: çağrı yerleri olduğu gibi kalır ama
+/// `os_log` erken çıkar, dolayısıyla enterpolasyondaki ifadeler hiç değerlendirilmez ve
+/// kullanıcı cihazında hiçbir iz yayılmaz.
+#if DEBUG
 let cameraLog = Logger(subsystem: "rozcan.Flapse", category: "camera")
+#else
+let cameraLog = Logger(OSLog.disabled)
+#endif
 
 enum CameraFlashMode: String, CaseIterable, Sendable {
     case auto, on, off
