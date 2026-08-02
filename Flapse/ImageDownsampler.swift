@@ -16,6 +16,31 @@ enum ImageDownsampler {
         return UIImage(cgImage: cgImage)
     }
 
+    /// Opak bir kareyi JPEG'e yazarken alfa kanalını düşürür.
+    ///
+    /// `CGImageSourceCreateThumbnailAtIndex` sonucu opak bir fotoğrafta bile alfa
+    /// bilgisi taşıyabiliyor; bu haliyle JPEG'e yazınca ImageIO uyarı veriyor
+    /// ("trying to save an opaque image with 'AlphaPremulLast'") ve çözümlemede
+    /// gereken bellek ikiye katlanıyor. Opak bir bağlama yeniden çizerek bunu önlüyoruz.
+    static func opaqueJPEGData(from image: UIImage, compressionQuality: CGFloat) -> Data? {
+        if let cgImage = image.cgImage {
+            switch cgImage.alphaInfo {
+            case .none, .noneSkipFirst, .noneSkipLast:
+                return image.jpegData(compressionQuality: compressionQuality)
+            default:
+                break
+            }
+        }
+        let format = UIGraphicsImageRendererFormat.preferred()
+        format.opaque = true
+        format.scale = image.scale
+        let renderer = UIGraphicsImageRenderer(size: image.size, format: format)
+        let flattened = renderer.image { _ in
+            image.draw(in: CGRect(origin: .zero, size: image.size))
+        }
+        return flattened.jpegData(compressionQuality: compressionQuality)
+    }
+
     static func image(
         from data: Data?,
         maxPixelSize: CGFloat,

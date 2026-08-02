@@ -3,11 +3,18 @@ import Photos
 import UIKit
 import ImageIO
 import CoreLocation
+import AVFoundation
 
 struct PhotoImportSource {
     let assetIdentifier: String?
     let selectionIndex: Int
     let load: () async -> Data?
+    /// Doluysa bu kaynak bir video klibidir: `load` çağrılmaz, klip doğrudan
+    /// geçici bir dosya URL'i olarak alınıp `VideoEntryStorage`'a kopyalanır
+    /// (video verisini `Data` olarak belleğe yüklemekten kaçınmak için).
+    var loadVideoFile: (() async -> URL?)? = nil
+
+    var isVideo: Bool { loadVideoFile != nil }
 }
 
 @MainActor
@@ -28,6 +35,11 @@ extension PhotoLibraryImporting {
 @MainActor
 final class PhotoLibraryImporter: PhotoLibraryImporting {
 
+    private enum LoadedMedia {
+        case photo(Data)
+        case video(fileName: String, duration: Double, poster: Data?)
+    }
+
     func buildEntries(
         from sources: [PhotoImportSource],
         maxPixelSize: CGFloat,
@@ -37,16 +49,28 @@ final class PhotoLibraryImporter: PhotoLibraryImporting {
 
         let meta = libraryMeta(for: sources.compactMap(\.assetIdentifier))
 
-        var loaded: [(id: String, index: Int, data: Data, date: Date?, location: CLLocation?)] = []
+        var loaded: [(id: String, index: Int, media: LoadedMedia, date: Date?, location: CLLocation?)] = []
         loaded.reserveCapacity(sources.count)
 
         for (offset, source) in sources.enumerated() {
-            guard let data = await source.load() else { continue }
             let identifier = source.assetIdentifier ?? UUID().uuidString
             let assetMeta = source.assetIdentifier.flatMap { meta[$0] }
-            let date = assetMeta?.date ?? Self.exifDate(from: data)
-            let location = assetMeta?.location ?? Self.exifLocation(from: data)
-            loaded.append((identifier, source.selectionIndex, data, date, location))
+            if source.isVideo, let loadVideoFile = source.loadVideoFile {
+                guard let tempURL = await loadVideoFile() else { continue }
+                let entryID = UUID()
+                let fileName = VideoEntryStorage.fileName(for: entryID)
+                let destination = VideoEntryStorage.directory.appendingPathComponent(fileName)
+                guard (try? await Self.moveVideo(from: tempURL, to: destination)) != nil else { continue }
+                let duration = (try? await AVURLAsset(url: destination).load(.duration).seconds) ?? 0
+                let poster = await Self.videoPoster(at: destination)
+                let date = assetMeta?.date ?? Date()
+                loaded.append((identifier, source.selectionIndex, .video(fileName: fileName, duration: duration, poster: poster), date, assetMeta?.location))
+            } else {
+                guard let data = await source.load() else { continue }
+                let date = assetMeta?.date ?? Self.exifDate(from: data)
+                let location = assetMeta?.location ?? Self.exifLocation(from: data)
+                loaded.append((identifier, source.selectionIndex, .photo(data), date, location))
+            }
             progress(Double(offset + 1) / Double(sources.count) * 0.5)
         }
 
@@ -60,8 +84,20 @@ final class PhotoLibraryImporter: PhotoLibraryImporting {
         entries.reserveCapacity(resolved.count)
         for (offset, item) in resolved.enumerated() {
             guard let source = byIdentifier[item.assetIdentifier] else { continue }
-            guard let downsampled = await downsample(source.data, maxPixelSize: maxPixelSize) else { continue }
-            let entry = Entry(capturedAt: item.date, imageData: downsampled, sourceAssetIdentifier: item.assetIdentifier)
+            let entry: Entry
+            switch source.media {
+            case .photo(let data):
+                guard let downsampled = await downsample(data, maxPixelSize: maxPixelSize) else { continue }
+                entry = Entry(capturedAt: item.date, imageData: downsampled, sourceAssetIdentifier: item.assetIdentifier)
+            case .video(let fileName, let duration, let poster):
+                entry = Entry(
+                    capturedAt: item.date,
+                    imageData: poster,
+                    sourceAssetIdentifier: item.assetIdentifier,
+                    videoFileName: fileName,
+                    videoDuration: duration
+                )
+            }
             if let location = source.location {
                 entry.latitude = location.coordinate.latitude
                 entry.longitude = location.coordinate.longitude
@@ -70,6 +106,17 @@ final class PhotoLibraryImporter: PhotoLibraryImporting {
             progress(0.5 + Double(offset + 1) / Double(resolved.count) * 0.5)
         }
         return entries
+    }
+
+    private static func moveVideo(from tempURL: URL, to destination: URL) async throws {
+        try await Task.detached(priority: .utility) {
+            try? FileManager.default.removeItem(at: destination)
+            try FileManager.default.copyItem(at: tempURL, to: destination)
+        }.value
+    }
+
+    private static func videoPoster(at url: URL) async -> Data? {
+        await CameraCaptureViewModel.posterData(for: url)
     }
 
     private func libraryMeta(for identifiers: [String]) -> [String: (date: Date?, location: CLLocation?)] {

@@ -172,7 +172,8 @@ final class TimelapseRenderService {
 
     func viewModel(for project: Project) -> TimelapseExportViewModel {
         if let job = jobs.first(where: { $0.id == project.id }) { return job.viewModel }
-        let job = Job(id: project.id, title: project.title, startedAt: Date.now, viewModel: TimelapseExportViewModel())
+        let composer: any TimelapseComposing = project.category.isVideoMode ? VideoClipComposer() : TimelapseComposer()
+        let job = Job(id: project.id, title: project.title, startedAt: Date.now, viewModel: TimelapseExportViewModel(composer: composer))
         jobs.append(job)
         return job.viewModel
     }

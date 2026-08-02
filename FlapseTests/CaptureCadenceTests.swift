@@ -53,4 +53,29 @@ final class CaptureCadenceTests: XCTestCase {
             CaptureCadence.weekly.isCaptureDue(lastCapture: last, now: now, calendar: calendar)
         )
     }
+
+    func test_aylik_20gunSonra_henuzGelmedi() {
+        let last = date(2026, 6, 1)
+        let now  = date(2026, 6, 21)
+        XCTAssertFalse(
+            CaptureCadence.monthly.isCaptureDue(lastCapture: last, now: now, calendar: calendar)
+        )
+    }
+
+    func test_aylik_takvimAyiTamamlaninca_geldi() {
+        let last = date(2026, 6, 1)
+        let now  = date(2026, 7, 1)
+        XCTAssertTrue(
+            CaptureCadence.monthly.isCaptureDue(lastCapture: last, now: now, calendar: calendar)
+        )
+    }
+
+    func test_aylik_subatGibiKisaAydaDaDogruHesaplar() {
+        // 31 Ocak + 1 ay = takvim kuralına göre 28 Şubat (2026 artık yıl değil).
+        let last = date(2026, 1, 31)
+        XCTAssertEqual(
+            CaptureCadence.monthly.nextDueDate(after: last, calendar: calendar),
+            date(2026, 2, 28)
+        )
+    }
 }

@@ -4,6 +4,7 @@ import UIKit
 import CoreLocation
 import CloudKit
 import MapKit
+import UniformTypeIdentifiers
 
 struct ProjectDetailView: View {
 
@@ -29,6 +30,12 @@ struct ProjectDetailView: View {
     @State private var selectedEntryIDs: Set<UUID> = []
     @State private var showsAllTimelineEntries = false
     @State private var isRevealingTimelineEntries = false
+    @State private var archiveTempURL: URL?
+    @State private var archiveDocument: ProjectArchiveDocument?
+    @State private var isPresentingArchiveExporter = false
+    @State private var archiveExportFilename = "Proje"
+    @State private var isExportingArchive = false
+    @State private var archiveExportError: String?
 
     private static let initialTimelineEntryCount = 10
     fileprivate static let timelinePreviewPixelSize: CGFloat = 420
@@ -71,6 +78,10 @@ struct ProjectDetailView: View {
 
     private var accent: Color { Theme.accent(for: project.category) }
 
+    /// Her proje açılışı kendi izini kullanır; ortak bir ad, üst üste binen
+    /// gezinmelerde işaretleri karıştırıp gerçekte olmayan saniyeler üretiyordu.
+    private var traceName: String { "project-\(project.id.uuidString.prefix(8))" }
+
     private var liveEntries: [Entry] {
         fetchedEntries
     }
@@ -84,6 +95,8 @@ struct ProjectDetailView: View {
     }
 
     var body: some View {
+
+        let _ = PerfTrace.mark(traceName, "body evaluated")
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 Text(project.title)
@@ -121,6 +134,7 @@ struct ProjectDetailView: View {
             .padding(16)
         }
         .background(theme.canvas.ignoresSafeArea())
+        .onAppear { PerfTrace.end(traceName, "detay göründü") }
         .navigationBarTitleDisplayMode(.inline)
         .safeAreaInset(edge: .bottom, spacing: 0) {
             if isSelectingEntries {
@@ -205,6 +219,9 @@ struct ProjectDetailView: View {
                     }
                 }
             }
+            Button("Proje Arşivi (Fotoğraflar + Videolar)") {
+                exportProjectArchive()
+            }
             Button("Vazgeç", role: .cancel) {}
         }
         .sheet(item: $activeSheet) { sheet in
@@ -253,9 +270,50 @@ struct ProjectDetailView: View {
                 .presentationDetents([.medium, .large])
             }
         }
+        .fileExporter(
+            isPresented: $isPresentingArchiveExporter,
+            document: archiveDocument,
+            contentType: ProjectArchive.utType,
+            defaultFilename: archiveExportFilename
+        ) { result in
+            if case .failure(let error) = result {
+                archiveExportError = error.localizedDescription
+            }
+            if let archiveTempURL {
+                try? FileManager.default.removeItem(at: archiveTempURL)
+            }
+            archiveTempURL = nil
+            archiveDocument = nil
+        }
+        .overlay {
+            if isExportingArchive {
+                ZStack {
+                    Color.black.opacity(0.25).ignoresSafeArea()
+                    HStack(spacing: 10) {
+                        ProgressView().tint(.white)
+                        Text("Arşiv hazırlanıyor…")
+                            .font(Theme.body(14))
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 18)
+                    .padding(.vertical, 14)
+                    .liquidGlassBarCapsule()
+                }
+                .transition(.opacity)
+            }
+        }
+        .alert("Arşiv oluşturulamadı", isPresented: Binding(
+            get: { archiveExportError != nil },
+            set: { if !$0 { archiveExportError = nil } }
+        )) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(archiveExportError ?? "")
+        }
         .background {
             Color.clear
                 .fullScreenCover(item: $activeCover) { cover in
+                    let _ = CameraLaunchTrace.mark("cover content building")
                     switch cover {
                     case .capture:
                         CameraCaptureView(project: project)
@@ -280,8 +338,19 @@ struct ProjectDetailView: View {
         let due = isCaptureDue
         return Button {
             if canAddEntry {
-                CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category))
-                activeCover = .capture
+                CameraLaunchTrace.begin("project detail CTA")
+                CameraService.shared.prewarm(
+                    position: CameraCaptureViewModel.initialPosition(for: project.category),
+                    videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: project),
+                    micEnabled: project.category.isVideoMode
+                )
+                CameraLaunchTrace.mark("prewarm dispatched")
+                CameraLaunchIndicator.shared.show()
+                Task { @MainActor in
+                    CameraLaunchTrace.mark("overlay frame yielded")
+                    activeCover = .capture
+                    CameraLaunchTrace.mark("activeCover set")
+                }
             } else {
                 activeSheet = .paywall
             }
@@ -289,10 +358,11 @@ struct ProjectDetailView: View {
             HStack(spacing: 14) {
                 ZStack {
                     Circle().fill(.white.opacity(0.22)).frame(width: 46, height: 46)
-                    Image(systemName: "camera.fill").font(.system(size: 20, weight: .bold))
+                    Image(systemName: project.category.isVideoMode ? "video.fill" : "camera.fill")
+                        .font(.system(size: 20, weight: .bold))
                 }
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(due ? "Bugünün karesini çek" : "Yeni kare ekle")
+                    Text(captureCTATitle(due: due))
                         .font(Theme.headline(18))
                     Text(canAddEntry ? "Sıradaki: No. \(liveEntries.count + 1)" : "Ücretsiz sınır doldu — Pro")
                         .font(Theme.caption(12)).opacity(0.9)
@@ -313,6 +383,17 @@ struct ProjectDetailView: View {
         }
         .buttonStyle(.plain)
         .accessibilityIdentifier("captureButton")
+    }
+
+    private func captureCTATitle(due: Bool) -> String {
+        if project.category.isVideoMode {
+            return due
+                ? String(localized: "Bugünün videosunu çek", bundle: .appLanguage)
+                : String(localized: "Yeni video ekle", bundle: .appLanguage)
+        }
+        return due
+            ? String(localized: "Bugünün karesini çek", bundle: .appLanguage)
+            : String(localized: "Yeni kare ekle", bundle: .appLanguage)
     }
 
     private var collaboratorsRow: some View {
@@ -425,6 +506,30 @@ struct ProjectDetailView: View {
         .background(theme.surface, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .contentShape(Rectangle())
         .onTapGesture { if atLimit { activeSheet = .paywall } }
+    }
+
+    /// Projeyi kayıpsız bir paket (`.flapseproject`) olarak dışa aktarır ve sistem
+    /// paylaşım sayfasını açar. SwiftData'dan okunan düz veriler (`snapshot`) hızlıdır;
+    /// asıl disk yazımı (fotoğraf/video kopyalama) arka planda çalışır, bu yüzden
+    /// video ağırlıklı büyük projelerde bile arayüz kilitlenmez.
+    private func exportProjectArchive() {
+        isExportingArchive = true
+        let snapshot = ProjectArchive.snapshot(of: project)
+        let filename = ProjectArchive.sanitizedExportName(project.title)
+        Task {
+            defer { isExportingArchive = false }
+            do {
+                let url = try await Task.detached(priority: .userInitiated) {
+                    try ProjectArchive.write(snapshot)
+                }.value
+                archiveTempURL = url
+                archiveDocument = ProjectArchiveDocument(wrapper: try FileWrapper(url: url))
+                archiveExportFilename = filename
+                isPresentingArchiveExporter = true
+            } catch {
+                archiveExportError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        }
     }
 
     private func renderShareCard() -> URL? {
@@ -1266,6 +1371,17 @@ private struct TimelineEntryRow: View {
         .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
     }
 
+    @ViewBuilder
+    private var videoBadge: some View {
+        if entry.isVideo {
+            Image(systemName: "play.circle.fill")
+                .font(.system(size: 34))
+                .foregroundStyle(.white.opacity(0.9))
+                .shadow(color: .black.opacity(0.25), radius: 4)
+                .allowsHitTesting(false)
+        }
+    }
+
     private var card: some View {
         Button(action: onTap) {
             ZStack {
@@ -1292,6 +1408,7 @@ private struct TimelineEntryRow: View {
                 }
             }
             .overlay(alignment: .bottomLeading) { timeStamp }
+            .overlay(alignment: .center) { videoBadge }
             .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
             .overlay(

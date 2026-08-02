@@ -185,6 +185,7 @@ enum Theme {
         .baby:         Color(light: "3E8E9E", dark: "7FC3D1"),
         .outfit:       Color(light: "B0568A", dark: "D98BB8"),
         .coupleMode:   Color(light: "C2566B", dark: "F191A6"),
+        .video:        Color(light: "5B6B8A", dark: "9AAAD1"),
         .other:        Color(light: "6E675E", dark: "B3ABA0")
     ]
 
@@ -205,6 +206,7 @@ enum Theme {
         case .baby:         "stroller.fill"
         case .outfit:       "tshirt.fill"
         case .coupleMode:   "person.2.fill"
+        case .video:        "video.fill"
         case .other:        "sparkles"
         }
     }
@@ -462,6 +464,7 @@ struct GlassSurface: ViewModifier {
 struct PrimaryButtonStyle: ButtonStyle {
     @Environment(\.theme) private var theme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isEnabled) private var isEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -469,11 +472,16 @@ struct PrimaryButtonStyle: ButtonStyle {
             .foregroundStyle(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
-            .liquidGlassStyle(cornerRadius: 14, tint: theme.accent, interactive: true)
-            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 3)
-            .opacity(configuration.isPressed ? 0.85 : 1)
+            .liquidGlassStyle(
+                cornerRadius: 14,
+                tint: isEnabled ? theme.accent : theme.inkMuted.opacity(0.4),
+                interactive: isEnabled
+            )
+            .shadow(color: .black.opacity(isEnabled ? 0.12 : 0), radius: 8, x: 0, y: 3)
+            .opacity(configuration.isPressed ? 0.85 : (isEnabled ? 1 : 0.6))
             .scaleEffect(configuration.isPressed && !reduceMotion ? 0.98 : 1)
             .animation(reduceMotion ? nil : .spring(response: 0.3, dampingFraction: 0.8), value: configuration.isPressed)
+            .animation(.easeInOut(duration: 0.18), value: isEnabled)
     }
 }
 

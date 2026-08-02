@@ -1,916 +1,930 @@
 {
-  "sourceLanguage": "tr",
-  "strings": {
-    "Aktivite": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "النشاط"
+  "sourceLanguage" : "tr",
+  "strings" : {
+    "·" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld " : {
+
+    },
+    "Aktivite" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "النشاط"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aktivität"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivität"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activity"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activity"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actividad"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actividad"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Activité"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activité"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "गतिविधि"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "गतिविधि"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "アクティビティ"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アクティビティ"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "활동"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "활동"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Atividade"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atividade"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Активность"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Активность"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "活动"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活动"
           }
         }
       }
     },
-    "Bugün %lld çekim": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld لقطات اليوم"
+    "Bugün %lld çekim" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld لقطات اليوم"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute %lld Aufnahmen"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute %lld Aufnahmen"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld to capture today"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld to capture today"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld capturas hoy"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld capturas hoy"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld captures aujourd'hui"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld captures aujourd'hui"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "आज %lld फ़ोटो"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आज %lld फ़ोटो"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今日の撮影 %lld 件"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日の撮影 %lld 件"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "오늘 촬영 %lld건"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘 촬영 %lld건"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld capturas hoje"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld capturas hoje"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сегодня %lld съёмок"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня %lld съёмок"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今日 %lld 个拍摄"
-          }
-        }
-      }
-    },
-    "Bugün için tamam": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "اكتمل اليوم"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Für heute erledigt"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "All set for today"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Todo listo por hoy"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tout est fait pour aujourd'hui"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "आज के लिए हो गया"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今日は完了"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "오늘은 끝"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tudo certo por hoje"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "На сегодня всё"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今天已完成"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日 %lld 个拍摄"
           }
         }
       }
     },
-    "Bugün çekildi": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "تم التصوير اليوم"
+    "Bugün çekildi" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم التصوير اليوم"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Heute aufgenommen"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Heute aufgenommen"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Captured today"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Captured today"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capturado hoy"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturado hoy"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capturé aujourd'hui"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturé aujourd'hui"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "आज की फ़ोटो ले ली गई"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आज की फ़ोटो ले ली गई"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今日は撮影済み"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日は撮影済み"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "오늘 촬영 완료"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘 촬영 완료"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capturado hoje"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturado hoje"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Сегодня снято"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сегодня снято"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "今日已拍摄"
-          }
-        }
-      }
-    },
-    "GÜN SERİSİ": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سلسلة الأيام"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "TAGESSERIE"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "DAY STREAK"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "RACHA DE DÍAS"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SÉRIE DE JOURS"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "दिन की स्ट्रीक"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連続日数"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "연속 기록"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "SEQUÊNCIA DE DIAS"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "СЕРИЯ ДНЕЙ"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连续天数"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日已拍摄"
           }
         }
       }
     },
-    "Gün serin ve bugünün çekim durumu.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سلسلة أيامك وحالة تصوير اليوم."
+    "Bugün için tamam" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اكتمل اليوم"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deine Tagesserie und der heutige Aufnahmestatus."
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für heute erledigt"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your day streak and today's capture status."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "All set for today"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tu racha de días y el estado de captura de hoy."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Todo listo por hoy"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ta série de jours et l'état de capture du jour."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout est fait pour aujourd'hui"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "आपकी दिन की स्ट्रीक और आज की फ़ोटो स्थिति।"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आज के लिए हो गया"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連続日数と今日の撮影状況。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日は完了"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "연속 기록과 오늘의 촬영 상태."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "오늘은 끝"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sua sequência de dias e o status de captura de hoje."
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tudo certo por hoje"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ваша серия дней и статус съёмки на сегодня."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "На сегодня всё"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你的连续天数和今日拍摄状态。"
-          }
-        }
-      }
-    },
-    "Projeler": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "المشاريع"
-          }
-        },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projekte"
-          }
-        },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projects"
-          }
-        },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Proyectos"
-          }
-        },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projets"
-          }
-        },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "प्रोजेक्ट"
-          }
-        },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "プロジェクト"
-          }
-        },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝트"
-          }
-        },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Projetos"
-          }
-        },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Проекты"
-          }
-        },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "项目"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天已完成"
           }
         }
       }
     },
-    "Projelerinin son kareleri.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "أحدث صور مشاريعك."
+    "Flapse" : {
+
+    },
+    "Gün serin ve bugünün çekim durumu." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة أيامك وحالة تصوير اليوم."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Die neuesten Fotos deiner Projekte."
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Deine Tagesserie und der heutige Aufnahmestatus."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The latest photos of your projects."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your day streak and today's capture status."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Las últimas fotos de tus proyectos."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu racha de días y el estado de captura de hoy."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les dernières photos de tes projets."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta série de jours et l'état de capture du jour."
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "आपके प्रोजेक्ट की नवीनतम फ़ोटो।"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपकी दिन की स्ट्रीक और आज की फ़ोटो स्थिति।"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "プロジェクトの最新写真。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連続日数と今日の撮影状況。"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "프로젝트의 최신 사진."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연속 기록과 오늘의 촬영 상태."
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "As fotos mais recentes dos seus projetos."
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sua sequência de dias e o status de captura de hoje."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Последние кадры ваших проектов."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваша серия дней и статус съёмки на сегодня."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "你项目的最新照片。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的连续天数和今日拍摄状态。"
           }
         }
       }
     },
-    "Son 5 haftanın kareleri.": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "صور آخر 5 أسابيع."
+    "gün serisi" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة أيام"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fotos der letzten 5 Wochen."
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tagesserie"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photos from the last 5 weeks."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "day streak"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fotos de las últimas 5 semanas."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "racha de días"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Photos des 5 dernières semaines."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "série de jours"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "पिछले 5 हफ़्तों की फ़ोटो।"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "दिन की स्ट्रीक"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "直近5週間の写真。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連続日数"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "지난 5주간의 사진."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연속 기록"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fotos das últimas 5 semanas."
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sequência de dias"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Кадры за последние 5 недель."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "серия дней"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "最近 5 周的照片。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连续天数"
           }
         }
       }
     },
-    "Timelapse hazır": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "الفيديو جاهز"
+    "GÜN SERİSİ" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سلسلة الأيام"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitraffer fertig"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TAGESSERIE"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timelapse ready"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DAY STREAK"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timelapse listo"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "RACHA DE DÍAS"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timelapse prêt"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SÉRIE DE JOURS"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "टाइमलैप्स तैयार"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "दिन की स्ट्रीक"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイムラプス完成"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連続日数"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "타임랩스 완료"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "연속 기록"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Timelapse pronto"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SEQUÊNCIA DE DIAS"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Таймлапс готов"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "СЕРИЯ ДНЕЙ"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "延时视频已完成"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "连续天数"
           }
         }
       }
     },
-    "Timelapse oluşturuluyor": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جارٍ إنشاء الفيديو"
+    "Projeler" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المشاريع"
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitraffer wird erstellt"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projekte"
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creating timelapse"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projects"
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creando timelapse"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyectos"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Création du timelapse"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projets"
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "टाइमलैप्स बन रहा है"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "प्रोजेक्ट"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイムラプスを作成中"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロジェクト"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "타임랩스 생성 중"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로젝트"
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Criando timelapse"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projetos"
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Создаётся таймлапс"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Проекты"
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在生成延时视频"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "项目"
           }
         }
       }
     },
-    "Timelapse oluşturuluyor…": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "جارٍ إنشاء الفيديو…"
+    "Projelerinin son kareleri." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أحدث صور مشاريعك."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zeitraffer wird erstellt…"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die neuesten Fotos deiner Projekte."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creating timelapse…"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The latest photos of your projects."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creando timelapse…"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las últimas fotos de tus proyectos."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Création du timelapse…"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les dernières photos de tes projets."
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "टाइमलैप्स बन रहा है…"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "आपके प्रोजेक्ट की नवीनतम फ़ोटो।"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "タイムラプスを作成中…"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "プロジェクトの最新写真。"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "타임랩스 생성 중…"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "프로젝트의 최신 사진."
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Criando timelapse…"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As fotos mais recentes dos seus projetos."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Создаётся таймлапс…"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Последние кадры ваших проектов."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "正在生成延时视频…"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你项目的最新照片。"
           }
         }
       }
     },
-    "gün serisi": {
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "سلسلة أيام"
+    "Son 5 haftanın kareleri." : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "صور آخر 5 أسابيع."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tagesserie"
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos der letzten 5 Wochen."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "day streak"
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos from the last 5 weeks."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "racha de días"
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos de las últimas 5 semanas."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "série de jours"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photos des 5 dernières semaines."
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "दिन की स्ट्रीक"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "पिछले 5 हफ़्तों की फ़ोटो।"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "連続日数"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "直近5週間の写真。"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "연속 기록"
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지난 5주간의 사진."
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "sequência de dias"
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotos das últimas 5 semanas."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "серия дней"
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Кадры за последние 5 недель."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "连续天数"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "最近 5 周的照片。"
+          }
+        }
+      }
+    },
+    "Timelapse hazır" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفيديو جاهز"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitraffer fertig"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse ready"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse listo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse prêt"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "टाइमलैप्स तैयार"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイムラプス完成"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타임랩스 완료"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse pronto"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Таймлапс готов"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "延时视频已完成"
+          }
+        }
+      }
+    },
+    "Timelapse oluşturuluyor" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ إنشاء الفيديو"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitraffer wird erstellt"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creating timelapse"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creando timelapse"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Création du timelapse"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "टाइमलैप्स बन रहा है"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイムラプスを作成中"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타임랩스 생성 중"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criando timelapse"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создаётся таймлапс"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在生成延时视频"
+          }
+        }
+      }
+    },
+    "Timelapse oluşturuluyor…" : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جارٍ إنشاء الفيديو…"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeitraffer wird erstellt…"
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creating timelapse…"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creando timelapse…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Création du timelapse…"
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "टाइमलैप्स बन रहा है…"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "タイムラプスを作成中…"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "타임랩스 생성 중…"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Criando timelapse…"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Создаётся таймлапс…"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在生成延时视频…"
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }

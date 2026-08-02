@@ -18,6 +18,7 @@ enum ProjectCategory: String, Codable, CaseIterable, Identifiable, Sendable {
     case baby
     case outfit
     case coupleMode = "capture_together"
+    case video
     case other
 
     var id: String { rawValue }
@@ -36,12 +37,17 @@ enum ProjectCategory: String, Codable, CaseIterable, Identifiable, Sendable {
         case .baby:         String(localized: "Bebek", bundle: .appLanguage)
         case .outfit:       String(localized: "Kombin", bundle: .appLanguage)
         case .coupleMode:   String(localized: "Çift Modu", bundle: .appLanguage)
+        case .video:        String(localized: "Video", bundle: .appLanguage)
         case .other:        String(localized: "Diğer", bundle: .appLanguage)
         }
     }
 
     /// "Çift Modu" bir Pro kategorisidir: iki kişi aynı karede, bölme kılavuzuyla.
     var isPro: Bool { self == .coupleMode }
+
+    /// Video modunda hizalama (ghost/smart/manual) uygulanmaz; medya doğrudan
+    /// video klip olarak eklenir ve dışa aktarımda sırayla birleştirilir.
+    var isVideoMode: Bool { self == .video }
 }
 
 /// Çekim sıklığı (kadans). Hatırlatıcıların ve "çekim zamanı geldi mi?" mantığının
@@ -50,6 +56,7 @@ enum CaptureCadence: String, Codable, CaseIterable, Identifiable, Sendable {
     case daily
     case everyOtherDay = "every_other_day"
     case weekly
+    case monthly
 
     var id: String { rawValue }
 
@@ -58,21 +65,29 @@ enum CaptureCadence: String, Codable, CaseIterable, Identifiable, Sendable {
         case .daily:         String(localized: "Her gün", bundle: .appLanguage)
         case .everyOtherDay: String(localized: "Gün aşırı", bundle: .appLanguage)
         case .weekly:        String(localized: "Haftalık", bundle: .appLanguage)
+        case .monthly:       String(localized: "Aylık", bundle: .appLanguage)
         }
     }
 
-    /// İki çekim arasındaki gün sayısı.
+    /// İki çekim arasındaki gün sayısı. `.monthly` gerçek ay uzunluğuna göre
+    /// değişir (28-31 gün); burada yalnızca kaba bir yaklaşık değer döner —
+    /// gerçek hesap `nextDueDate(after:calendar:)` içindeki takvim-ay ekleme
+    /// dalından gelir.
     var dayInterval: Int {
         switch self {
         case .daily:         1
         case .everyOtherDay: 2
         case .weekly:        7
+        case .monthly:       30
         }
     }
 
     /// Son çekimden sonra bir sonraki çekimin beklendiği gün.
     func nextDueDate(after lastCapture: Date, calendar: Calendar = .current) -> Date {
-        calendar.date(byAdding: .day, value: dayInterval, to: lastCapture) ?? lastCapture
+        if self == .monthly {
+            return calendar.date(byAdding: .month, value: 1, to: lastCapture) ?? lastCapture
+        }
+        return calendar.date(byAdding: .day, value: dayInterval, to: lastCapture) ?? lastCapture
     }
 
     /// `now` anı itibarıyla yeni bir çekimin zamanı geldi mi?
@@ -105,6 +120,13 @@ final class Entry {
     @Attribute(.externalStorage) var imageData: Data?
     var imageRevision: Int = 0
 
+    // Video modu: gerçek klip `Application Support/EntryVideos/<videoFileName>`
+    // altında dosya olarak saklanır (SwiftData/CloudKit blob'una gömülmez, bkz.
+    // VideoEntryStorage). `imageData` video girdilerinde ilk karenin poster'ıdır;
+    // mevcut grid/timeline/ghost kodları bu sayede değişmeden çalışır.
+    var videoFileName: String?
+    var videoDuration: Double?
+
     // "Ghost" hizalaması için referans noktası. 0...1 aralığında NORMALIZE koordinat
     // tutuyoruz; böylece farklı çözünürlüklerde bile aynı yere denk gelir.
     var anchorX: Double?
@@ -133,7 +155,9 @@ final class Entry {
         anchorY: Double? = nil,
         sourceAssetIdentifier: String? = nil,
         subjectKindRaw: String? = nil,
-        featurePrintData: Data? = nil
+        featurePrintData: Data? = nil,
+        videoFileName: String? = nil,
+        videoDuration: Double? = nil
     ) {
         self.id = id
         self.capturedAt = capturedAt
@@ -143,10 +167,37 @@ final class Entry {
         self.sourceAssetIdentifier = sourceAssetIdentifier
         self.subjectKindRaw = subjectKindRaw
         self.featurePrintData = featurePrintData
+        self.videoFileName = videoFileName
+        self.videoDuration = videoDuration
     }
 
     var imageCacheKey: String {
         "\(id.uuidString)-\(imageRevision)"
+    }
+
+    var isVideo: Bool { videoFileName != nil }
+
+    /// Video klibinin diskteki tam konumu (varsa).
+    var videoFileURL: URL? {
+        guard let videoFileName else { return nil }
+        return VideoEntryStorage.directory.appendingPathComponent(videoFileName)
+    }
+}
+
+/// Video modu klipleri için dosya tabanlı depolama. Fotoğraflardaki `.externalStorage`
+/// deseninin aksine, onlarca MB'a çıkabilen video klipleri SwiftData/CloudKit blob'u
+/// olarak tutmuyoruz — `TimelapseLibrary.directory`'yle aynı yaklaşım: diskte ayrı
+/// bir dizin, model yalnızca dosya adını saklar.
+enum VideoEntryStorage {
+    static var directory: URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("EntryVideos", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base
+    }
+
+    static func fileName(for entryID: UUID) -> String {
+        "\(entryID.uuidString).mp4"
     }
 }
 

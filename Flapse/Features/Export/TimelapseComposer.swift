@@ -139,9 +139,12 @@ struct TimelapseOverlayOptions: Equatable {
 }
 
 /// Videoya girecek tek kare: görsel veri + çekildiği tarih (tarih bindirmesi için).
+/// Video modu girdilerinde `imageData` yalnızca poster/thumbnail'dir; gerçek klip
+/// `videoFileURL`'de tutulur ve `VideoClipComposer` onu kullanır.
 struct TimelapseFrame: Equatable, Sendable {
     let imageData: Data
     let capturedAt: Date
+    var videoFileURL: URL? = nil
 }
 
 /// Kareler arası geçiş: efekt yok ya da kısa, yumuşak bir çapraz geçiş.
@@ -172,6 +175,9 @@ struct ManualAlignment: Equatable {
 }
 
 struct TimelapseExportSettings: Equatable {
+    /// Video modunda kliplerin KENDİ sesi korunsun mu? Kapatılırsa yalnızca
+    /// seçilen müzik duyulur. Fotoğraf projelerinde anlamsızdır, yok sayılır.
+    var keepsClipAudio: Bool = true
     let renderSize: CGSize
     let framesPerSecond: Int32
     let includesWatermark: Bool          // ücretsiz katmanda uygulama etiketi zorunlu
@@ -193,6 +199,9 @@ struct TimelapseExportSettings: Equatable {
     var soundtrackURL: URL? = nil
     /// Ritim senkronu: doluysa her kare bir sonraki vuruşa kadar gösterilir.
     var beatTimes: [Double]? = nil
+    /// Müziğin videoyla başlayacağı nokta (sn). Kullanıcı "Başlangıç Noktası" ekranından
+    /// seçmemişse 0 — parça baştan çalar.
+    var soundtrackStartTime: Double = 0
 
     static func current(
         isPro: Bool,
@@ -208,7 +217,8 @@ struct TimelapseExportSettings: Equatable {
         transitionPlan: [TimelapseTransition]? = nil,
         alignmentSubject: AlignmentSubject = .auto,
         soundtrackURL: URL? = nil,
-        beatTimes: [Double]? = nil
+        beatTimes: [Double]? = nil,
+        soundtrackStartTime: Double = 0
     ) -> TimelapseExportSettings {
         let unlocked = FeatureGate.isUnlocked(.highResExport, isPro: isPro)
         let fps = speedMultiplier.map { Int32(min(12, max(1, ($0 * 4).rounded()))) } ?? speed.framesPerSecond
@@ -225,7 +235,8 @@ struct TimelapseExportSettings: Equatable {
             alignmentSubject: alignmentSubject,
             zoom: CGFloat(min(2, max(0.5, zoom))),
             soundtrackURL: soundtrackURL,
-            beatTimes: beatTimes
+            beatTimes: beatTimes,
+            soundtrackStartTime: soundtrackStartTime
         )
     }
 }
@@ -281,7 +292,7 @@ struct TimelapseComposer: TimelapseComposing {
             token.cancel()
         }
         guard let audio = settings.soundtrackURL else { return silent }
-        return try await SoundtrackMuxer.mux(videoURL: silent, audioURL: audio)
+        return try await SoundtrackMuxer.mux(videoURL: silent, audioURL: audio, startOffset: settings.soundtrackStartTime)
     }
 
     struct OutroAssets: @unchecked Sendable {
@@ -302,8 +313,10 @@ struct TimelapseComposer: TimelapseComposing {
 
     /// Kapanış kartı, uygulama açılışıyla birebir aynı görünsün: gerçek LogoMark ve
     /// kullanıcının temasındaki zemin/metin renkleri bir kez hazırlanır.
+    /// `internal` (VideoClipComposer video-modu outro klibi için bu görsel varlıkları
+    /// ve kare üretimini yeniden kullanır — aynı outro tasarımı, ayrı üretim yolu).
     @MainActor
-    private static func outroAssets() -> OutroAssets {
+    static func outroAssets() -> OutroAssets {
         let renderer = ImageRenderer(content: LogoMark(size: 512))
         renderer.scale = 1
         renderer.isOpaque = false
@@ -537,7 +550,7 @@ struct TimelapseComposer: TimelapseComposing {
         return outputURL
     }
 
-    private static let dateFormatter: DateFormatter = {
+    static let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
         formatter.timeStyle = .none
@@ -708,7 +721,7 @@ struct TimelapseComposer: TimelapseComposing {
     /// Video kapanışı: son kare tema zeminine yumuşakça karışır, ardından logo uygulama
     /// açılışındaki gibi dönerek ve yaylanarak belirir; "Flapse" yazısı altına gelir.
     /// Toplam süre ~3 sn; logo ekranın en fazla dörtte biri kadar yer kaplar.
-    private static func outroFrame(base: UIImage, t: CGFloat, assets: OutroAssets, size: CGSize, days: Int) -> CGImage? {
+    static func outroFrame(base: UIImage, t: CGFloat, assets: OutroAssets, size: CGSize, days: Int) -> CGImage? {
         let fadeP = min(1, max(0, t / 0.2))
         let animP = min(1, max(0, (t - 0.16) / 0.34))
         let textP = min(1, max(0, (t - 0.4) / 0.18))
@@ -928,7 +941,7 @@ struct TimelapseComposer: TimelapseComposing {
         context.restoreGState()
     }
 
-    private static func pixelBuffer(
+    static func pixelBuffer(
         for image: CGImage,
         adaptor: AVAssetWriterInputPixelBufferAdaptor,
         width: Int,

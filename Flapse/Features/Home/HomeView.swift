@@ -6,16 +6,16 @@ struct HomeView: View {
 
     let isActive: Bool
     let onCapture: (Project) -> Void
-    let onShowProjects: () -> Void
+    let onCreateProject: () -> Void
 
     init(
         isActive: Bool = true,
         onCapture: @escaping (Project) -> Void = { _ in },
-        onShowProjects: @escaping () -> Void = {}
+        onCreateProject: @escaping () -> Void = {}
     ) {
         self.isActive = isActive
         self.onCapture = onCapture
-        self.onShowProjects = onShowProjects
+        self.onCreateProject = onCreateProject
     }
 
     @Query(filter: #Predicate<Project> { $0.deletedAt == nil }, sort: \Project.createdAt, order: .reverse)
@@ -103,6 +103,7 @@ struct HomeView: View {
                 .padding(20)
             }
         }
+        .overlay(alignment: .top) { ScrollEdgeFade(height: 72) }
         .toolbar(.hidden, for: .navigationBar)
     }
 
@@ -161,7 +162,7 @@ struct HomeView: View {
                     .multilineTextAlignment(.center)
             }
 
-            Button("Yeni Proje", action: onShowProjects)
+            Button("Yeni Proje", action: onCreateProject)
                 .buttonStyle(.flapsePrimary)
         }
         .padding(24)
@@ -288,12 +289,12 @@ private struct DailyCaptureCard: View {
                         .font(.headline)
                         .foregroundStyle(theme.ink)
                         .lineLimit(1)
-                    Text("Kare çek")
+                    Text(project.category.isVideoMode ? "Video çek" : "Kare çek")
                         .font(.subheadline)
                         .foregroundStyle(theme.inkMuted)
                 }
                 Spacer()
-                Image(systemName: "camera.fill")
+                Image(systemName: project.category.isVideoMode ? "video.fill" : "camera.fill")
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(width: 44, height: 44)

@@ -3,8 +3,6 @@
   "strings" : {
     "CFBundleDisplayName" : {
       "comment" : "Bundle display name",
-      "extractionState" : "extracted_with_value",
-      "shouldTranslate" : false,
       "localizations" : {
         "tr" : {
           "stringUnit" : {
@@ -12,12 +10,11 @@
             "value" : "Flapse"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
     },
     "CFBundleName" : {
       "comment" : "Bundle name",
-      "extractionState" : "extracted_with_value",
-      "shouldTranslate" : false,
       "localizations" : {
         "tr" : {
           "stringUnit" : {
@@ -25,7 +22,11 @@
             "value" : "Flapse"
           }
         }
-      }
+      },
+      "shouldTranslate" : false
+    },
+    "Flapse Proje Arşivi" : {
+
     },
     "NSCameraUsageDescription" : {
       "comment" : "Privacy - Camera Usage Description",
@@ -105,85 +106,84 @@
       }
     },
     "NSFaceIDUsageDescription" : {
-      "comment": "Privacy - Face ID Usage Description",
-      "localizations": {
-        "ar": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "يُستخدم Face ID لفتح المشاريع ومقاطع التايم لابس المخفية."
+      "comment" : "Privacy - Face ID Usage Description",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يُستخدم Face ID لفتح المشاريع ومقاطع التايم لابس المخفية."
           }
         },
-        "de": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID wird verwendet, um ausgeblendete Projekte und Timelapses zu öffnen."
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID wird verwendet, um ausgeblendete Projekte und Timelapses zu öffnen."
           }
         },
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID is used to open hidden projects and timelapses."
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID is used to open hidden projects and timelapses."
           }
         },
-        "es": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID se usa para abrir proyectos y timelapses ocultos."
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID se usa para abrir proyectos y timelapses ocultos."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID est utilisé pour ouvrir les projets et timelapses masqués."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID est utilisé pour ouvrir les projets et timelapses masqués."
           }
         },
-        "hi": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "छिपे हुए प्रोजेक्ट और टाइमलैप्स खोलने के लिए Face ID का उपयोग किया जाता है।"
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "छिपे हुए प्रोजेक्ट और टाइमलैप्स खोलने के लिए Face ID का उपयोग किया जाता है।"
           }
         },
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "非表示のプロジェクトとタイムラプスを開くためにFace IDを使用します。"
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "非表示のプロジェクトとタイムラプスを開くためにFace IDを使用します。"
           }
         },
-        "ko": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "가려진 프로젝트와 타임랩스를 열기 위해 Face ID를 사용합니다."
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "가려진 프로젝트와 타임랩스를 열기 위해 Face ID를 사용합니다."
           }
         },
-        "pt": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "O Face ID é usado para abrir projetos e timelapses ocultos."
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O Face ID é usado para abrir projetos e timelapses ocultos."
           }
         },
-        "ru": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Face ID используется для открытия скрытых проектов и таймлапсов."
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID используется для открытия скрытых проектов и таймлапсов."
           }
         },
-        "tr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gizlenen proje ve timelapse'leri açmak için Face ID kullanılır."
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gizlenen proje ve timelapse'leri açmak için Face ID kullanılır."
           }
         },
-        "zh-Hans": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "面容 ID 用于打开隐藏的项目和延时摄影。"
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "面容 ID 用于打开隐藏的项目和延时摄影。"
           }
         }
       }
     },
     "NSLocationWhenInUseUsageDescription" : {
       "comment" : "Privacy - Location When In Use Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -259,9 +259,85 @@
         }
       }
     },
+    "NSMicrophoneUsageDescription" : {
+      "comment" : "Privacy - Microphone Usage Description",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يلزم الوصول إلى الميكروفون لتسجيل الصوت أثناء تصوير الفيديو."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Mikrofonzugriff wird benötigt, um beim Filmen Ton aufzunehmen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microphone access is needed to record sound while filming video."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita acceso al micrófono para grabar sonido al filmar vídeo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L'accès au microphone est nécessaire pour enregistrer le son lors du tournage de vidéos."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "वीडियो शूट करते समय आवाज़ रिकॉर्ड करने के लिए माइक्रोफ़ोन एक्सेस चाहिए।"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動画撮影中に音声を録音するためにマイクへのアクセスが必要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동영상 촬영 중 소리를 녹음하려면 마이크 접근이 필요합니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso ao microfone é necessário para gravar o som ao filmar vídeos."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ к микрофону нужен, чтобы записывать звук при съёмке видео."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Video çekerken sesi kaydetmek için mikrofona erişim gerekir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "拍摄视频时需要访问麦克风以录制声音。"
+          }
+        }
+      }
+    },
     "NSPhotoLibraryAddUsageDescription" : {
       "comment" : "Privacy - Photo Library Additions Usage Description",
-      "extractionState" : "extracted_with_value",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -337,84 +413,83 @@
         }
       }
     },
-      "NSPhotoLibraryUsageDescription" : {
-          "comment" : "Privacy - Photo Library Usage Description",
-          "extractionState" : "extracted_with_value",
-          "localizations" : {
-              "ar" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "يلزم الوصول لقراءة تاريخ التقاط الصور وموقعها عند استيرادها."
-                  }
-              },
-              "de" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "Der Zugriff wird benötigt, um beim Import Aufnahmedatum und Standort der Fotos zu lesen."
-                  }
-              },
-              "en" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "Access is needed to read capture dates and locations when importing photos."
-                  }
-              },
-              "es" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "Se necesita acceso para leer la fecha y la ubicación al importar fotos."
-                  }
-              },
-              "fr" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "L’accès est nécessaire pour lire la date et le lieu de prise de vue lors de l’importation des photos."
-                  }
-              },
-              "hi" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "फ़ोटो इंपोर्ट करते समय उनकी तारीख और स्थान पढ़ने के लिए एक्सेस चाहिए।"
-                  }
-              },
-              "ja" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "写真の読み込み時に撮影日時と位置情報を取得するため、アクセスが必要です。"
-                  }
-              },
-              "ko" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "사진을 가져올 때 촬영 날짜와 위치 정보를 읽으려면 접근 권한이 필요합니다."
-                  }
-              },
-              "pt" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "É necessário acesso para ler a data e a localização ao importar fotografias."
-                  }
-              },
-              "ru" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "Доступ нужен, чтобы при импорте фотографий считывать дату и место съёмки."
-                  }
-              },
-              "tr" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "Fotoğraflardan içe aktarırken çekim tarihi ve konum bilgisini okumak için erişim gerekir."
-                  }
-              },
-              "zh-Hans" : {
-                  "stringUnit" : {
-                      "state" : "translated",
-                      "value" : "导入照片时，需要访问权限以读取拍摄日期和位置信息。"
-                  }
-              }
+    "NSPhotoLibraryUsageDescription" : {
+      "comment" : "Privacy - Photo Library Usage Description",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يلزم الوصول لقراءة تاريخ التقاط الصور وموقعها عند استيرادها."
           }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Zugriff wird benötigt, um beim Import Aufnahmedatum und Standort der Fotos zu lesen."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Access is needed to read capture dates and locations when importing photos."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se necesita acceso para leer la fecha y la ubicación al importar fotos."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès est nécessaire pour lire la date et le lieu de prise de vue lors de l’importation des photos."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "फ़ोटो इंपोर्ट करते समय उनकी तारीख और स्थान पढ़ने के लिए एक्सेस चाहिए।"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "写真の読み込み時に撮影日時と位置情報を取得するため、アクセスが必要です。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "사진을 가져올 때 촬영 날짜와 위치 정보를 읽으려면 접근 권한이 필요합니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "É necessário acesso para ler a data e a localização ao importar fotografias."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Доступ нужен, чтобы при импорте фотографий считывать дату и место съёмки."
+          }
+        },
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fotoğraflardan içe aktarırken çekim tarihi ve konum bilgisini okumak için erişim gerekir."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "导入照片时，需要访问权限以读取拍摄日期和位置信息。"
+          }
+        }
       }
+    }
   },
   "version" : "1.0"
 }

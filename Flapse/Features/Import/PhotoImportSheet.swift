@@ -45,6 +45,14 @@ struct PhotoImportSheet: View {
         _viewModel = State(initialValue: PhotoImportViewModel(repository: repository))
     }
 
+    /// İçe aktarma hedefi Video kategorisindeyse foto yerine video seçilir/eklenir.
+    private var targetIsVideo: Bool {
+        switch mode {
+        case .existing(let project): return project.category.isVideoMode
+        case .newProject: return viewModel.category.isVideoMode
+        }
+    }
+
     private func notifyFinishedIfNeeded() {
         let project: Project
         switch mode {
@@ -65,7 +73,7 @@ struct PhotoImportSheet: View {
             }
             .onDisappear { notifyFinishedIfNeeded() }
             .fullScreenCover(isPresented: $isShowingPhotoPicker) {
-                SystemPhotoPicker(maxSelectionCount: maxSelection) { photos in
+                SystemPhotoPicker(maxSelectionCount: maxSelection, allowsVideo: targetIsVideo) { photos in
                     if !photos.isEmpty {
                         selection = photos
                     }
@@ -139,13 +147,13 @@ struct PhotoImportSheet: View {
             isShowingPhotoPicker = true
         } label: {
             HStack(spacing: 14) {
-                Image(systemName: selection.isEmpty ? "photo.stack" : "checkmark.circle.fill")
+                Image(systemName: pickerIcon)
                     .font(.system(size: 22, weight: .semibold))
                     .foregroundStyle(theme.accent)
                     .frame(width: 44, height: 44)
                     .background(theme.accent.opacity(0.12), in: Circle())
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(selection.isEmpty ? "Fotoğraf Seç" : "\(selection.count) fotoğraf seçildi")
+                    Text(pickerTitle)
                         .font(Theme.headline(17)).foregroundStyle(theme.ink)
                     Text(pickerSubtitle)
                         .font(Theme.caption(13)).foregroundStyle(theme.inkMuted)
@@ -158,6 +166,22 @@ struct PhotoImportSheet: View {
             .cardStyle()
         }
         .buttonStyle(.plain)
+    }
+
+    private var pickerIcon: String {
+        if !selection.isEmpty { return "checkmark.circle.fill" }
+        return targetIsVideo ? "video.stack" : "photo.stack"
+    }
+
+    private var pickerTitle: String {
+        if !selection.isEmpty {
+            return targetIsVideo
+                ? String(localized: "\(selection.count) video seçildi", bundle: .appLanguage)
+                : String(localized: "\(selection.count) fotoğraf seçildi", bundle: .appLanguage)
+        }
+        return targetIsVideo
+            ? String(localized: "Video Seç", bundle: .appLanguage)
+            : String(localized: "Fotoğraf Seç", bundle: .appLanguage)
     }
 
     private var titleField: some View {
@@ -223,7 +247,7 @@ struct PhotoImportSheet: View {
 
     private var importButton: some View {
         Button(action: startImport) {
-            Text(selection.isEmpty ? "Önce fotoğraf seç" : "İçeri aktar")
+            Text(importButtonTitle)
                 .font(Theme.headline(17))
         }
         .buttonStyle(.flapsePrimary)
@@ -231,10 +255,23 @@ struct PhotoImportSheet: View {
         .padding(20)
     }
 
-    private var pickerSubtitle: LocalizedStringKey {
-        if !selection.isEmpty { return "Değiştirmek için dokun" }
-        if let maxSelection { return "En fazla \(maxSelection) fotoğraf seçebilirsin (ücretsiz sınır)" }
-        return "Kütüphanenden yüzlerce kare seçebilirsin"
+    private var pickerSubtitle: String {
+        if !selection.isEmpty { return String(localized: "Değiştirmek için dokun", bundle: .appLanguage) }
+        if let maxSelection {
+            return targetIsVideo
+                ? String(localized: "En fazla \(maxSelection) video seçebilirsin (ücretsiz sınır)", bundle: .appLanguage)
+                : String(localized: "En fazla \(maxSelection) fotoğraf seçebilirsin (ücretsiz sınır)", bundle: .appLanguage)
+        }
+        return targetIsVideo
+            ? String(localized: "Kütüphanenden videolarını seçebilirsin", bundle: .appLanguage)
+            : String(localized: "Kütüphanenden yüzlerce kare seçebilirsin", bundle: .appLanguage)
+    }
+
+    private var importButtonTitle: String {
+        guard selection.isEmpty else { return String(localized: "İçeri aktar", bundle: .appLanguage) }
+        return targetIsVideo
+            ? String(localized: "Önce video seç", bundle: .appLanguage)
+            : String(localized: "Önce fotoğraf seç", bundle: .appLanguage)
     }
 
     private var canImport: Bool {
@@ -298,13 +335,25 @@ struct PhotoImportSheet: View {
         .padding(24)
     }
 
+    private func makeSource(index: Int, item: SelectedPhoto, isVideo: Bool) -> PhotoImportSource {
+        var videoLoader: (() async -> URL?)?
+        if isVideo {
+            videoLoader = { await item.loadVideoFile() }
+        }
+        return PhotoImportSource(
+            assetIdentifier: item.assetIdentifier,
+            selectionIndex: index,
+            load: { await item.loadData() },
+            loadVideoFile: videoLoader
+        )
+    }
+
     private func startImport() {
-        let sources = selection.enumerated().map { index, item in
-            PhotoImportSource(
-                assetIdentifier: item.assetIdentifier,
-                selectionIndex: index,
-                load: { await item.loadData() }
-            )
+        let isVideo = targetIsVideo
+        var sources: [PhotoImportSource] = []
+        sources.reserveCapacity(selection.count)
+        for (index, item) in selection.enumerated() {
+            sources.append(makeSource(index: index, item: item, isVideo: isVideo))
         }
         Task {
             switch mode {
@@ -320,8 +369,14 @@ struct PhotoImportSheet: View {
     }
 
     private var navigationTitle: String {
-        if case .existing = mode { return String(localized: "Fotoğraf Ekle", bundle: .appLanguage) }
-        return String(localized: "Fotoğraflardan Oluştur", bundle: .appLanguage)
+        if case .existing = mode {
+            return targetIsVideo
+                ? String(localized: "Video Ekle", bundle: .appLanguage)
+                : String(localized: "Fotoğraf Ekle", bundle: .appLanguage)
+        }
+        return targetIsVideo
+            ? String(localized: "Videolardan Oluştur", bundle: .appLanguage)
+            : String(localized: "Fotoğraflardan Oluştur", bundle: .appLanguage)
     }
 }
 
@@ -443,10 +498,33 @@ private struct SelectedPhoto: Identifiable, @unchecked Sendable {
             }
         }
     }
+
+    /// Video klipleri `Data`'ya yüklenmez (bellek maliyeti) — geçici bir dosya
+    /// URL'i olarak alınır, çağıran bunu kalıcı depoya kopyalar.
+    func loadVideoFile() async -> URL? {
+        let typeIdentifier = provider.registeredTypeIdentifiers.first {
+            UTType($0)?.conforms(to: .movie) == true
+        } ?? UTType.movie.identifier
+
+        return await withCheckedContinuation { continuation in
+            provider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, _ in
+                guard let url else {
+                    continuation.resume(returning: nil)
+                    return
+                }
+                let temp = FileManager.default.temporaryDirectory
+                    .appendingPathComponent("flapse-import-\(UUID().uuidString)")
+                    .appendingPathExtension(url.pathExtension.isEmpty ? "mov" : url.pathExtension)
+                try? FileManager.default.copyItem(at: url, to: temp)
+                continuation.resume(returning: temp)
+            }
+        }
+    }
 }
 
 private struct SystemPhotoPicker: UIViewControllerRepresentable {
     let maxSelectionCount: Int?
+    var allowsVideo: Bool = false
     let onComplete: ([SelectedPhoto]) -> Void
     let onCancel: () -> Void
 
@@ -456,7 +534,7 @@ private struct SystemPhotoPicker: UIViewControllerRepresentable {
 
     func makeUIViewController(context: Context) -> PHPickerViewController {
         var configuration = PHPickerConfiguration(photoLibrary: .shared())
-        configuration.filter = .images
+        configuration.filter = allowsVideo ? .videos : .images
         configuration.selectionLimit = maxSelectionCount ?? 0
         configuration.selection = .ordered
         configuration.preferredAssetRepresentationMode = .current

@@ -67,6 +67,13 @@ struct ProjectListView: View {
         ZStack {
             theme.canvas.ignoresSafeArea()
 
+            VStack(alignment: .leading, spacing: 0) {
+                pageHeader
+                    .background(alignment: .top) { ScrollEdgeFade(height: 130) }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 8)
+                    .padding(.bottom, 10)
+
             if visibleProjects.isEmpty && jobs.isEmpty {
                 EmptyProjectsView(onCreate: addProjectTapped, onImport: importTapped)
             } else {
@@ -104,9 +111,13 @@ struct ProjectListView: View {
                                         .buttonStyle(.plain)
                                         .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                                     } else {
-                                        NavigationLink {
-                                            ProjectDetailView(project: project)
-                                        } label: {
+                                        // Değer tabanlı gezinme: hedef ekran ancak
+                                        // gerçekten girildiğinde kurulur. Kapanış
+                                        // biçimindeki `NavigationLink { ... }` hedefi
+                                        // ÖNDEN inşa ediyordu — ölçümde her sekme
+                                        // geçişinde proje sayısı kadar `ProjectDetailView`
+                                        // kuruluyor ve geçiş ~130 ms sürüyordu.
+                                        NavigationLink(value: project) {
                                             Color.clear
                                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                                                 .contentShape(Rectangle())
@@ -141,11 +152,14 @@ struct ProjectListView: View {
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
             }
+            }
         }
-        .navigationTitle("Projeler")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) { importButton }
-            ToolbarItem(placement: .primaryAction) { addButton }
+        // Ana ekranla aynı desen: gezinme çubuğu tamamen gizli, başlık ve sağdaki
+        // düğmeler tek satırda, içeriğin en üstünde.
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(for: Project.self) { project in
+            let _ = PerfTrace.begin("project-\(project.id.uuidString.prefix(8))", detail: "detay açılıyor")
+            ProjectDetailView(project: project)
         }
         .sheet(item: $activeSheet) { sheet in
             switch sheet {
@@ -182,6 +196,25 @@ struct ProjectListView: View {
         }
     }
 
+    /// Başlık ve sağdaki düğmeler aynı satırda — ana ekrandaki karşılama yazısıyla
+    /// aynı dikey konumda.
+    private var pageHeader: some View {
+        HStack(alignment: .center) {
+            Text("Projeler")
+                .font(.largeTitle.bold())
+                .foregroundStyle(theme.ink)
+                .accessibilityAddTraits(.isHeader)
+            Spacer(minLength: 12)
+            HStack(spacing: 10) {
+                importButton
+                addButton
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .liquidGlassBarCapsule()
+        }
+    }
+
     private var importButton: some View {
         Button {
             importTapped()
@@ -208,8 +241,8 @@ struct ProjectListView: View {
             .scaledToFit()
             .fontWeight(.medium)
             .foregroundStyle(theme.accent)
-            .frame(width: 21, height: 21)
-            .frame(width: 30, height: 30, alignment: .center)
+            .frame(width: 23, height: 23)
+            .frame(width: 35, height: 35, alignment: .center)
     }
 
     private func visibleJobs(projectIDs: Set<UUID>) -> [TimelapseRenderService.Job] {
@@ -458,39 +491,52 @@ private struct ProjectCard: View {
     }
 }
 
+/// Sürekli dönen bir kenarlık — `repeatForever` ile animasyonlanan bir açı yerine
+/// `TimelineView` kullanır: her kare açıyı doğrudan mutlak zamandan hesaplar, bu
+/// yüzden görünüm bir süre arka planda/ekran dışında kalıp geri geldiğinde
+/// "biriken" animasyonu bir anda tüketip hızlı dönmez — o anki doğru açıyı gösterir.
 private struct FireStreakBorder: View {
     let cornerRadius: CGFloat
     let isActive: Bool
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var isMoving = false
+
+    private static let period = 4.0
+
+    private static let gradientColors: [Color] = [
+        Color(red: 1.0, green: 0.32, blue: 0.09),
+        Color(red: 1.0, green: 0.62, blue: 0.05),
+        Color(red: 1.0, green: 0.84, blue: 0.15),
+        Color(red: 1.0, green: 0.62, blue: 0.05),
+        Color(red: 1.0, green: 0.32, blue: 0.09)
+    ]
 
     var body: some View {
-        RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
-            .strokeBorder(
-                AngularGradient(
-                    colors: [
-                        Color.orange.opacity(0.55),
-                        Color.orange,
-                        Color.yellow.opacity(0.78),
-                        Color.orange.opacity(0.55)
-                    ],
-                    center: .center,
-                    startAngle: .degrees(isMoving && !reduceMotion ? 360 : 0),
-                    endAngle: .degrees(isMoving && !reduceMotion ? 720 : 360)
-                ),
-                lineWidth: 2
+        TimelineView(.animation(minimumInterval: 1.0 / 30.0, paused: !isActive || reduceMotion)) { timeline in
+            let angle = Self.angle(at: timeline.date)
+            let gradient = AngularGradient(
+                colors: Self.gradientColors,
+                center: .center,
+                startAngle: .degrees(angle),
+                endAngle: .degrees(angle + 360)
             )
-            .animation(
-                reduceMotion || !isActive ? nil : .linear(duration: 7).repeatForever(autoreverses: false),
-                value: isMoving
-            )
-            .allowsHitTesting(false)
-            .onAppear { isMoving = isActive }
-            .onChange(of: isActive) { _, active in
-                isMoving = active
+            ZStack {
+                // Kenarlığın hemen altında yumuşak, bulanık bir eş — alevin canlı
+                // ama soğuk-neon değil, sıcak bir parıltıyla nefes almasını sağlar.
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(gradient, lineWidth: 5)
+                    .blur(radius: 4)
+                    .opacity(0.55)
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .strokeBorder(gradient, lineWidth: 2.5)
             }
-            .onDisappear { isMoving = false }
+        }
+        .allowsHitTesting(false)
+    }
+
+    private static func angle(at date: Date) -> Double {
+        let t = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: period)
+        return (t / period) * 360
     }
 }
 

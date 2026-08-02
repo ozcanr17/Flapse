@@ -7,8 +7,18 @@ extension EnvironmentValues {
 
 struct MainTabView: View {
 
-    enum Tab: Hashable {
+    enum Tab: Hashable, CaseIterable {
         case home, projects, saved, settings
+
+        /// Soldan sağa ekran sırası; geçişin yönünü bu belirler.
+        var order: Int {
+            switch self {
+            case .home: 0
+            case .projects: 1
+            case .saved: 2
+            case .settings: 3
+            }
+        }
     }
 
     @State private var tab: Tab = .home
@@ -29,6 +39,7 @@ struct MainTabView: View {
     @State private var isDraggingBar = false
     @State private var projectsPath = NavigationPath()
     @State private var isCustomTabBarHidden = false
+    private var launchIndicator: CameraLaunchIndicator { .shared }
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let barTint = Color(light: "F5F5F7", dark: "1B1B1F").opacity(0.26)
@@ -67,24 +78,15 @@ struct MainTabView: View {
     var body: some View {
         ZStack {
             theme.canvas.ignoresSafeArea()
+            // Paneller canlı kalır: `TabView` sekme değişiminde görünümleri yeniden
+            // kurmaz. Yönlü geçiş animasyonu denendi ve ÖLÇÜLDÜ — her geçişte panel
+            // baştan kurulduğu için maliyet 10-50 ms'den 45-178 ms'ye çıkıyordu.
+            // Akıcılık animasyondan önce geldiği için animasyon geri alındı.
             TabView(selection: $tab) {
-                pane {
-                    HomeView(
-                        isActive: tab == .home,
-                        onCapture: beginCapture,
-                        onShowProjects: { activate(barItems[1]) }
-                    )
-                }
-                .tag(Tab.home)
-
-                projectsPane
-                    .tag(Tab.projects)
-
-                pane { SavedTimelapsesView() }
-                    .tag(Tab.saved)
-
-                pane { SettingsView(onWelcomeFinished: { selectTab(.home) }) }
-                    .tag(Tab.settings)
+                paneContent(.home).tag(Tab.home)
+                paneContent(.projects).tag(Tab.projects)
+                paneContent(.saved).tag(Tab.saved)
+                paneContent(.settings).tag(Tab.settings)
             }
             .toolbar(.hidden, for: .tabBar)
         }
@@ -96,6 +98,15 @@ struct MainTabView: View {
             }
         }
         .animation(reduceMotion ? nil : .smooth(duration: 0.22), value: isCustomTabBarHidden)
+        .overlay {
+            if launchIndicator.isVisible {
+                CameraLaunchOverlay()
+            }
+        }
+        .animation(reduceMotion ? nil : .smooth(duration: 0.28), value: launchIndicator.isVisible)
+        // Önizleme katmanının pahalı kurulumunu uygulama açılışında bir kez ödüyoruz;
+        // böylece hiçbir kamera açılışı bunu beklemek zorunda kalmıyor.
+        .task { CameraPreviewHost.shared.warmUp() }
         .sheet(isPresented: $showQuickPick, onDismiss: presentPendingCapture) {
             QuickCaptureSheet(projects: capturableProjects) { project in
                 pendingCapture = project
@@ -111,6 +122,7 @@ struct MainTabView: View {
             }
         }
         .fullScreenCover(item: $captureRoute) { route in
+            let _ = CameraLaunchTrace.mark("cover content building")
             switch route {
             case .project(let project):
                 CameraCaptureView(project: project)
@@ -128,7 +140,7 @@ struct MainTabView: View {
             if let due = capturableProjects.first(where: { $0.isCaptureDue() }) {
                 let count = liveEntryCount(in: due)
                 if FeatureGate.canAddEntry(isPro: store.isPro, currentEntryCount: count) {
-                    CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: due.category))
+                    CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: due.category), videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: due), micEnabled: due.category.isVideoMode)
                     captureRoute = .project(due)
                 } else {
                     showPaywall = true
@@ -136,6 +148,26 @@ struct MainTabView: View {
             } else {
                 captureTapped()
             }
+        }
+    }
+
+    @ViewBuilder
+    private func paneContent(_ target: Tab) -> some View {
+        switch target {
+        case .home:
+            pane {
+                HomeView(
+                    isActive: tab == .home,
+                    onCapture: beginCapture,
+                    onCreateProject: { showAddProject = true }
+                )
+            }
+        case .projects:
+            projectsPane
+        case .saved:
+            pane { SavedTimelapsesView() }
+        case .settings:
+            pane { SettingsView(onWelcomeFinished: { selectTab(.home) }) }
         }
     }
 
@@ -195,7 +227,7 @@ struct MainTabView: View {
             .coordinateSpace(name: "tabBarSpace")
             // Önceki, daha belirgin Liquid Glass görünümü: sistem materyali
             // temaya uyumlu çok hafif bir tint ile arka planı kırar.
-            .liquidGlassCapsule(tint: Self.barTint, interactive: true)
+            .liquidGlassCapsule(tint: Self.barTint, interactive: true, scrimOpacity: 0.06)
             .overlay {
                 Capsule()
                     .strokeBorder(
@@ -305,11 +337,14 @@ struct MainTabView: View {
 
     private func selectTab(_ target: Tab) {
         guard target != tab else { return }
+        PerfTrace.begin("tab", detail: "\(tab) → \(target)")
         var transaction = Transaction()
         transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            tab = target
-        }
+        withTransaction(transaction) { tab = target }
+        PerfTrace.mark("tab", "state set")
+        // Bir sonraki runloop turunda ölçmek, SwiftUI'nin yeni sekmeyi kurup
+        // yerleştirmesinin ne kadar sürdüğünü gösterir.
+        Task { @MainActor in PerfTrace.end("tab", "new tab laid out") }
     }
 
     private func iconRow(reportsFrames: Bool) -> some View {
@@ -362,24 +397,57 @@ struct MainTabView: View {
     }
 
     private func captureTapped() {
-        refreshCaptureProjects()
+        // Elimizde zaten proje varsa sorguyu atlayıp kamerayı hemen ısıtıyoruz.
+        // Boş görünüyorsa bu bilgi bayat olabilir (ör. uygulama yeni açıldı):
+        // "proje yok" kararını vermeden önce mutlaka tazeliyoruz.
+        CameraLaunchTrace.begin("home capture button")
+        if liveProjects.isEmpty { refreshCaptureProjects() }
+        CameraLaunchTrace.mark("liveProjects check (n=\(liveProjects.count))")
         guard !liveProjects.isEmpty else {
             showAddProject = true
             return
         }
-        CameraService.shared.prewarm()
         if store.isPro {
-            captureRoute = .auto
+            CameraService.shared.prewarm(
+                position: CameraCaptureViewModel.initialPosition(for: .other),
+                videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: nil)
+            )
+            // Göstergeyi önce göster, ağır işi (proje sorgusu + tam ekran sunumu) bir
+            // sonraki runloop turuna bırak. Aynı turda yapılırsa SwiftUI araya kare
+            // çizemez ve kullanıcı donmuş bir arayüz görür.
+            CameraLaunchTrace.mark("prewarm dispatched")
+            launchIndicator.show()
+            Task { @MainActor in
+                CameraLaunchTrace.mark("overlay frame yielded")
+                refreshCaptureProjects()
+                CameraLaunchTrace.mark("projects fetched (n=\(captureProjects.count))")
+                captureRoute = .auto
+                CameraLaunchTrace.mark("captureRoute set")
+            }
         } else {
+            // Ücretsiz akışta kamera doğrudan açılmaz; önce proje seçilir. Burada
+            // ısıtmak, seçilen proje farklı bir pozisyon/preset istediğinde ÇALIŞAN
+            // oturumun baştan yapılandırılmasına yol açıyordu. Isıtmayı seçim anına
+            // bırakıyoruz (bkz. QuickCaptureSheet) — orada doğru parametrelerle,
+            // tek seferde yapılıyor.
+            refreshCaptureProjects()
             showQuickPick = true
         }
     }
 
     private func beginCapture(_ project: Project) {
+        CameraLaunchTrace.begin("project card")
         let count = liveEntryCount(in: project)
+        CameraLaunchTrace.mark("liveEntryCount (n=\(count))")
         if FeatureGate.canAddEntry(isPro: store.isPro, currentEntryCount: count) {
-            CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category))
-            captureRoute = .project(project)
+            CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category), videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: project), micEnabled: project.category.isVideoMode)
+            CameraLaunchTrace.mark("prewarm dispatched")
+            launchIndicator.show()
+            Task { @MainActor in
+                CameraLaunchTrace.mark("overlay frame yielded")
+                captureRoute = .project(project)
+                CameraLaunchTrace.mark("captureRoute set")
+            }
         } else {
             showPaywall = true
         }
@@ -393,8 +461,9 @@ struct MainTabView: View {
         pendingCapture = nil
         let count = liveEntryCount(in: project)
         if FeatureGate.canAddEntry(isPro: store.isPro, currentEntryCount: count) {
-            CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category))
-            captureRoute = .project(project)
+            CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category), videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: project), micEnabled: project.category.isVideoMode)
+            launchIndicator.show()
+            Task { @MainActor in captureRoute = .project(project) }
         } else {
             CameraService.shared.stop()
             showPaywall = true
@@ -428,7 +497,9 @@ struct QuickCaptureSheet: View {
                     let accent = Theme.accent(for: project.category)
                     Button {
                         CameraService.shared.prewarm(
-                            position: CameraCaptureViewModel.initialPosition(for: project.category)
+                            position: CameraCaptureViewModel.initialPosition(for: project.category),
+                            videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: project),
+                            micEnabled: project.category.isVideoMode
                         )
                         onSelect(project)
                     } label: {

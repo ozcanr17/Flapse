@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import UIKit
 import Photos
+import AVFoundation
 
 struct EntryViewerView: View {
 
@@ -228,8 +229,12 @@ struct EntryViewerView: View {
                     .accessibilityLabel(Text("Fotoğrafı düzenle"))
 
                     Button {
-                        CameraService.shared.prewarm(position: CameraCaptureViewModel.initialPosition(for: project.category))
-                        retakeTarget = entry
+                        CameraService.shared.prewarm(
+                            position: CameraCaptureViewModel.initialPosition(for: project.category),
+                            videoCapable: CameraCaptureViewModel.sessionVideoCapable(for: project)
+                        )
+                        CameraLaunchIndicator.shared.show()
+                        Task { @MainActor in retakeTarget = entry }
                     } label: {
                         Label("Yeniden Çek", systemImage: "camera.badge.clock")
                             .frame(maxWidth: .infinity)
@@ -321,6 +326,46 @@ private struct EntryPage: View {
     @State private var dragBase: CGSize?
 
     var body: some View {
+        ZStack {
+            if entry.isVideo {
+                videoBody
+            } else {
+                photoBody
+            }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// Video girdileri oynatılabilir olmalı: daha önce burada yalnızca poster
+    /// gösteriliyordu ve poster üretilememişse ekran tamamen siyah kalıyordu.
+    @ViewBuilder
+    private var videoBody: some View {
+        if let url = entry.videoFileURL, FileManager.default.fileExists(atPath: url.path) {
+            // Oynatıcı üst çubuk ile alt yuvanın arasında, ortalanmış olarak durur.
+            // Tam ekran verildiğinde kendi kontrolleri bizim düğmelerimizle üst üste
+            // biniyordu (ekranda üç kapatma ikonu görünüyordu).
+            // Oynatıcı, üst çubuk ile alt yuvanın arasında ORTALANIR ve kendi
+            // en-boy oranını korur. Tam ekran verildiğinde oynatıcının kendi
+            // kontrolleri bizim düğmelerimizle üst üste biniyordu.
+            SimpleVideoPlayer(url: url)
+                .id(url)
+                .aspectRatio(3.0 / 4.0, contentMode: .fit)
+                .frame(maxWidth: .infinity)
+                .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
+                .padding(.horizontal, 12)
+                .padding(.top, 72)
+                .padding(.bottom, 200)
+        } else {
+            ContentUnavailableView(
+                "Video bulunamadı",
+                systemImage: "video.slash",
+                description: Text("Bu klibin dosyası cihazda bulunamadı.")
+            )
+            .foregroundStyle(.white)
+        }
+    }
+
+    private var photoBody: some View {
         ZStack {
             if let image {
                 Image(uiImage: image)

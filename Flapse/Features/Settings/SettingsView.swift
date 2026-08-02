@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 import UIKit
 import AuthenticationServices
+import UniformTypeIdentifiers
 
 struct SettingsView: View {
 
@@ -27,6 +28,7 @@ struct SettingsView: View {
 
     @State private var auth = AuthService()
     @State private var showPaywall = false
+    @State private var showFeedback = false
     @State private var cloudAccountAvailable: Bool?
     @State private var showWelcome = false
     @State private var shouldReturnHomeAfterWelcome = false
@@ -34,6 +36,9 @@ struct SettingsView: View {
     @State private var adminSignInMessage: String?
     @State private var isConfirmingAccountDeletion = false
     @State private var cloudRestartRequired = UserDefaults.standard.bool(forKey: CloudBackupPreference.restartRequiredKey)
+    @State private var isImportingArchive = false
+    @State private var importArchiveError: String?
+    @State private var importedArchiveTitle: String?
 
     var body: some View {
         List {
@@ -71,6 +76,29 @@ struct SettingsView: View {
                 }
                 .font(Theme.body(15))
                 .foregroundStyle(theme.secondary)
+            }
+
+            Section {
+                Button {
+                    showFeedback = true
+                } label: {
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Bildir")
+                                .font(Theme.headline(15))
+                                .foregroundStyle(theme.ink)
+                            Text("Hata bildir, özellik veya iyileştirme öner")
+                                .font(Theme.caption(12))
+                                .foregroundStyle(theme.inkMuted)
+                        }
+                    } icon: {
+                        Image(systemName: "exclamationmark.bubble")
+                            .foregroundStyle(theme.accent)
+                    }
+                }
+                .accessibilityIdentifier("feedbackButton")
+            } footer: {
+                Text("Karşılaştığın bir sorunu ya da eklenmesini istediğin bir şeyi doğrudan bana yazabilirsin.")
             }
 
             Section {
@@ -230,6 +258,16 @@ struct SettingsView: View {
                         Image(systemName: "trash").foregroundStyle(theme.accent)
                     }
                 }
+                Button {
+                    isImportingArchive = true
+                } label: {
+                    Label {
+                        Text("Proje Arşivi İçe Aktar").foregroundStyle(theme.ink)
+                    } icon: {
+                        Image(systemName: "tray.and.arrow.down").foregroundStyle(theme.accent)
+                    }
+                }
+                .accessibilityIdentifier("importProjectArchiveButton")
                 Button("Karşılama ekranını göster") {
                     showWelcome = true
                 }
@@ -295,6 +333,36 @@ struct SettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showPaywall) {
             PaywallView(store: store)
+        }
+        .sheet(isPresented: $showFeedback) {
+            FeedbackSheet()
+        }
+        .fileImporter(
+            isPresented: $isImportingArchive,
+            allowedContentTypes: [ProjectArchive.utType, .folder]
+        ) { result in
+            switch result {
+            case .success(let url):
+                importProjectArchive(from: url)
+            case .failure(let error):
+                importArchiveError = error.localizedDescription
+            }
+        }
+        .alert("İçe aktarılamadı", isPresented: Binding(
+            get: { importArchiveError != nil },
+            set: { if !$0 { importArchiveError = nil } }
+        )) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(importArchiveError ?? "")
+        }
+        .alert("İçe Aktarıldı", isPresented: Binding(
+            get: { importedArchiveTitle != nil },
+            set: { if !$0 { importedArchiveTitle = nil } }
+        )) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text("\"\(importedArchiveTitle ?? "")\" yeni bir proje olarak eklendi.")
         }
         .fullScreenCover(isPresented: $showWelcome, onDismiss: finishWelcomeReplay) {
             WelcomeView {
@@ -393,6 +461,26 @@ struct SettingsView: View {
                 customThemeEnabled = true
             }
         )
+    }
+
+    /// Seçilen `.flapseproject` paketini okur (arka planda; SwiftData'ya dokunmaz)
+    /// ve yeni bir proje olarak ekler (mevcut hiçbir veriyi değiştirmez). `url`
+    /// güvenlik kapsamlı olabileceğinden erişim, okuma bitene kadar açık tutulur.
+    private func importProjectArchive(from url: URL) {
+        Task {
+            let accessed = url.startAccessingSecurityScopedResource()
+            defer { if accessed { url.stopAccessingSecurityScopedResource() } }
+            do {
+                let imported = try await Task.detached(priority: .userInitiated) {
+                    try ProjectArchive.read(packageAt: url)
+                }.value
+                let project = try ProjectArchive.materialize(imported, into: settingsContext)
+                importedArchiveTitle = project.title
+                refreshStatistics()
+            } catch {
+                importArchiveError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
+            }
+        }
     }
 
     private func refreshStatistics() {

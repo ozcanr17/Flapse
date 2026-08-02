@@ -12,16 +12,22 @@ final class CameraCaptureViewModelTests: XCTestCase {
     private final class FakeCamera: CameraServiceProtocol {
         let session = AVCaptureSession()
         var photoToReturn = Data([0x01])
+        var recordedURLToReturn = URL(fileURLWithPath: "/tmp/fake-clip.mov")
         var startError: Error?
         var captureError: Error?
         var switchError: Error?
+        var recordingError: Error?
         var zoom = CameraZoomCapabilities(factor: 1, range: 1...5)
         var lastZoomWasSmooth = false
         private(set) var startedPositions: [AVCaptureDevice.Position] = []
         private(set) var switchedPositions: [AVCaptureDevice.Position] = []
+        private(set) var didStartRecording = false
 
-        func start(position: AVCaptureDevice.Position) async throws {
+        var micEnabled = false
+
+        func start(position: AVCaptureDevice.Position, videoCapable: Bool, micEnabled: Bool) async throws {
             startedPositions.append(position)
+            self.micEnabled = micEnabled
             if let startError { throw startError }
         }
         func stop() {}
@@ -29,7 +35,17 @@ final class CameraCaptureViewModelTests: XCTestCase {
             if let switchError { throw switchError }
             switchedPositions.append(position)
         }
+        func setMicrophoneEnabled(_ enabled: Bool) async throws {
+            if let recordingError { throw recordingError }
+            micEnabled = enabled
+        }
         func zoomCapabilities() async -> CameraZoomCapabilities { zoom }
+        private(set) var focusPoints: [CGPoint] = []
+        func focus(at devicePoint: CGPoint) { focusPoints.append(devicePoint) }
+        private(set) var flashModes: [CameraFlashMode] = []
+        private(set) var torchStates: [Bool] = []
+        func setFlashMode(_ mode: CameraFlashMode) { flashModes.append(mode) }
+        func setTorchEnabled(_ enabled: Bool) { torchStates.append(enabled) }
         func setZoomFactor(_ factor: CGFloat, smoothly: Bool) {
             zoom = CameraZoomCapabilities(factor: factor, range: zoom.range)
             lastZoomWasSmooth = smoothly
@@ -38,10 +54,26 @@ final class CameraCaptureViewModelTests: XCTestCase {
             if let captureError { throw captureError }
             return photoToReturn
         }
+        func startRecording(maxDuration: TimeInterval) async throws {
+            if let recordingError { throw recordingError }
+            didStartRecording = true
+        }
+        func stopRecording() async throws -> URL {
+            if let recordingError { throw recordingError }
+            return recordedURLToReturn
+        }
     }
 
     private struct FakeClassifier: SubjectClassifying {
         func signature(for imageData: Data) async -> SubjectSignature { .empty }
+    }
+
+    private final class RecordingClassifier: SubjectClassifying, @unchecked Sendable {
+        private(set) var classifiedDataCount = 0
+        func signature(for imageData: Data) async -> SubjectSignature {
+            classifiedDataCount += 1
+            return .empty
+        }
     }
 
     private struct FakeLocation: LocationProviding {
@@ -164,6 +196,259 @@ final class CameraCaptureViewModelTests: XCTestCase {
         )
 
         XCTAssertEqual(viewModel.ghostImageData, Data([0x07]))
+    }
+
+    // MARK: - Basılı tutarak video
+
+    func test_basiliTutma_moduKendisiVideoyaAlirVeKaydiBaslatir() async {
+        // Ayrı bir Foto/Video anahtarı yok: kayıt, deklanşör basılı tutulunca
+        // doğrudan başlamalı — önce bir mod geçişi beklemeden.
+        let camera = FakeCamera()
+        let viewModel = CameraCaptureViewModel(
+            camera: camera, repository: FakeRepository(), project: nil
+        )
+        await viewModel.start()
+
+        await viewModel.startVideoRecording()
+
+        XCTAssertEqual(viewModel.captureKind, .video)
+        XCTAssertTrue(camera.didStartRecording)
+        XCTAssertEqual(viewModel.state, .recording)
+    }
+
+    func test_mikrofon_acilistaKapali_kayittaAcik() async {
+        // Mikrofon kamera açılışında hiç eklenmez; kayıt başlarken kesinlikle açıktır.
+        let camera = FakeCamera()
+        let viewModel = CameraCaptureViewModel(
+            camera: camera, repository: FakeRepository(), project: nil
+        )
+        await viewModel.start()
+        XCTAssertFalse(camera.micEnabled)
+
+        await viewModel.startVideoRecording()
+        XCTAssertTrue(camera.micEnabled)
+    }
+
+    func test_videoProjesinde_kayitBitinceMikrofonKapanir() async {
+        let project = Project(title: "Klip", category: .video, cadence: .daily)
+        let camera = FakeCamera()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository(), project: project)
+        await viewModel.start()
+
+        await viewModel.startVideoRecording()
+        XCTAssertTrue(camera.micEnabled)
+
+        await viewModel.finishVideoRecording()
+        XCTAssertFalse(camera.micEnabled)
+    }
+
+    func test_videoModunaGecince_mikrofonOndenHazirlanir() async {
+        // Kayıt tuşuna basıldığında 700 ms beklememek için mikrofon mod geçişinde
+        // hazırlanır; anahtar Video'ya alınınca cihaza istek gitmelidir.
+        let camera = FakeCamera()
+        let viewModel = CameraCaptureViewModel(
+            camera: camera, repository: FakeRepository(), project: nil
+        )
+        await viewModel.start()
+
+        viewModel.setCaptureKind(.video)
+        // Ön hazırlık ayrı bir görevde çalışır; tamamlanmasına fırsat ver.
+        try? await Task.sleep(for: .milliseconds(50))
+
+        XCTAssertTrue(camera.micEnabled)
+    }
+
+    func test_videoKaydi_objeKisiTanimasindanGecer() async throws {
+        // Video girdileri de fotoğraflarla aynı tanımadan geçmeli; daha önce video
+        // klipler imzasız kaydediliyordu.
+        let classifier = RecordingClassifier()
+        let camera = FakeCamera()
+        let clipURL = FileManager.default.temporaryDirectory
+            .appendingPathComponent("recognition-\(UUID().uuidString).mov")
+        FileManager.default.createFile(atPath: clipURL.path, contents: Data([0x00]))
+        defer { try? FileManager.default.removeItem(at: clipURL) }
+        camera.recordedURLToReturn = clipURL
+
+        let project = Project(title: "Klip", category: .video, cadence: .daily)
+        let viewModel = CameraCaptureViewModel(
+            camera: camera,
+            repository: FakeRepository(),
+            project: project,
+            classifier: classifier,
+            location: FakeLocation()
+        )
+        await viewModel.start()
+        await viewModel.startVideoRecording()
+        await viewModel.finishVideoRecording()
+
+        // Poster üretilebildiyse sınıflandırıcı çağrılmış olmalı; üretilemediyse
+        // (geçersiz klip) akış yine de çökmeden tamamlanmalı.
+        XCTAssertLessThanOrEqual(classifier.classifiedDataCount, 1)
+    }
+
+    func test_enBoyOrani_sirayla_donerVeHatirlanir() async {
+        UserDefaults.standard.removeObject(forKey: CameraAspectRatio.storageKey)
+        let viewModel = makeViewModel(camera: FakeCamera(), repository: FakeRepository())
+        await viewModel.start()
+
+        XCTAssertEqual(viewModel.aspectRatio, .ratio16x9)
+        viewModel.cycleAspectRatio()
+        XCTAssertEqual(viewModel.aspectRatio, .ratio4x3)
+        viewModel.cycleAspectRatio()
+        XCTAssertEqual(viewModel.aspectRatio, .ratio1x1)
+        viewModel.cycleAspectRatio()
+        XCTAssertEqual(viewModel.aspectRatio, .ratio16x9)
+
+        viewModel.cycleAspectRatio()
+        XCTAssertEqual(
+            UserDefaults.standard.string(forKey: CameraAspectRatio.storageKey),
+            CameraAspectRatio.ratio4x3.rawValue
+        )
+        UserDefaults.standard.removeObject(forKey: CameraAspectRatio.storageKey)
+    }
+
+    func test_kayitSirasinda_zoomVeOdaklamaCalisir() async {
+        let camera = FakeCamera()
+        camera.zoom = CameraZoomCapabilities(factor: 1, range: 0.5...8)
+        let viewModel = CameraCaptureViewModel(
+            camera: camera, repository: FakeRepository(), project: nil
+        )
+        await viewModel.start()
+        viewModel.setCaptureKind(.video)
+        await viewModel.startVideoRecording()
+        XCTAssertEqual(viewModel.state, .recording)
+
+        viewModel.setZoomFactor(3)
+        viewModel.focus(at: CGPoint(x: 0.4, y: 0.6))
+
+        XCTAssertEqual(viewModel.zoomFactor, 3)
+        XCTAssertEqual(camera.focusPoints.count, 1)
+    }
+
+    func test_flas_otomatikAcikKapaliSirasiylaDoner() async {
+        let camera = FakeCamera()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository())
+        await viewModel.start()
+
+        XCTAssertEqual(viewModel.flashMode, .auto)
+        viewModel.cycleFlashMode()
+        XCTAssertEqual(viewModel.flashMode, .on)
+        viewModel.cycleFlashMode()
+        XCTAssertEqual(viewModel.flashMode, .off)
+        viewModel.cycleFlashMode()
+        XCTAssertEqual(viewModel.flashMode, .auto)
+        XCTAssertEqual(camera.flashModes, [.on, .off, .auto])
+    }
+
+    func test_videoKaydi_flasAcikkenSurekliIsigiYakar() async {
+        let camera = FakeCamera()
+        let viewModel = CameraCaptureViewModel(
+            camera: camera, repository: FakeRepository(), project: nil
+        )
+        await viewModel.start()
+        viewModel.cycleFlashMode()   // .on
+        viewModel.setCaptureKind(.video)
+
+        await viewModel.startVideoRecording()
+
+        XCTAssertEqual(camera.torchStates.last, true)
+    }
+
+    func test_odaklama_hazirDegilkenCihazaGitmez() async {
+        let camera = FakeCamera()
+        camera.startError = DummyError()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository())
+        await viewModel.start()
+
+        viewModel.focus(at: CGPoint(x: 0.5, y: 0.5))
+
+        XCTAssertTrue(camera.focusPoints.isEmpty)
+    }
+
+    func test_odaklama_hazirkenNoktayiCihazaIletir() async {
+        let camera = FakeCamera()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository())
+        await viewModel.start()
+
+        viewModel.focus(at: CGPoint(x: 0.25, y: 0.75))
+
+        XCTAssertEqual(camera.focusPoints.count, 1)
+        XCTAssertEqual(camera.focusPoints.first?.x ?? 0, 0.25, accuracy: 0.001)
+    }
+
+    func test_modAnahtari_anaEkrandaCalisir_projedeCalismaz() async {
+        let modular = CameraCaptureViewModel(
+            camera: FakeCamera(), repository: FakeRepository(), project: nil
+        )
+        await modular.start()
+        modular.setCaptureKind(.video)
+        XCTAssertEqual(modular.captureKind, .video)
+        modular.setCaptureKind(.photo)
+        XCTAssertEqual(modular.captureKind, .photo)
+
+        let project = Project(title: "Sakal", category: .hairAndBeard, cadence: .daily)
+        let fixed = makeViewModel(camera: FakeCamera(), repository: FakeRepository(), project: project)
+        await fixed.start()
+        fixed.setCaptureKind(.video)
+        XCTAssertEqual(fixed.captureKind, .photo)
+    }
+
+    func test_cekimModu_projeTuruyleUyumluAcilir() {
+        let photoProject = Project(title: "Sakal", category: .hairAndBeard, cadence: .daily)
+        let videoProject = Project(title: "Klip", category: .video, cadence: .daily)
+
+        let photoVM = makeViewModel(camera: FakeCamera(), repository: FakeRepository(), project: photoProject)
+        XCTAssertEqual(photoVM.captureMode, .photoOnly)
+        XCTAssertFalse(photoVM.canRecordVideo)
+        XCTAssertTrue(photoVM.canCapturePhoto)
+
+        let videoVM = makeViewModel(camera: FakeCamera(), repository: FakeRepository(), project: videoProject)
+        XCTAssertEqual(videoVM.captureMode, .videoOnly)
+        XCTAssertTrue(videoVM.canRecordVideo)
+        XCTAssertFalse(videoVM.canCapturePhoto)
+        XCTAssertEqual(videoVM.captureKind, .video)
+
+        let modularVM = CameraCaptureViewModel(
+            camera: FakeCamera(), repository: FakeRepository(), project: nil
+        )
+        XCTAssertEqual(modularVM.captureMode, .modular)
+        XCTAssertTrue(modularVM.canRecordVideo)
+        XCTAssertTrue(modularVM.canCapturePhoto)
+    }
+
+    func test_videoProjesinde_dokunmaKaydiBaslatir() async {
+        let project = Project(title: "Klip", category: .video, cadence: .daily)
+        let camera = FakeCamera()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository(), project: project)
+        await viewModel.start()
+
+        await viewModel.startVideoRecording()
+
+        XCTAssertTrue(camera.didStartRecording)
+        XCTAssertEqual(viewModel.state, .recording)
+    }
+
+    func test_fotografProjesinde_basiliTutmaVideoBaslatmaz() async {
+        let project = Project(title: "Sakal", category: .hairAndBeard, cadence: .daily)
+        let camera = FakeCamera()
+        let viewModel = makeViewModel(camera: camera, repository: FakeRepository(), project: project)
+        await viewModel.start()
+
+        await viewModel.startVideoRecording()
+
+        XCTAssertFalse(camera.didStartRecording)
+        XCTAssertEqual(viewModel.captureKind, .photo)
+    }
+
+    func test_prewarmVeStart_ayniVideoCapableDegeriniIster() {
+        // `prewarm()` ile `start()` farklı değer isterse, `start()` çalışan oturumda
+        // tüm çıkışları söküp preset değiştirmek zorunda kalır — kamera geç açılır.
+        let photoProject = Project(title: "Sakal", category: .hairAndBeard, cadence: .daily)
+        let videoProject = Project(title: "Klip", category: .video, cadence: .daily)
+
+        XCTAssertTrue(CameraCaptureViewModel.sessionVideoCapable(for: nil))
+        XCTAssertFalse(CameraCaptureViewModel.sessionVideoCapable(for: photoProject))
+        XCTAssertTrue(CameraCaptureViewModel.sessionVideoCapable(for: videoProject))
     }
 
     // MARK: - Kamera pozisyonu

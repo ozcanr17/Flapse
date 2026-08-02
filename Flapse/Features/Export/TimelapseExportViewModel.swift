@@ -35,6 +35,8 @@ final class TimelapseExportViewModel {
         soundtrackURL: URL? = nil,
         bundledBeats: [Double]? = nil,
         beatSync: Bool = false,
+        soundtrackStartTime: Double = 0,
+        keepsClipAudio: Bool = true,
         overlay: TimelapseOverlayOptions = TimelapseOverlayOptions(),
         smartAlignment: Bool = false,
         manualAnchor: ManualAlignment? = nil,
@@ -56,7 +58,8 @@ final class TimelapseExportViewModel {
             self?.export(
                 frames: frames, isPro: isPro, speed: speed, speedMultiplier: speedMultiplier,
                 aspect: aspect, zoom: zoom, soundtrackURL: soundtrackURL, bundledBeats: bundledBeats,
-                beatSync: beatSync, overlay: overlay, smartAlignment: smartAlignment,
+                beatSync: beatSync, soundtrackStartTime: soundtrackStartTime, keepsClipAudio: keepsClipAudio,
+                overlay: overlay, smartAlignment: smartAlignment,
                 manualAnchor: manualAnchor, manualAnchors: manualAnchors,
                 transition: transition, alignmentSubject: alignmentSubject
             )
@@ -72,12 +75,19 @@ final class TimelapseExportViewModel {
                     }
                     if beats?.count ?? 0 < 2 { beats = nil }
                     if let raw = beats {
+                        // Kullanıcı bir başlangıç noktası seçtiyse, vuruşlar da o noktaya
+                        // göre kaydırılır — aksi halde kesimler duyduğunuz müzikle uyuşmaz.
+                        let shifted = soundtrackStartTime > 0
+                            ? raw.compactMap { $0 >= soundtrackStartTime ? $0 - soundtrackStartTime : nil }
+                            : raw
                         let audioDuration = (try? await AVURLAsset(url: soundtrackURL).load(.duration).seconds) ?? 0
-                        beats = Self.loopedCutTimes(
-                            beats: raw,
-                            frameCount: frames.count,
-                            audioDuration: audioDuration
-                        )
+                        beats = shifted.count >= 2
+                            ? Self.loopedCutTimes(
+                                beats: shifted,
+                                frameCount: frames.count,
+                                audioDuration: max(0, audioDuration - soundtrackStartTime)
+                            )
+                            : nil
                     }
                 }
                 let transitionPlan = transition == .adaptive
@@ -91,7 +101,8 @@ final class TimelapseExportViewModel {
                     transition: transition, transitionPlan: transitionPlan,
                     alignmentSubject: alignmentSubject,
                     soundtrackURL: soundtrackURL,
-                    beatTimes: beats
+                    beatTimes: beats,
+                    soundtrackStartTime: soundtrackStartTime
                 )
                 let url = try await composer.makeVideo(
                     from: frames,
@@ -120,6 +131,13 @@ final class TimelapseExportViewModel {
                 self?.renderTask = nil
             }
         }
+    }
+
+    /// Render sonrası müzik senkronu ayarlandığında (yalnızca ses yeniden muxlanmış,
+    /// görsel render tekrarlanmamış) sonucu doğrudan `.finished` fazına uygular.
+    func applyResyncedOutput(_ url: URL) {
+        guard case .finished = phase else { return }
+        phase = .finished(url)
     }
 
     func cancel() {

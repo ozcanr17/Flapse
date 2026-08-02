@@ -526,6 +526,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Gelişim fotoğraflarını çekmek için kameraya erişim gerekir.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gizlenen proje ve timelapse'leri açmak için Face ID kullanılır.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Çekimlerinize yer bilgisi eklemek için konuma erişim gerekir.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Video çekerken sesi kaydetmek için mikrofona erişim gerekir.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Kareleri ve timelapse videolarını fotoğraflarına kaydetmek için erişim gerekir.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fotoğraflardan içe aktarırken çekim tarihi ve konum bilgisini okumak için erişim gerekir.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -569,6 +570,7 @@
 				INFOPLIST_KEY_NSCameraUsageDescription = "Gelişim fotoğraflarını çekmek için kameraya erişim gerekir.";
 				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gizlenen proje ve timelapse'leri açmak için Face ID kullanılır.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Çekimlerinize yer bilgisi eklemek için konuma erişim gerekir.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Video çekerken sesi kaydetmek için mikrofona erişim gerekir.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Kareleri ve timelapse videolarını fotoğraflarına kaydetmek için erişim gerekir.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Fotoğraflardan içe aktarırken çekim tarihi ve konum bilgisini okumak için erişim gerekir.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

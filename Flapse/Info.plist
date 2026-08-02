@@ -28,5 +28,39 @@
 		<string>processing</string>
 		<string>remote-notification</string>
 	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>rozcan.flapse.projectarchive</string>
+			<key>UTTypeDescription</key>
+			<string>Flapse Proje Arşivi</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+				<string>public.folder</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>flapseproject</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>Flapse Proje Arşivi</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>rozcan.flapse.projectarchive</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+	</array>
 </dict>
 </plist>

@@ -26,6 +26,7 @@ struct TimelapseExportSheet: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.theme) private var theme
     @Environment(\.modelContext) private var modelContext
+    @State private var keepsClipAudio = true
     @State private var showPaywall = false
     @State private var speedX: Double = 1.0
     @State private var zoomX: Double = 1.0
@@ -33,7 +34,10 @@ struct TimelapseExportSheet: View {
     @State private var soundtrackURL: URL?
     @State private var bundledBeats: [Double]?
     @State private var beatSync = false
-    @State private var isPickingAudio = false
+    @State private var isPickingMusic = false
+    @State private var soundtrackStartTime: Double = 0
+    @State private var isAdjustingStart = false
+    @State private var isAdjustingSyncAfterRender = false
     @State private var aiCaption: String?
     @State private var isWritingCaption = false
     @State private var aspect: TimelapseAspect = .threeFour
@@ -65,7 +69,7 @@ struct TimelapseExportSheet: View {
         var result: [TimelapseFrame] = []
         for entry in project.sortedEntries {
             if let data = entry.imageData {
-                result.append(TimelapseFrame(imageData: data, capturedAt: entry.capturedAt))
+                result.append(TimelapseFrame(imageData: data, capturedAt: entry.capturedAt, videoFileURL: entry.videoFileURL))
             }
             await Task.yield()
         }
@@ -106,6 +110,21 @@ struct TimelapseExportSheet: View {
                     }
                 }
             }
+            .sheet(isPresented: $isAdjustingSyncAfterRender) {
+                if case .finished(let url) = viewModel.phase, let soundtrackURL {
+                    PostRenderSyncSheet(
+                        videoURL: url,
+                        soundtrackURL: soundtrackURL,
+                        initialOffset: soundtrackStartTime
+                    ) { newURL, newOffset in
+                        soundtrackStartTime = newOffset
+                        viewModel.applyResyncedOutput(newURL)
+                        lastRenderedURL = newURL
+                        savedToPhotos = false
+                        savedToLibrary = false
+                    }
+                }
+            }
         }
     }
 
@@ -127,11 +146,18 @@ struct TimelapseExportSheet: View {
 
                 VStack(spacing: 18) {
                     speedControl
-                    zoomControl
+                    if !isVideoMode {
+                        zoomControl
+                    }
                     aspectControl
+                    if isVideoMode {
+                        clipAudioControl
+                    }
                     musicControl
-                    transitionControl
-                    alignmentControl
+                    if !isVideoMode {
+                        transitionControl
+                        alignmentControl
+                    }
                     overlayControls
                 }
                 .disabled(isRendering)
@@ -260,6 +286,18 @@ struct TimelapseExportSheet: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.flapsePrimary)
+                if soundtrackURL != nil {
+                    Button {
+                        isAdjustingSyncAfterRender = true
+                    } label: {
+                        Label("Müzik Senkronunu Ayarla", systemImage: "waveform")
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 12)
+                            .foregroundStyle(theme.accent)
+                            .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
                 Button {
                     saveVideoToPhotos(url)
                 } label: {
@@ -429,16 +467,8 @@ struct TimelapseExportSheet: View {
                     .font(Theme.caption(13))
                     .foregroundStyle(theme.inkMuted)
                 Spacer()
-                Menu {
-                    Button("Kapalı") { setSoundtrack(nil, title: nil) }
-                    ForEach(SoundtrackOption.bundled) { option in
-                        Button(option.title) { setSoundtrack(option.url, title: option.title, beats: option.beatGrid) }
-                    }
-                    Button {
-                        if store.isPro { isPickingAudio = true } else { showPaywall = true }
-                    } label: {
-                        Label("Dosyadan seç…", systemImage: "folder")
-                    }
+                Button {
+                    if store.isPro { isPickingMusic = true } else { showPaywall = true }
                 } label: {
                     Text(soundtrackTitle ?? String(localized: "Kapalı", bundle: .appLanguage))
                         .font(Theme.caption(13))
@@ -447,6 +477,7 @@ struct TimelapseExportSheet: View {
                         .padding(.vertical, 6)
                         .background(theme.surface, in: Capsule())
                 }
+                .buttonStyle(.plain)
                 .disabled(viewModel.phase == .rendering)
             }
             if soundtrackURL != nil {
@@ -458,23 +489,46 @@ struct TimelapseExportSheet: View {
                 .tint(theme.accent)
                 .disabled(viewModel.phase == .rendering)
                 .onChange(of: beatSync) { isStale = true }
+
+                Button {
+                    isAdjustingStart = true
+                } label: {
+                    Label(startTimeLabel, systemImage: "timeline.selection")
+                        .font(Theme.caption(13))
+                        .foregroundStyle(theme.inkMuted)
+                }
+                .buttonStyle(.plain)
+                .disabled(viewModel.phase == .rendering)
             }
         }
-        .fileImporter(isPresented: $isPickingAudio, allowedContentTypes: [.audio]) { result in
-            guard case .success(let url) = result else { return }
-            let scoped = url.startAccessingSecurityScopedResource()
-            defer { if scoped { url.stopAccessingSecurityScopedResource() } }
-            let local = FileManager.default.temporaryDirectory
-                .appendingPathComponent("soundtrack-\(UUID().uuidString)")
-                .appendingPathExtension(url.pathExtension.isEmpty ? "m4a" : url.pathExtension)
-            if (try? FileManager.default.copyItem(at: url, to: local)) != nil {
-                let title = url.deletingPathExtension().lastPathComponent
-                Task {
-                    let prepared = await SoundtrackTranscoder.aacFile(from: local)
-                    setSoundtrack(prepared, title: title)
+        .sheet(isPresented: $isPickingMusic) {
+            MusicPickerSheet(selectedTitle: soundtrackTitle) { url, title, beats in
+                setSoundtrack(url, title: title, beats: beats)
+            }
+            .presentationDetents([.medium, .large])
+            .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $isAdjustingStart) {
+            if let soundtrackURL {
+                MusicTrimSheet(
+                    url: soundtrackURL,
+                    title: soundtrackTitle ?? "",
+                    initialOffset: soundtrackStartTime
+                ) { offset in
+                    soundtrackStartTime = offset
+                    isStale = true
                 }
             }
         }
+    }
+
+    private var startTimeLabel: String {
+        guard soundtrackStartTime > 0 else {
+            return String(localized: "Başlangıcı ayarla", bundle: .appLanguage)
+        }
+        let total = Int(soundtrackStartTime.rounded())
+        let formatted = String(format: "%d:%02d", total / 60, total % 60)
+        return String(localized: "Başlangıç: \(formatted)", bundle: .appLanguage)
     }
 
     private func setSoundtrack(_ url: URL?, title: String?, beats: [Double]? = nil) {
@@ -486,6 +540,7 @@ struct TimelapseExportSheet: View {
         soundtrackTitle = title
         bundledBeats = beats
         beatSync = url != nil
+        soundtrackStartTime = 0
         isStale = true
     }
 
@@ -686,6 +741,26 @@ struct TimelapseExportSheet: View {
         }
     }
 
+    /// Video kategorisi projede hizalama/geçiş uygulanmaz — klipler yalnızca sert
+    /// kesmeyle sırayla birleştirilir; müzik/tarih damgası/en-boy oranı/hız korunur.
+    private var isVideoMode: Bool { project.category.isVideoMode }
+
+    /// Video modunda kliplerin kendi sesi korunsun mu?
+    private var clipAudioControl: some View {
+        Toggle(isOn: $keepsClipAudio) {
+            VStack(alignment: .leading, spacing: 2) {
+                Label("Klip sesi", systemImage: "waveform")
+                    .font(Theme.headline(15))
+                Text(keepsClipAudio
+                     ? "Kliplerin kendi sesi korunur; müzik altta çalar."
+                     : "Yalnızca seçilen müzik duyulur.")
+                    .font(Theme.caption(12))
+                    .foregroundStyle(theme.inkMuted)
+            }
+        }
+        .tint(theme.accent)
+    }
+
     private func export() {
         savedToPhotos = false
         savedToLibrary = false
@@ -697,15 +772,17 @@ struct TimelapseExportSheet: View {
             isPro: store.isPro,
             speedMultiplier: speedX,
             aspect: aspect,
-            zoom: zoomX,
+            zoom: isVideoMode ? 1 : zoomX,
             soundtrackURL: soundtrackURL,
             bundledBeats: bundledBeats,
             beatSync: beatSync,
+            soundtrackStartTime: soundtrackStartTime,
+            keepsClipAudio: keepsClipAudio,
             overlay: effectiveOverlay,
-            smartAlignment: alignMode == .smart,
-            manualAnchor: (proAlign && alignMode == .manual) ? manual : nil,
-            manualAnchors: (proAlign && alignMode == .manual && manuals.count == frames.count) ? manuals : nil,
-            transition: transition,
+            smartAlignment: !isVideoMode && alignMode == .smart,
+            manualAnchor: (!isVideoMode && proAlign && alignMode == .manual) ? manual : nil,
+            manualAnchors: (!isVideoMode && proAlign && alignMode == .manual && manuals.count == frames.count) ? manuals : nil,
+            transition: isVideoMode ? .cut : transition,
             alignmentSubject: alignmentSubject
         )
         TimelapseRenderService.shared.didStartRender(for: project)
@@ -936,7 +1013,7 @@ struct SpinningLogo: View {
 
 /// Oynatıcıyı bir kez oluşturup tutar; her SwiftUI güncellemesinde yeni bir AVPlayer
 /// üretmeyi (ve sızıntıyı) önler. `.id(url)` ile URL değişince görünüm yeniden kurulur.
-private struct ExportedVideoPlayer: View {
+struct ExportedVideoPlayer: View {
     @State private var player: AVPlayer
 
     init(url: URL) {

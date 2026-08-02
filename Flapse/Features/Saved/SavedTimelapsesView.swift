@@ -13,6 +13,15 @@ struct SavedTimelapsesView: View {
     @State private var pendingDeletion: SavedTimelapse?
     @State private var showPhotosDenied = false
 
+    /// Ana ekrandaki karşılama yazısıyla aynı desen: büyük, sola dayalı, içeriğin
+    /// başında — gezinme çubuğunun büyük-başlık boşluğu olmadan.
+    private var pageTitle: some View {
+        Text("Kaydedilenler")
+            .font(.largeTitle.bold())
+            .foregroundStyle(theme.ink)
+            .accessibilityAddTraits(.isHeader)
+    }
+
     var body: some View {
         ZStack {
             theme.canvas.ignoresSafeArea()
@@ -21,13 +30,15 @@ struct SavedTimelapsesView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
+                        pageTitle
                         librarySection
                     }
                     .padding(20)
                 }
             }
         }
-        .navigationTitle("Kaydedilenler")
+        .overlay(alignment: .top) { ScrollEdgeFade(height: 72) }
+        .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $playing) { item in
             SavedPlayerSheet(item: item)
         }

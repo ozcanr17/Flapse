@@ -23,7 +23,10 @@ struct SoundtrackOption: Identifiable, Equatable {
             ("joyful", String(localized: "Neşeli", bundle: .appLanguage), 0.5),
             ("upbeat", String(localized: "Tempolu", bundle: .appLanguage), 0.6),
             ("sad", String(localized: "Hüzünlü", bundle: .appLanguage), 60.0 / 70.0),
-            ("cinematic", String(localized: "Sinematik", bundle: .appLanguage), 2.0)
+            ("cinematic", String(localized: "Sinematik", bundle: .appLanguage), 2.0),
+            ("dreamy", String(localized: "Rüya gibi", bundle: .appLanguage), 1.2),
+            ("warm", String(localized: "Sıcak", bundle: .appLanguage), 0.8),
+            ("minimal", String(localized: "Minimal", bundle: .appLanguage), 1.0)
         ]
         return names.compactMap { entry in
             guard let url = Bundle.main.url(forResource: entry.file, withExtension: "m4a")
@@ -31,6 +34,109 @@ struct SoundtrackOption: Identifiable, Equatable {
             else { return nil }
             return SoundtrackOption(id: entry.file, title: entry.title, url: url, beatInterval: entry.beat)
         }
+    }
+}
+
+/// Kullanıcının Dosyalar'dan seçtiği parçaların son kullanılanlar listesi. Her proje
+/// için yeniden Dosyalar'a gitmemesi için, dönüştürülmüş (AAC) dosya kalıcı depoya
+/// kopyalanır ve küçük bir liste `UserDefaults`'ta tutulur (`TimelapseLibrary`/
+/// `VideoEntryStorage` ile aynı dosya-tabanlı depolama deseni).
+enum RecentSoundtracks {
+    private static let key = "recentSoundtracks.v1"
+    private static let maxCount = 8
+
+    static var directory: URL {
+        let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
+            .appendingPathComponent("RecentSoundtracks", isDirectory: true)
+        try? FileManager.default.createDirectory(at: base, withIntermediateDirectories: true)
+        return base
+    }
+
+    struct Entry: Codable, Identifiable, Equatable {
+        let id: String
+        let title: String
+        let addedAt: Date
+
+        var url: URL { RecentSoundtracks.directory.appendingPathComponent(id) }
+    }
+
+    static func all() -> [Entry] {
+        guard let data = UserDefaults.standard.data(forKey: key),
+              let entries = try? JSONDecoder().decode([Entry].self, from: data)
+        else { return [] }
+        return entries.filter { FileManager.default.fileExists(atPath: $0.url.path) }
+    }
+
+    @discardableResult
+    static func add(sourceURL: URL, title: String) -> Entry? {
+        let ext = sourceURL.pathExtension.isEmpty ? "m4a" : sourceURL.pathExtension
+        let fileName = "\(UUID().uuidString).\(ext)"
+        let destination = directory.appendingPathComponent(fileName)
+        guard (try? FileManager.default.copyItem(at: sourceURL, to: destination)) != nil else { return nil }
+
+        var entries = all().filter { $0.title != title }
+        entries.insert(Entry(id: fileName, title: title, addedAt: Date()), at: 0)
+        if entries.count > maxCount {
+            for stale in entries[maxCount...] {
+                try? FileManager.default.removeItem(at: stale.url)
+            }
+            entries = Array(entries.prefix(maxCount))
+        }
+        save(entries)
+        return entries.first
+    }
+
+    static func remove(_ entry: Entry) {
+        try? FileManager.default.removeItem(at: entry.url)
+        save(all().filter { $0.id != entry.id })
+    }
+
+    private static func save(_ entries: [Entry]) {
+        guard let data = try? JSONEncoder().encode(entries) else { return }
+        UserDefaults.standard.set(data, forKey: key)
+    }
+}
+
+/// Müzik seçim ekranında dokununca çalıp duraklatan basit önizleme oynatıcı. Aynı anda
+/// tek bir parça çalar; başka bir parçaya dokununca öncekini otomatik durdurur.
+@MainActor
+@Observable
+final class SoundtrackPreviewPlayer: NSObject {
+    private(set) var playingID: String?
+    private var player: AVAudioPlayer?
+
+    func toggle(id: String, url: URL) {
+        if playingID == id {
+            stop()
+        } else {
+            play(id: id, url: url)
+        }
+    }
+
+    func play(id: String, url: URL, at offset: Double = 0) {
+        stop()
+        try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+        try? AVAudioSession.sharedInstance().setActive(true)
+        guard let player = try? AVAudioPlayer(contentsOf: url) else { return }
+        player.numberOfLoops = -1
+        player.volume = 0.9
+        player.prepareToPlay()
+        player.currentTime = max(0, min(offset, player.duration))
+        player.play()
+        self.player = player
+        playingID = id
+    }
+
+    /// Çalarken başlangıç noktasını değiştirir (kullanıcı kaydırma çubuğunu sürüklerken).
+    func seek(to offset: Double) {
+        player?.currentTime = max(0, min(offset, player?.duration ?? 0))
+    }
+
+    func stop() {
+        player?.stop()
+        player = nil
+        playingID = nil
+        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
     }
 }
 
@@ -312,11 +418,11 @@ enum SoundtrackMuxer {
         min(1.2, max(0, videoDuration / 2))
     }
 
-    static func mux(videoURL: URL, audioURL: URL) async throws -> URL {
-        try await mux(videoURL: videoURL, audioURL: audioURL, allowRetry: true)
+    static func mux(videoURL: URL, audioURL: URL, startOffset: Double = 0) async throws -> URL {
+        try await mux(videoURL: videoURL, audioURL: audioURL, startOffset: startOffset, allowRetry: true)
     }
 
-    private static func mux(videoURL: URL, audioURL: URL, allowRetry: Bool) async throws -> URL {
+    private static func mux(videoURL: URL, audioURL: URL, startOffset: Double, allowRetry: Bool) async throws -> URL {
         let videoAsset = AVURLAsset(url: videoURL)
         let audioAsset = AVURLAsset(url: audioURL)
 
@@ -332,12 +438,19 @@ enum SoundtrackMuxer {
         let audioDuration = try await audioAsset.load(.duration)
         try compVideo.insertTimeRange(CMTimeRange(start: .zero, duration: videoDuration), of: videoTrack, at: .zero)
 
+        // Kullanıcı bir başlangıç noktası seçtiyse ilk tur oradan başlar; parça
+        // sonuna ulaşınca sonraki turlar parçanın gerçek başından normal şekilde devam eder.
+        let clampedOffset = max(0, min(startOffset, max(0, audioDuration.seconds - 0.1)))
+        var sourcePosition = CMTime(seconds: clampedOffset, preferredTimescale: audioDuration.timescale)
         var cursor = CMTime.zero
         while cursor < videoDuration {
-            let remaining = videoDuration - cursor
-            let chunk = min(remaining, audioDuration)
-            try compAudio.insertTimeRange(CMTimeRange(start: .zero, duration: chunk), of: audioTrack, at: cursor)
+            let remainingVideo = videoDuration - cursor
+            let remainingSource = audioDuration - sourcePosition
+            let chunk = min(remainingVideo, remainingSource)
+            guard chunk > .zero else { break }
+            try compAudio.insertTimeRange(CMTimeRange(start: sourcePosition, duration: chunk), of: audioTrack, at: cursor)
             cursor = cursor + chunk
+            sourcePosition = .zero
         }
 
         let mix = AVMutableAudioMix()
@@ -369,7 +482,7 @@ enum SoundtrackMuxer {
         } catch {
             try? FileManager.default.removeItem(at: outputURL)
             guard allowRetry, let fallback = await SoundtrackTranscoder.transcode(audioURL) else { throw error }
-            return try await mux(videoURL: videoURL, audioURL: fallback, allowRetry: false)
+            return try await mux(videoURL: videoURL, audioURL: fallback, startOffset: startOffset, allowRetry: false)
         }
         try? FileManager.default.removeItem(at: videoURL)
         return outputURL

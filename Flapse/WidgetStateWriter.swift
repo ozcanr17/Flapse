@@ -80,7 +80,7 @@ private actor WidgetThumbnailWriter {
             titles.append(cover.title)
             let url = directory.appendingPathComponent("project-\(index).jpg")
             if let image = await ImageDownsampler.image(from: cover.data, maxPixelSize: 480),
-               let jpeg = image.jpegData(compressionQuality: 0.76) {
+               let jpeg = ImageDownsampler.opaqueJPEGData(from: image, compressionQuality: 0.76) {
                 try? jpeg.write(to: url, options: .atomic)
             } else {
                 try? FileManager.default.removeItem(at: url)
