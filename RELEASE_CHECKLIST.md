@@ -22,9 +22,10 @@ Son doğrulama: **2026-08-02**. "Doğrulandı" yazan maddeler bu tarihte gerçek
       adı `Timelapse` şemasını gösteriyordu; 2026-08-02'de `Flapse`/`FlapseTests`
       olarak düzeltildi ama bu düzeltme de yalnızca yerelde duruyor. CI istiyorsan
       token'a `workflow` yetkisi ver, `.gitignore:25`'i kaldır ve dosyayı commit'le.
-- [ ] **Unit testler doğrulanmadı.** `FlapseTests` üç ayrı oturumda başlatıldı, hiçbirinde
-      tamamlanmadı (simülatör boot ile `xctest` başlangıcı arasında takılıyor). Yayından
-      önce koşturulup yeşil olduğu görülmeli.
+- [x] **Unit testler yeşil — 2026-08-02'de koşuldu: 184 test, 0 hata, ~31 sn.**
+      Üç oturumdur "takılan" testlerin sebebi test kodu ya da uygulama değil,
+      kilitlenmiş bir `CoreSimulatorService`'ti. Tekrarlarsa çözümü HANDOFF.md'deki
+      "The test hang" bölümünde.
 
 ## Gizlilik beyanı — DİKKAT
 

@@ -160,15 +160,8 @@ planned items, and get the app ready to publish on the App Store.
 
 ### Still unverified / blocked
 
-- **Unit tests have now failed to complete in three separate sessions.** This
-  session's run was started clean with nothing else touching the simulator; the
-  simulator booted, `xctest` never started, and it was stopped (SIGTERM) at the
-  user's request. **There is still no test result for any of the last two
-  sessions' changes.** This is the single biggest open risk — the next session
-  should treat "why does `xcodebuild test` hang after simulator boot" as a task
-  in its own right, not as a step inside another task. Worth trying: a fresh
-  simulator device, `-resultBundlePath` to see where it stalls, or running the
-  tests from the Xcode UI once to see the real error.
+- ~~Unit tests never complete~~ — **SOLVED, see "The test hang" below. The
+  suite is green: 184 tests, 0 failures.**
 - **An App Store archive cannot be produced on this Mac.** `security
   find-identity -p codesigning` shows only an *Apple Development* certificate,
   and `~/Library/MobileDevice/Provisioning Profiles/` is empty. So the
@@ -178,6 +171,45 @@ planned items, and get the app ready to publish on the App Store.
   `codesign -d --entitlements - <path>/Flapse.app`
 - Everything in the first session's "Where we are stuck" list below is still
   unverified — the export → Files → import round trip in particular.
+
+### The test hang — root cause found, tests are green
+
+Three sessions reported `xcodebuild test` hanging "after simulator boot". **It
+was never the tests or the app — it was a wedged `CoreSimulatorService` on this
+Mac.** The suite is green: **184 tests, 0 failures, ~16 seconds.**
+
+How it was isolated (repeat this if it ever comes back):
+
+1. Split the phases. `xcodebuild build-for-testing` finished in **21 seconds** —
+   so the build was never the problem, the run was.
+2. `xcodebuild test-without-building` stalled immediately after printing its
+   invocation banner. `ps` showed the simulator booted and `testmanagerd`
+   running, but **no `xctest` process and no `Flapse` process** — the test host
+   app was never launching.
+3. Reproduced it outside xcodebuild entirely: `xcrun simctl install booted
+   Flapse.app` hung with no output, and `xcrun simctl bootstatus <udid> -b`
+   never returned even though the device reported `Booted`. That pins it on
+   CoreSimulator, not on anything in this repo.
+
+The fix:
+
+```sh
+pkill -TERM -f "xcodebuild test"          # never -9 an xctest process
+xcrun simctl shutdown all
+killall -9 com.apple.CoreSimulator.CoreSimulatorService   # respawns on demand
+xcrun simctl boot C85B1445-BFF2-40AC-B7FD-95A9C374AFA8
+```
+
+After that, `simctl install` took 10 seconds and the full suite ran normally.
+
+Two things worth knowing for next time:
+
+- **`FlapseTests` is a host-app bundle** (`TEST_HOST = Flapse.app`), so every
+  test run launches the whole app first. That is why a broken simulator looks
+  exactly like a broken test suite — the failure is upstream of any test code.
+- The disk is at **93% full (~14 GiB free)**. Not proven to be the cause, but
+  CoreSimulator is known to misbehave when space runs low, and this Mac is
+  close. Worth clearing DerivedData if the hang recurs.
 
 ### Known limitations left in on purpose (import/export)
 
@@ -369,13 +401,20 @@ and commit.
   codebase (declaration included); only `count <= 1` is real dead code.
   `@main`-attributed types are an expected, harmless exception (count = 1,
   not actually dead).
+- **Do not conclude the test suite is broken when `xcodebuild test` hangs.**
+  Three sessions did, and the suite was green all along — a wedged
+  `CoreSimulatorService` was stopping the test host app from launching. Before
+  blaming any code, split the phases (`build-for-testing` vs
+  `test-without-building`) and check whether `xcrun simctl install booted` on
+  its own hangs. Full procedure and fix in "The test hang" above.
 - **Do not run more than one `xcodebuild test` at a time, and never
   `pkill -9` an `xctest` process.** An earlier session traced a ~9-minute
   hang with zero CPU directly to a `pkill -9 xctest`, which corrupted the
-  simulator's test daemon; the fix was restarting the simulator. This
-  session again found two overlapping `xcodebuild test` runs stuck for over
-  an hour — kill with plain `kill` (SIGTERM) if you must, and confirm no
-  other test run is alive before starting a new one.
+  simulator's test daemon; the fix was restarting the simulator. Kill with
+  plain `kill` (SIGTERM) if you must, and confirm no other test run is alive
+  before starting a new one. (Killing `CoreSimulatorService` with -9 *is*
+  fine — it is a host-side daemon that respawns on demand, and that is exactly
+  what unblocked the hang above.)
 - **Do not restore the duplicate tab icon row, the 0.4s tab spring, or the
   220ms context-menu delay** in `MainTabView.swift`/`Theme.swift` — all were
   measured as directly responsible for sluggish interaction in an earlier
@@ -542,11 +581,11 @@ Do not redo: the camera-review-screen redesign, the streak border, the
 import/export feature, the localization pass, the instrumentation gating, or
 the release-checklist rewrite.
 
-The two things actually worth doing next, in order:
+The one thing actually worth doing next:
 
-1. **Work out why `xcodebuild test` never finishes.** Three sessions, zero test
-   results. Treat it as its own task.
-2. **On-device verification** of the export → Files → import round trip and the
+1. **On-device verification** of the export → Files → import round trip and the
    camera review screen (the user has deferred this twice; it needs them).
 
-Then the owner-side App Store Connect work in `RELEASE_CHECKLIST.md`.
+Then the owner-side App Store Connect work in `RELEASE_CHECKLIST.md` — the
+privacy questionnaire and the distribution certificate are the two items
+blocking a submission.
