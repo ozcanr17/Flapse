@@ -25,6 +25,14 @@ Kod tarafındaki mevcut durum: **Apple Developer işlemleri tamamlandıktan sonr
 - Paylaşım kartları 1080×1350 ve 1080×1920 sosyal medya ölçülerine göre yenilendi.
 - GitHub Actions üzerinde Release build, analyze ve test kontrolü etkin.
 
+## Geliştirme sırasında Pro özelliklerini test etme
+
+Xcode'dan telefona yüklenen `DEBUG` sürümünde Ayarlar ekranının en altındaki Flapse logosuna beş kez dokunarak Test Pro açılıp kapatılabilir. Durum değiştiğinde uygulama bir onay mesajı gösterir ve seçim sonraki Debug açılışlarında korunur.
+
+Bu mekanizma `#if DEBUG` ile korunur. App Store'a gönderilen Release derlemesinde kodu, anahtarı ve kullanıcı arayüzü bulunmaz. Archive alırken `Release` yapılandırmasının kullanıldığını yine de kontrol et.
+
+Belirli bir Apple ID veya iCloud hesabına CloudKit/UserDefaults üzerinden Pro atama. Dijital özellikleri StoreKit dışında açan hesap tabanlı bir yetki App Review ve In-App Purchase kuralları açısından risklidir. TestFlight ve yayın sürümündeki satın alma testleri için bu Debug anahtarı yerine Apple'ın Sandbox hesaplarını, StoreKit Testing'i veya App Store Connect offer code sistemini kullan.
+
 ## Senin yapman gerekenler
 
 ### 1. Apple Developer hesabını kontrol et

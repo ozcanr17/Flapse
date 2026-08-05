@@ -24,7 +24,25 @@ final class StoreService: StoreServiceProtocol {
     /// Uygulamanın her yerinde okunan tek doğruluk kaynağı.
     ///
     /// Yayın sürümünde Pro yalnızca doğrulanmış StoreKit yetkisiyle açılır.
-    var isPro: Bool { entitlementActive }
+    var isPro: Bool {
+        #if DEBUG
+        entitlementActive || debugProOverrideActive
+        #else
+        entitlementActive
+        #endif
+    }
+
+    #if DEBUG
+    private static let debugProOverrideKey = "debug.store.proOverride"
+    private(set) var debugProOverrideActive = UserDefaults.standard.bool(forKey: debugProOverrideKey)
+
+    @discardableResult
+    func toggleDebugProOverride() -> Bool {
+        debugProOverrideActive.toggle()
+        UserDefaults.standard.set(debugProOverrideActive, forKey: Self.debugProOverrideKey)
+        return debugProOverrideActive
+    }
+    #endif
 
     private var storeProducts: [Product] = []   // satın alma için Product'ları içeride tutuyoruz
     @ObservationIgnored nonisolated(unsafe) private var updatesTask: Task<Void, Never>?

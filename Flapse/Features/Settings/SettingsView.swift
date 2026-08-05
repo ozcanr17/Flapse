@@ -38,6 +38,10 @@ struct SettingsView: View {
     @State private var isImportingArchive = false
     @State private var importArchiveError: String?
     @State private var importedArchiveTitle: String?
+    #if DEBUG
+    @State private var debugLogoTapCount = 0
+    @State private var debugProMessage: String?
+    #endif
 
     var body: some View {
         List {
@@ -290,6 +294,16 @@ struct SettingsView: View {
                         .foregroundStyle(theme.inkMuted)
                 }
                 .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                #if DEBUG
+                .onTapGesture {
+                    debugLogoTapCount += 1
+                    guard debugLogoTapCount >= 5 else { return }
+                    debugLogoTapCount = 0
+                    let enabled = store.toggleDebugProOverride()
+                    debugProMessage = enabled ? "Test Pro etkinleştirildi." : "Test Pro kapatıldı."
+                }
+                #endif
                 .listRowBackground(Color.clear)
             }
         }
@@ -334,6 +348,16 @@ struct SettingsView: View {
         } message: {
             Text("\"\(importedArchiveTitle ?? "")\" yeni bir proje olarak eklendi.")
         }
+        #if DEBUG
+        .alert("Test Pro", isPresented: Binding(
+            get: { debugProMessage != nil },
+            set: { if !$0 { debugProMessage = nil } }
+        )) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(debugProMessage ?? "")
+        }
+        #endif
         .fullScreenCover(isPresented: $showWelcome, onDismiss: finishWelcomeReplay) {
             WelcomeView {
                 shouldReturnHomeAfterWelcome = true

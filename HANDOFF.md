@@ -59,10 +59,13 @@ automatic fixes, verification, and an App Store readiness decision.
   regression tests for the exact 1080×1350 and 1080×1920 dimensions.
 - Added `APP_STORE_YAYIN_DURUMU.md` with the account owner's complete manual
   Apple Developer, CloudKit, App Store Connect and TestFlight checklist.
+- Added a five-tap Test Pro toggle to the Settings footer logo under `#if DEBUG`.
+  It persists only for development builds and is absent from Release; never
+  convert it into an account/iCloud/CloudKit entitlement or remove the guard.
 
 ### Verification on 2026-08-05
 
-- Unit tests: **190 passed, 0 failed**, about 6 seconds locally.
+- Unit tests: **191 passed, 0 failed**, about 6 seconds locally.
 - UI tests: full package ran 31 configurations/cases; 30 passed. The only
   failure was a stale test tap on a non-hittable project card. After correcting
   the test, that camera case passed in isolation.
