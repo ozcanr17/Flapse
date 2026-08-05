@@ -18,12 +18,8 @@ Son doğrulama: **2026-08-05**. "Doğrulandı" yazan maddeler bu tarihte gerçek
 - [x] Kullanıcıya görünen dizeler 12 dilde; biçim/oran anahtarları çevrilmez olarak
       işaretli. Güvenlik denetiminde kaldırılan gizli geliştirici metinleri Release
       kaynaklarında bulunmuyor.
-- [ ] **CI GitHub'da koşmuyor.** `.github/workflows/` `.gitignore`'da (commit `23f57c7`:
-      token'da `workflow` yetkisi olmadığı için push engelleniyordu), yani workflow
-      dosyası repoda yok ve Actions hiç çalışmadı. Ayrıca yerel dosya hâlâ eski proje
-      adı `Timelapse` şemasını gösteriyordu; 2026-08-02'de `Flapse`/`FlapseTests`
-      olarak düzeltildi ama bu düzeltme de yalnızca yerelde duruyor. CI istiyorsan
-      token'a `workflow` yetkisi ver, `.gitignore:25`'i kaldır ve dosyayı commit'le.
+- [x] GitHub Actions CI etkin: macOS 26 / Xcode 26.6 üzerinde Release build,
+      static analyze ve unit test çalıştırıyor.
 - [x] **Unit testler yeşil — 2026-08-05: 186 test, 0 hata, ~16 sn.**
 - [x] **UI testleri doğrulandı** — tam pakette 31 koşunun 30'u geçti; kamera testindeki
       görünmez seçici tıklaması düzeltildikten sonra o test tek başına da geçti.

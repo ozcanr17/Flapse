@@ -78,8 +78,8 @@ automatic fixes, verification, and an App Store readiness decision.
   devices, verify purchase/restore, permissions, project sharing, background
   render, Live Activity/Dynamic Island and widgets, then submit with review notes.
 - Confirm distribution rights/licenses for all eight bundled soundtracks.
-- CI is still intentionally absent from GitHub because `.github/workflows/` is
-  ignored after an earlier token lacked workflow scope.
+- GitHub Actions CI is enabled on macOS 26 / Xcode 26.6 and runs Release build,
+  static analysis and unit tests for main pushes and pull requests.
 
 ### Do not regress
 

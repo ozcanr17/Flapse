@@ -22,4 +22,3 @@ fastlane/screenshots/**/*.png
 
 # Xcode results
 *.xcresult
-.github/workflows/

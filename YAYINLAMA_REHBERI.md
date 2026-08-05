@@ -137,8 +137,8 @@ için: App Store Connect → Users and Access → **Sandbox Testers**'dan test h
   `CURRENT_PROJECT_VERSION` da artmalı.
 - `CKShare.publicPermission = .readWrite` bilinçli tercih (linki olan herkes katılabilir) —
   Birlikte Çekim'i geniş duyurmadan önce bir kez daha gözden geçir.
-- CI için: `.gitignore`'dan `.github/workflows/`'u çıkar, `workflow` yetkili bir git
-  kimliğiyle push'la.
+- GitHub Actions CI her main push ve pull request için Release build, static analyze
+  ve unit test çalıştırır; kırmızı bir koşuyla yayın yapma.
 
 ---
 
