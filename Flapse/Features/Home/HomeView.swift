@@ -2,6 +2,45 @@ import SwiftUI
 import SwiftData
 import UIKit
 
+private struct HomeMetrics {
+    let latestEntryByProjectID: [UUID: Entry]
+    let entryCountByProjectID: [UUID: Int]
+    let longestStreak: Int
+    let weekCount: Int
+    let recentEntries: [Entry]
+    let activityEntries: [Entry]
+
+    init(entries: [Entry], now: Date = .now, calendar: Calendar = .current) {
+        let weekCutoff = calendar.date(byAdding: .day, value: -7, to: now) ?? now
+        let activityCutoff = calendar.date(byAdding: .day, value: -(15 * 7), to: now) ?? now
+        var latest: [UUID: Entry] = [:]
+        var datesByProject: [UUID: [Date]] = [:]
+        var weekCount = 0
+        var activityEntries: [Entry] = []
+        activityEntries.reserveCapacity(min(entries.count, 256))
+
+        // Query en yeniden eskiye sıralı. Tek geçişle ana ekranın bütün sayısal
+        // özetlerini çıkarırız; ayrı ayrı group/filter/max taramaları yapmayız.
+        for entry in entries {
+            guard let projectID = entry.project?.id else { continue }
+            if latest[projectID] == nil { latest[projectID] = entry }
+            datesByProject[projectID, default: []].append(entry.capturedAt)
+            if entry.capturedAt >= weekCutoff { weekCount += 1 }
+            if entry.capturedAt >= activityCutoff { activityEntries.append(entry) }
+        }
+
+        self.latestEntryByProjectID = latest
+        self.entryCountByProjectID = datesByProject.mapValues(\.count)
+        self.longestStreak = datesByProject.values
+            .lazy
+            .map { ActivitySummary.streak(capturedDates: $0) }
+            .max() ?? 0
+        self.weekCount = weekCount
+        self.recentEntries = Array(entries.prefix(10))
+        self.activityEntries = activityEntries
+    }
+}
+
 struct HomeView: View {
 
     let isActive: Bool
@@ -33,26 +72,6 @@ struct HomeView: View {
         projects.filter { !$0.isDeleted && $0.deletedAt == nil && !$0.isHidden }
     }
 
-    private var dueProjects: [Project] {
-        liveProjects.filter { $0.isCaptureDue() }
-    }
-
-    private var longestStreak: Int {
-        Dictionary(grouping: liveEntries, by: { $0.project?.id })
-            .values
-            .map { ActivitySummary.streak(capturedDates: $0.map(\.capturedAt)) }
-            .max() ?? 0
-    }
-
-    private var weekCount: Int {
-        let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: Date()) ?? Date()
-        return liveEntries.filter { $0.capturedAt >= cutoff }.count
-    }
-
-    private var recentEntries: [Entry] {
-        Array(liveEntries.prefix(10))
-    }
-
     private var dailyTip: LocalizedStringKey {
         Calendar.current.component(.day, from: Date()).isMultiple(of: 2)
             ? "Her gün aynı ışıkta çekersen geçişler daha pürüzsüz olur."
@@ -70,7 +89,10 @@ struct HomeView: View {
 
     var body: some View {
         let live = liveProjects
-        let due = dueProjects
+        let metrics = HomeMetrics(entries: liveEntries)
+        let due = live.filter {
+            $0.cadence.isCaptureDue(lastCapture: metrics.latestEntryByProjectID[$0.id]?.capturedAt)
+        }
         return ZStack {
             theme.canvas.ignoresSafeArea()
             ScrollView {
@@ -80,23 +102,30 @@ struct HomeView: View {
                         emptyState
                     } else {
                         if let firstDueProject = due.first {
-                            DailyCaptureCard(project: firstDueProject) {
+                            DailyCaptureCard(
+                                project: firstDueProject,
+                                latestEntry: metrics.latestEntryByProjectID[firstDueProject.id]
+                            ) {
                                 onCapture(firstDueProject)
                             }
                         }
                         ActivityHeroCard(
                             totalCaptures: liveEntries.count,
                             dueCount: due.count,
-                            entries: liveEntries,
+                            entries: metrics.activityEntries,
                             isActive: isActive
                         )
                         if due.count > 1 {
-                            dueSection(due)
+                            dueSection(
+                                due,
+                                latestEntries: metrics.latestEntryByProjectID,
+                                entryCounts: metrics.entryCountByProjectID
+                            )
                         }
-                        statsGrid(liveProjectCount: live.count)
+                        statsGrid(liveProjectCount: live.count, metrics: metrics)
                         tipCard
-                        if !recentEntries.isEmpty {
-                            recentSection
+                        if !metrics.recentEntries.isEmpty {
+                            recentSection(metrics.recentEntries)
                         }
                     }
                 }
@@ -118,12 +147,12 @@ struct HomeView: View {
         }
     }
 
-    private func statsGrid(liveProjectCount: Int) -> some View {
+    private func statsGrid(liveProjectCount: Int, metrics: HomeMetrics) -> some View {
         LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible(), spacing: 12)], spacing: 12) {
             StatTile(icon: "square.grid.2x2", value: liveProjectCount, label: "Aktif proje")
             StatTile(icon: "photo.stack", value: liveEntries.count, label: "Toplam kare")
-            StatTile(icon: "flame", value: longestStreak, label: "En uzun seri")
-            StatTile(icon: "calendar", value: weekCount, label: "Bu hafta")
+            StatTile(icon: "flame", value: metrics.longestStreak, label: "En uzun seri")
+            StatTile(icon: "calendar", value: metrics.weekCount, label: "Bu hafta")
         }
     }
 
@@ -170,7 +199,11 @@ struct HomeView: View {
         .cardStyle()
     }
 
-    private func dueSection(_ due: [Project]) -> some View {
+    private func dueSection(
+        _ due: [Project],
+        latestEntries: [UUID: Entry],
+        entryCounts: [UUID: Int]
+    ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Bugün çekim zamanı")
                 .font(.footnote.weight(.semibold))
@@ -179,21 +212,25 @@ struct HomeView: View {
                 Button {
                     onCapture(project)
                 } label: {
-                    dueRow(project)
+                    dueRow(
+                        project,
+                        latestEntry: latestEntries[project.id],
+                        entryCount: entryCounts[project.id] ?? 0
+                    )
                 }
                 .buttonStyle(.plain)
             }
         }
     }
 
-    private func dueRow(_ project: Project) -> some View {
+    private func dueRow(_ project: Project, latestEntry: Entry?, entryCount: Int) -> some View {
         HStack(spacing: 12) {
-            DueRowThumb(project: project)
+            DueRowThumb(project: project, latestEntry: latestEntry)
             VStack(alignment: .leading, spacing: 2) {
                 Text(project.title)
                     .font(Theme.headline(15))
                     .foregroundStyle(theme.ink)
-                Text("\((project.entries ?? []).lazy.filter { !$0.isDeleted && $0.deletedAt == nil }.count) kare · \(project.cadence.displayName)")
+                Text("\(entryCount) kare · \(project.cadence.displayName)")
                     .font(Theme.caption(12))
                     .foregroundStyle(theme.inkMuted)
             }
@@ -207,14 +244,14 @@ struct HomeView: View {
         .contentShape(RoundedRectangle(cornerRadius: Theme.cornerRadius, style: .continuous))
     }
 
-    private var recentSection: some View {
+    private func recentSection(_ entries: [Entry]) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Son kareler")
                 .font(Theme.caption(13))
                 .foregroundStyle(theme.inkMuted)
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 10) {
-                    ForEach(recentEntries) { entry in
+                    ForEach(entries) { entry in
                         RecentEntryThumb(entry: entry)
                     }
                 }
@@ -251,16 +288,11 @@ private struct StatTile: View {
 
 private struct DailyCaptureCard: View {
     let project: Project
+    let latestEntry: Entry?
     let action: () -> Void
 
     @Environment(\.theme) private var theme
     @State private var photo: UIImage?
-
-    private var latestEntry: Entry? {
-        (project.entries ?? []).lazy
-            .filter { !$0.isDeleted && $0.deletedAt == nil }
-            .max { $0.capturedAt < $1.capturedAt }
-    }
 
     var body: some View {
         let last = latestEntry
@@ -314,16 +346,11 @@ private struct DailyCaptureCard: View {
 
 private struct DueRowThumb: View {
     let project: Project
+    let latestEntry: Entry?
 
     @State private var photo: UIImage?
 
     private var accent: Color { Theme.accent(for: project.category) }
-    private var latestEntry: Entry? {
-        (project.entries ?? []).lazy
-            .filter { !$0.isDeleted && $0.deletedAt == nil }
-            .max { $0.capturedAt < $1.capturedAt }
-    }
-
     var body: some View {
         let last = latestEntry
         ZStack {

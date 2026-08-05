@@ -2,6 +2,38 @@ import SwiftUI
 import SwiftData
 import UIKit
 
+private struct ProjectCardSnapshot {
+    let lastEntry: Entry?
+    let count: Int
+    let streak: Int
+
+    var lastCaptureDate: Date? { lastEntry?.capturedAt }
+
+    static func grouped(entries: [Entry]) -> [UUID: ProjectCardSnapshot] {
+        struct Accumulator {
+            var lastEntry: Entry?
+            var dates: [Date] = []
+        }
+
+        var grouped: [UUID: Accumulator] = [:]
+        grouped.reserveCapacity(min(entries.count, 64))
+        for entry in entries {
+            guard let projectID = entry.project?.id else { continue }
+            grouped[projectID, default: Accumulator()].dates.append(entry.capturedAt)
+            if grouped[projectID]?.lastEntry?.capturedAt ?? .distantPast < entry.capturedAt {
+                grouped[projectID]?.lastEntry = entry
+            }
+        }
+        return grouped.mapValues { value in
+            ProjectCardSnapshot(
+                lastEntry: value.lastEntry,
+                count: value.dates.count,
+                streak: ActivitySummary.streak(capturedDates: value.dates)
+            )
+        }
+    }
+}
+
 /// Projeleri listeleyen ana ekran.
 struct ProjectListView: View {
 
@@ -13,6 +45,10 @@ struct ProjectListView: View {
 
     @Query(filter: #Predicate<Project> { $0.deletedAt == nil }, sort: \Project.createdAt, order: .reverse)
     private var projects: [Project]
+    @Query(filter: #Predicate<Entry> {
+        $0.deletedAt == nil && $0.project?.deletedAt == nil
+    }, sort: \Entry.capturedAt, order: .reverse)
+    private var liveEntries: [Entry]
     @Environment(\.modelContext) private var modelContext
     @Environment(StoreService.self) private var store
     @Environment(\.theme) private var theme
@@ -34,21 +70,8 @@ struct ProjectListView: View {
         var id: Int { hashValue }
     }
 
-    private var activeProjects: [Project] {
-        projects
-            .filter { !$0.isDeleted && $0.deletedAt == nil }
-            .map { (project: $0, activity: $0.lastActivityDate) }
-            .sorted {
-                if $0.activity == $1.activity {
-                    return $0.project.createdAt > $1.project.createdAt
-                }
-                return $0.activity > $1.activity
-            }
-            .map(\.project)
-    }
-
-    private var liveProjects: [Project] {
-        activeProjects.filter { !$0.isHidden }
+    private var activeProjectCount: Int {
+        projects.lazy.filter { !$0.isDeleted && $0.deletedAt == nil }.count
     }
 
     private func isLocked(_ project: Project, unlockedProjectID: UUID?) -> Bool {
@@ -57,7 +80,19 @@ struct ProjectListView: View {
     }
 
     var body: some View {
-        let sortedProjects = activeProjects
+        // Bütün ilişkileri her proje kartında yeniden dolaşmak, P proje ve E kare
+        // için aynı E kayıtlarını tekrar tekrar işliyordu. Tek geçişlik özet hem
+        // sıralamayı hem kartları besler; fotoğraf baytlarına dokunmaz.
+        let snapshots = ProjectCardSnapshot.grouped(entries: liveEntries)
+        let sortedProjects = projects
+            .filter { !$0.isDeleted && $0.deletedAt == nil }
+            .sorted { lhs, rhs in
+                let lhsActivity = snapshots[lhs.id]?.lastCaptureDate ?? lhs.createdAt
+                let rhsActivity = snapshots[rhs.id]?.lastCaptureDate ?? rhs.createdAt
+                return lhsActivity == rhsActivity
+                    ? lhs.createdAt > rhs.createdAt
+                    : lhsActivity > rhsActivity
+            }
         let visibleProjects = sortedProjects.filter { !$0.isHidden }
         let unlockedID = FeatureGate.unlockedProjectID(
             isPro: store.isPro,
@@ -90,7 +125,11 @@ struct ProjectListView: View {
                         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
                     ForEach(visibleProjects) { project in
-                        ProjectCard(project: project, isActive: isActive)
+                        ProjectCard(
+                            project: project,
+                            snapshot: snapshots[project.id] ?? ProjectCardSnapshot(lastEntry: nil, count: 0, streak: 0),
+                            isActive: isActive
+                        )
                                 .overlay {
                                     if isLocked(project, unlockedProjectID: unlockedID) {
                                         Button {
@@ -147,7 +186,11 @@ struct ProjectListView: View {
                                 .listRowBackground(Color.clear)
                                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                     }
-                    .onDelete(perform: deleteProjects)
+                    .onDelete { offsets in
+                        pendingDeletion = offsets.compactMap { index in
+                            visibleProjects.indices.contains(index) ? visibleProjects[index] : nil
+                        }
+                    }
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
@@ -331,7 +374,7 @@ struct ProjectListView: View {
             activeSheet = .signIn
             return
         }
-        if FeatureGate.canCreateProject(isPro: store.isPro, currentProjectCount: activeProjects.count) {
+        if FeatureGate.canCreateProject(isPro: store.isPro, currentProjectCount: activeProjectCount) {
             activeSheet = .addProject
         } else {
             activeSheet = .paywall
@@ -344,24 +387,20 @@ struct ProjectListView: View {
             activeSheet = .signIn
             return
         }
-        if store.isPro || FeatureGate.canCreateProject(isPro: false, currentProjectCount: activeProjects.count) {
+        if store.isPro || FeatureGate.canCreateProject(isPro: false, currentProjectCount: activeProjectCount) {
             activeSheet = .importNew
         } else {
             activeSheet = .paywall
         }
     }
 
-    private func deleteProjects(at offsets: IndexSet) {
-        pendingDeletion = offsets.compactMap { index in
-            liveProjects.indices.contains(index) ? liveProjects[index] : nil
-        }
-    }
 }
 
 /// Büyük foto-kahraman kartı: projenin son karesi arka plan olur; üstüne okunabilirlik
 /// için koyu geçiş, başlık ve ilerleme biner. Fotoğraf yoksa kategori rengine düşer.
 private struct ProjectCard: View {
     let project: Project
+    let snapshot: ProjectCardSnapshot
     let isActive: Bool
 
     @Environment(\.theme) private var theme
@@ -369,40 +408,11 @@ private struct ProjectCard: View {
 
     private var accent: Color { Theme.accent(for: project.category) }
 
-    private struct Snapshot {
-        let last: Entry?
-        let count: Int
-        let streak: Int
-        let isDue: Bool
-    }
-
-    private var snapshot: Snapshot {
-        var last: Entry?
-        var capturedDates: [Date] = []
-        capturedDates.reserveCapacity(project.entries?.count ?? 0)
-
-        for entry in project.entries ?? [] where !entry.isDeleted && entry.deletedAt == nil {
-            capturedDates.append(entry.capturedAt)
-            if let current = last, current.capturedAt >= entry.capturedAt {
-                continue
-            } else {
-                last = entry
-            }
-        }
-        return Snapshot(
-            last: last,
-            count: capturedDates.count,
-            streak: ActivitySummary.streak(capturedDates: capturedDates),
-            isDue: project.cadence.isCaptureDue(lastCapture: last?.capturedAt)
-        )
-    }
-
     var body: some View {
-        let snapshot = snapshot
-        let last = snapshot.last
+        let last = snapshot.lastEntry
         let count = snapshot.count
         let streak = snapshot.streak
-        let isDue = snapshot.isDue
+        let isDue = project.cadence.isCaptureDue(lastCapture: last?.capturedAt)
         VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 Image(systemName: Theme.icon(for: project.category))

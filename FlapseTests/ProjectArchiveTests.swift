@@ -113,7 +113,43 @@ final class ProjectArchiveTests: XCTestCase {
 
         XCTAssertEqual(url.lastPathComponent, "Biz.flapseproject")
         XCTAssertTrue(url.deletingLastPathComponent().lastPathComponent.hasPrefix("flapse-export-"))
-        XCTAssertNoThrow(try ProjectArchive.read(packageAt: url))
+        let values = try url.resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+        XCTAssertEqual(values.isRegularFile, true)
+        XCTAssertGreaterThan(values.fileSize ?? 0, 0)
+        let imported = try ProjectArchive.read(packageAt: url)
+        ProjectArchive.discard(imported)
+    }
+
+    @MainActor
+    func test_singleFileArchiveRoundTripsPhotoDateAndLocation() async throws {
+        let sourceContainer = AppModelContainer.makeInMemory()
+        let project = Project(title: "Aktarım", category: .coupleMode, cadence: .weekly)
+        let capturedAt = Date(timeIntervalSince1970: 1_700_000_000)
+        let photoBytes = Data([0xFF, 0xD8, 0xFF, 0xD9])
+        let entry = Entry(capturedAt: capturedAt, imageData: photoBytes, anchorX: 0.25, anchorY: 0.75)
+        entry.latitude = 40.992
+        entry.longitude = 29.124
+        entry.placeName = "Aydıntepe"
+        entry.project = project
+        sourceContainer.mainContext.insert(project)
+        sourceContainer.mainContext.insert(entry)
+        try sourceContainer.mainContext.save()
+
+        let url = try await ProjectArchive.write(project: project)
+        temporaryURLs.append(url.deletingLastPathComponent())
+        let imported = try ProjectArchive.read(packageAt: url)
+        let destinationContainer = AppModelContainer.makeInMemory()
+        _ = try await ProjectArchive.materialize(imported, into: destinationContainer)
+
+        let importedEntries = try destinationContainer.mainContext.fetch(FetchDescriptor<Entry>())
+        let importedEntry = try XCTUnwrap(importedEntries.first)
+        XCTAssertEqual(importedEntry.imageData, photoBytes)
+        XCTAssertEqual(importedEntry.capturedAt, capturedAt)
+        XCTAssertEqual(importedEntry.latitude, 40.992)
+        XCTAssertEqual(importedEntry.longitude, 29.124)
+        XCTAssertEqual(importedEntry.placeName, "Aydıntepe")
+        XCTAssertEqual(importedEntry.anchorX, 0.25)
+        XCTAssertEqual(importedEntry.anchorY, 0.75)
     }
 
     private func makePackage(

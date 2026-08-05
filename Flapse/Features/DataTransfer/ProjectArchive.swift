@@ -1,16 +1,13 @@
+import AppleArchive
 import Foundation
 import SwiftData
+import System
 import UniformTypeIdentifiers
 
-/// Bir projeyi kayıpsız şekilde tek bir dizin paketine (`.flapseproject`) aktarır ve
-/// aynı formattan geri okur.
-///
-/// Zip/sıkıştırma kütüphanesi kullanmıyoruz: paket, `Info.plist`'te `public.package`'a
-/// uyan bir UTType olarak tanımlı, bu yüzden Dosyalar uygulaması onu tek bir öğe gibi
-/// gösterir; sistem paylaşım sayfası da (Mail, Mesajlar) klasörleri gönderirken
-/// kendiliğinden sıkıştırır, alıcı taraf Dosyalar'ın yerleşik "Aç" özelliğiyle geri
-/// çıkarabilir. SwiftData modeline yalnızca `snapshot(of:)` (MainActor) dokunur; asıl
-/// disk I/O'su (`write`, `read`) model'den bağımsız çalışır ve arka planda yürütülebilir.
+/// Bir projeyi kayıpsız şekilde sıkıştırılmış, tek bir `.flapseproject` dosyasına
+/// aktarır ve aynı formattan geri okur. Önceki sürümlerin oluşturduğu dizin paketleri
+/// de içe aktarılabilir; yeni biçim Dosyalar'ın doğru boyut göstermesini ve Mail,
+/// Mesajlar/AirDrop gibi hedeflerin arşivi eksiksiz taşımasını sağlar.
 enum ProjectArchive {
 
     static let packageExtension = "flapseproject"
@@ -92,18 +89,27 @@ enum ProjectArchive {
         let safeTitle = sanitizedFileName(project.title.isEmpty ? "Proje" : project.title)
         let stagingDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("flapse-export-\(UUID().uuidString)", isDirectory: true)
-        let root = stagingDirectory
+        let payloadDirectory = stagingDirectory
+            .appendingPathComponent("payload", isDirectory: true)
+        let outputURL = stagingDirectory
             .appendingPathComponent(safeTitle, isDirectory: true)
             .appendingPathExtension(packageExtension)
         do {
-            try await writeContents(of: project, to: root)
+            try await writeContents(of: project, to: payloadDirectory)
+            try await Task.detached(priority: .userInitiated) {
+                try compress(directory: payloadDirectory, to: outputURL)
+                guard let size = regularFileSize(at: outputURL), size > 0 else {
+                    throw ArchiveError.manifestUnreadable
+                }
+                try FileManager.default.removeItem(at: payloadDirectory)
+            }.value
         } catch {
             // Yarım kalan paketi burada silmezsek geçici dizinde kalıcı olur: dışa
             // aktarma sayfası hiç açılmadığından çağıranın temizlik yolu da işlemez.
             try? FileManager.default.removeItem(at: stagingDirectory)
             throw error
         }
-        return root
+        return outputURL
     }
 
     @MainActor
@@ -204,6 +210,9 @@ enum ProjectArchive {
         /// `materialize` fotoğrafları buradan okur, bu yüzden çağıran güvenlik kapsamlı
         /// erişimi `materialize` bitene kadar da açık tutmalıdır.
         let packageURL: URL
+        /// Tek-dosya arşiv içe aktarılırken açılan geçici klasör. `materialize`
+        /// tamamlandığında (başarılı ya da hatalı) mutlaka temizlenir.
+        let cleanupDirectoryURL: URL?
         let entries: [ImportedEntry]
     }
 
@@ -217,6 +226,26 @@ enum ProjectArchive {
     /// dokunmadığı için arka planda çalıştırılabilir. Çağıran, `url` güvenlik kapsamlı
     /// bir URL ise erişimi `materialize` bitene kadar açık tutmalıdır.
     static func read(packageAt url: URL, maximumEntryCount: Int? = nil) throws -> ImportedProject {
+        let resolved = try resolvedPackageURL(for: url)
+        do {
+            return try readDirectoryPackage(
+                at: resolved.packageURL,
+                cleanupDirectoryURL: resolved.cleanupDirectoryURL,
+                maximumEntryCount: maximumEntryCount
+            )
+        } catch {
+            if let cleanupDirectoryURL = resolved.cleanupDirectoryURL {
+                try? FileManager.default.removeItem(at: cleanupDirectoryURL)
+            }
+            throw error
+        }
+    }
+
+    private static func readDirectoryPackage(
+        at url: URL,
+        cleanupDirectoryURL: URL?,
+        maximumEntryCount: Int?
+    ) throws -> ImportedProject {
         let manifestURL = url.appendingPathComponent("manifest.json")
         guard let manifestSize = regularFileSize(at: manifestURL) else {
             throw ArchiveError.manifestMissing
@@ -320,6 +349,7 @@ enum ProjectArchive {
             cadence: manifest.project.cadence,
             createdAt: manifest.project.createdAt,
             packageURL: url,
+            cleanupDirectoryURL: cleanupDirectoryURL,
             entries: entries
         )
     }
@@ -333,6 +363,11 @@ enum ProjectArchive {
         into container: ModelContainer
     ) async throws -> MaterializedProject {
         try await Task.detached(priority: .userInitiated) {
+            defer {
+                if let cleanupDirectoryURL = imported.cleanupDirectoryURL {
+                    try? FileManager.default.removeItem(at: cleanupDirectoryURL)
+                }
+            }
             let category = ProjectCategory(rawValue: imported.category) ?? .other
             let cadence = CaptureCadence(rawValue: imported.cadence) ?? .daily
             let projectID = UUID()
@@ -405,6 +440,109 @@ enum ProjectArchive {
                 throw error
             }
         }.value
+    }
+
+    /// Başarıyla okunmuş bir arşiv materialize edilmeden iptal edilirse çağrılır.
+    /// Eski klasör paketlerine dokunmaz; yalnızca uygulamanın açtığı geçici kopyayı siler.
+    static func discard(_ imported: ImportedProject) {
+        if let cleanupDirectoryURL = imported.cleanupDirectoryURL {
+            try? FileManager.default.removeItem(at: cleanupDirectoryURL)
+        }
+        discardCopiedVideos(in: imported.entries)
+    }
+
+    // MARK: - Single-file container
+
+    private struct ResolvedPackage {
+        let packageURL: URL
+        let cleanupDirectoryURL: URL?
+    }
+
+    /// Eski klasör paketini doğrudan, yeni tek dosyayı ise güvenli bir geçici
+    /// klasöre açarak ortak manifest doğrulama yoluna yönlendirir.
+    private static func resolvedPackageURL(for url: URL) throws -> ResolvedPackage {
+        let values = try? url.resourceValues(forKeys: [.isDirectoryKey, .isRegularFileKey, .isSymbolicLinkKey])
+        guard values?.isSymbolicLink != true else { throw ArchiveError.manifestUnreadable }
+        if values?.isDirectory == true {
+            return ResolvedPackage(packageURL: url, cleanupDirectoryURL: nil)
+        }
+        guard values?.isRegularFile == true else { throw ArchiveError.manifestUnreadable }
+
+        let extractionRoot = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flapse-import-\(UUID().uuidString)", isDirectory: true)
+        do {
+            try FileManager.default.createDirectory(at: extractionRoot, withIntermediateDirectories: true)
+            try extract(archiveAt: url, to: extractionRoot)
+            return ResolvedPackage(packageURL: extractionRoot, cleanupDirectoryURL: extractionRoot)
+        } catch {
+            try? FileManager.default.removeItem(at: extractionRoot)
+            throw ArchiveError.manifestUnreadable
+        }
+    }
+
+    /// AppleArchive LZFSE akışı JPEG/video gibi zaten sıkıştırılmış medyayı gereksiz
+    /// yere belleğe almadan, dosya dosya tek bir fiziksel arşive yazar.
+    private static func compress(directory: URL, to outputURL: URL) throws {
+        try ArchiveByteStream.withFileStream(
+            path: FilePath(outputURL.path),
+            mode: .writeOnly,
+            options: [.create, .truncate],
+            permissions: [.ownerReadWrite]
+        ) { fileStream in
+            try ArchiveByteStream.withCompressionStream(using: .lzfse, writingTo: fileStream) { compressedStream in
+                try ArchiveStream.withEncodeStream(writingTo: compressedStream) { archiveStream in
+                    try archiveStream.writeDirectoryContents(
+                        archiveFrom: FilePath(directory.path),
+                        keySet: .defaultForArchive
+                    )
+                }
+            }
+        }
+    }
+
+    private static func extract(archiveAt archiveURL: URL, to directory: URL) throws {
+        try ArchiveByteStream.withFileStream(
+            path: FilePath(archiveURL.path),
+            mode: .readOnly,
+            options: [],
+            permissions: []
+        ) { fileStream in
+            try ArchiveByteStream.withDecompressionStream(readingFrom: fileStream) { decompressedStream in
+                try ArchiveStream.withDecodeStream(
+                    readingFrom: decompressedStream,
+                    selectUsing: { _, path, data in
+                        guard isSafeArchivePath(path) else { return .cancel }
+                        if case .header(let header) = data,
+                           header.entryType != .regularFile,
+                           header.entryType != .directory {
+                            return .cancel
+                        }
+                        return .ok
+                    }
+                ) { decodeStream in
+                    try ArchiveStream.withExtractStream(extractingTo: FilePath(directory.path)) { extractStream in
+                        _ = try ArchiveStream.process(readingFrom: decodeStream, writingTo: extractStream)
+                    }
+                }
+            }
+        }
+    }
+
+    /// Arşiv açılmadan önce yalnızca beklenen iki seviyeli göreli yolları kabul eder.
+    /// Böylece manifest doğrulamasına ulaşmadan önce path traversal/link yazılamaz.
+    private static func isSafeArchivePath(_ path: FilePath) -> Bool {
+        guard path.isRelative, path.isLexicallyNormal else { return false }
+        let components = path.components.map(\.string)
+        guard !components.isEmpty, components.count <= 2,
+              !components.contains("."), !components.contains("..") else { return false }
+        switch components[0] {
+        case "manifest.json":
+            return components.count == 1
+        case "photos", "videos":
+            return true
+        default:
+            return false
+        }
     }
 
     /// İçe aktarma yarıda kaldığında `VideoEntryStorage`'a kopyalanmış klipleri siler.

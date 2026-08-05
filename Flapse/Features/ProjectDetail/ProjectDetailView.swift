@@ -39,7 +39,7 @@ struct ProjectDetailView: View {
     @State private var shareCardCreationFailed = false
 
     private static let initialTimelineEntryCount = 10
-    fileprivate static let timelinePreviewPixelSize: CGFloat = 420
+    fileprivate static let timelinePreviewPixelSize: CGFloat = 480
 
     private struct MonthKey: Hashable {
         let year: Int
@@ -1043,7 +1043,7 @@ struct ProjectDetailView: View {
             for entry in upcomingEntries {
                 guard !Task.isCancelled else { return }
                 _ = await ImageDownsampler.cachedImage(
-                    key: "row-preview-\(entry.imageCacheKey)",
+                    key: "row-\(entry.imageCacheKey)",
                     maxPixelSize: Self.timelinePreviewPixelSize
                 ) { entry.imageData }
                 await Task.yield()
@@ -1489,7 +1489,7 @@ private struct TimelineEntryRow: View {
         .task(id: entry.imageCacheKey) {
             let detailed = await ImageDownsampler.cachedImage(
                 key: "row-\(entry.imageCacheKey)",
-                maxPixelSize: 720
+                maxPixelSize: ProjectDetailView.timelinePreviewPixelSize
             ) { entry.imageData }
             guard !Task.isCancelled else { return }
             photo = detailed

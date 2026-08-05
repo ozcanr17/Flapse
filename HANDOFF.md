@@ -6,6 +6,116 @@ Written for a completely new session with no prior context.
 Historical sessions remain below for context. **Read "2026-08-05 App Store RC
 audit" first; it supersedes older test, signing, privacy and release-state claims.**
 
+## 2026-08-05 late session — performance log + real single-file archives
+
+User supplied a 1,216-line physical-device Debug log and reported that exported
+`.flapseproject` items show as 0 KB in Files. This work is implemented and ready
+to commit; it must not be lost.
+
+### Diagnosis
+
+- Tab PERFTRACE first-run/runloop completion was mostly 150–200 ms. The log's
+  repeated `body evaluated: +N ms` lines do **not** measure body execution time:
+  `PerfTrace.mark` reports time since the previous mark. Do not claim those
+  0.4–2.8 s values are single body executions without Instruments.
+- Project list did have a concrete scalability problem: sorting called
+  `Project.lastActivityDate`, then every `ProjectCard` traversed the same
+  `project.entries` relationship again for latest entry/count/streak. This made
+  repeated relationship walks grow badly with both project and entry counts.
+- Home separately grouped/filtered/scanned all entries several times, and its
+  due cards traversed project relationships again.
+- Timeline “Devamını Gör” preload used cache key `row-preview-*` at 420 px, but
+  visible rows immediately requested `row-*` at 720 px. The preload was thrown
+  away and every photo was decoded twice.
+- CloudKit `BGSystemTaskSchedulerErrorDomain Code=3`, LaunchServices share-sheet
+  diagnostics and AVFoundation Fig messages dominate the log but are OS-level
+  Debug noise; no crash/fatal error/duplicate ID appeared in this capture.
+- The old export was a directory package declared as `public.package` /
+  `public.folder`. Files may display directory packages as 0 KB and some share
+  targets do not reliably transfer them. The contents did include manifest,
+  photos, capture times, coordinates/place names, anchors and capture video
+  clips, but presentation/transport was ambiguous.
+
+### Local changes completed
+
+- `ProjectArchive.swift`: new exports are a **regular, non-zero-byte single
+  file**, streamed with AppleArchive + LZFSE. It still writes media one at a time
+  to bound memory, then compresses the staging directory without loading the
+  archive into RAM. Import transparently supports both the new file and old
+  directory package. Extracted temp directories are cleaned on success/error;
+  `discard(_:)` covers cancellation before materialization.
+- `Info.plist`: archive UTType now conforms to `public.data`, not folder/package.
+- `ProjectArchiveTests.swift`: asserts physical regular-file/non-zero size and
+  verifies photo bytes, captured date, latitude, longitude, place name and anchor
+  coordinates survive export/import. Eight archive tests pass.
+- `ProjectListView.swift`: a single pass over active entry metadata creates one
+  snapshot dictionary used by sorting and all cards. Removed per-card repeated
+  relationship scans.
+- `HomeView.swift`: one metadata pass creates latest-entry, count, streak,
+  seven-day and recent/activity summaries; due cards no longer scan project
+  relationships.
+- `ProjectDetailView.swift`: reveal preload and row use the exact same 480 px
+  cache entry, eliminating the duplicate decode while retaining sharp thumbnails.
+
+### Verification already completed
+
+- Debug simulator build after performance changes: `BUILD SUCCEEDED`.
+- Release simulator build after archive hardening: `BUILD SUCCEEDED`.
+- Focused `ProjectArchiveTests`: **8 passed, 0 failed**, including the new
+  single-file metadata round-trip.
+- Full unit suite reached **188 passed / 4 failed**. All four failures are the
+  same simulator-only SIGTRAP while constructing `CKContainer(identifier:)` in
+  `SharedProjectService.shared`; the crash reports point to CloudKit startup,
+  not any file changed in this task. One failing test was rerun alone and trapped
+  at the same point. Validate those CloudKit tests with a correctly entitled test
+  host/physical device; do not misreport this run as an archive regression.
+- `git diff --check`: clean.
+
+### Files changed by this task
+
+The relevant uncommitted files are:
+
+- `Flapse/Features/DataTransfer/ProjectArchive.swift`
+- `Flapse/Features/Home/HomeView.swift`
+- `Flapse/Features/ProjectDetail/ProjectDetailView.swift`
+- `Flapse/Features/Projects/ProjectListView.swift`
+- `Flapse/Info.plist`
+- `FlapseTests/ProjectArchiveTests.swift`
+
+`Flapse/Localizable.xcstrings` was already modified before this task; preserve it
+and do not reset/overwrite it. `.agents/` and `.codex/` are local untracked tool
+state and should not be committed. The repo is `/Users/ridvanozcan/Desktop/workspace/Flapse`;
+the environment's `/workspace/Timelapse` path is stale.
+
+### Archive semantics to explain accurately
+
+- New archives are one regular compressed file; Files must show a real non-zero
+  byte size. Old exports were directory packages, which Files could display as
+  0 KB even though `manifest.json`, `photos/` and `videos/` existed inside.
+- Preserved: project title/category/cadence/creation date; original stored photo
+  bytes; frame capture date; latitude/longitude/place name; alignment anchors;
+  capture-mode video clip and its duration.
+- Not included: separately rendered/saved timelapse-library videos, CloudKit
+  share participants/permissions, reminder configuration, or database object IDs.
+- Import always creates a new standalone project with new IDs; it never merges
+  into or overwrites an existing project. Content/metadata listed above round-trip.
+  The free-tier project/frame limits still apply.
+
+### Next plan
+
+1. Run full unit tests and a Release simulator build.
+2. Export a real photo-heavy project on device: Files must show a non-zero size.
+   Send it to another device/account, import it and spot-check photos, dates,
+   location, anchors and capture-mode videos.
+3. Re-run physical-device PERFTRACE, then use SwiftUI Instruments + Time Profiler
+   around tab switching. The instrumentation's body marks are intervals, not body
+   duration; use signposts/Instruments for causal attribution.
+4. If tab completion is still over 100 ms, inspect the always-alive Home and
+   Projects `@Query<Entry>` result size and Liquid Glass compositing before any
+   behavioral rewrite. Do not add arbitrary sleeps/debounce to mask latency.
+5. Preserve the pre-existing localization modifications. `.agents/` and `.codex/`
+   are local tool state and must not be committed.
+
 Read this file first, then:
 
 1. `README.md` for the feature overview.
