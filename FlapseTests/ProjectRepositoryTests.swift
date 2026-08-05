@@ -10,20 +10,8 @@ import SwiftData
 @MainActor
 final class ProjectRepositoryTests: XCTestCase {
 
-    private var container: ModelContainer!
-    private var repository: ProjectRepository!
-
-    override func setUp() {
-        super.setUp()
-        container = AppModelContainer.makeInMemory()
-        repository = ProjectRepository(context: container.mainContext)
-    }
-
-    override func tearDown() {
-        repository = nil
-        container = nil
-        super.tearDown()
-    }
+    private let container = AppModelContainer.makeInMemory()
+    private lazy var repository = ProjectRepository(context: container.mainContext)
 
     func test_olusturulanProje_listedeGorunur() throws {
         _ = try repository.createProject(title: "Sakal", category: .hairAndBeard, cadence: .daily)
@@ -252,5 +240,18 @@ final class ProjectRepositoryTests: XCTestCase {
         // .cascade gerçekten çalıştı mı? Hiç Entry kalmamalı.
         let remainingEntries = try container.mainContext.fetchCount(FetchDescriptor<Entry>())
         XCTAssertEqual(remainingEntries, 0)
+    }
+
+    func test_videoCekimiKaliciSilinince_dosyaDaSilinir() throws {
+        let project = try repository.createProject(title: "Video", category: .video, cadence: .daily)
+        let fileName = VideoEntryStorage.fileName(for: UUID())
+        let fileURL = VideoEntryStorage.directory.appendingPathComponent(fileName)
+        try Data([0x01]).write(to: fileURL)
+        let entry = Entry(videoFileName: fileName)
+        try repository.addEntry(entry, to: project)
+
+        try repository.permanentlyDeleteEntry(entry)
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: fileURL.path))
     }
 }

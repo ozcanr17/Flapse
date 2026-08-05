@@ -37,7 +37,7 @@ enum ProjectMatcher {
         var best: ProjectMatch?
         for set in sets {
             guard let score = score(for: signature, in: set) else { continue }
-            if best == nil || score < best!.distance {
+            if best.map({ score < $0.distance }) ?? true {
                 best = ProjectMatch(projectID: set.projectID, distance: score)
             }
         }

@@ -136,13 +136,16 @@ struct PostRenderSyncSheet: View {
         }
         let item = AVPlayerItem(asset: composition)
         player.replaceCurrentItem(with: item)
+        let loopPlayer = player
         loopObserver = NotificationCenter.default.addObserver(
             forName: .AVPlayerItemDidPlayToEndTime,
             object: item,
             queue: .main
-        ) { _ in
-            player.seek(to: .zero)
-            player.play()
+        ) { [weak loopPlayer] _ in
+            Task { @MainActor in
+                loopPlayer?.seek(to: .zero)
+                loopPlayer?.play()
+            }
         }
         if wasPlaying || !isPreparing {
             player.play()

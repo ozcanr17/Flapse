@@ -37,8 +37,8 @@ enum FeedbackKind: String, CaseIterable, Identifiable, Sendable {
 }
 
 /// Kullanıcının geliştiriciye gönderdiği bulgu. Mesajın yanında, hatayı
-/// tekrarlayabilmek için gereken en az teknik bağlam taşınır — kişisel veri
-/// içermez, iletişim e-postası isteğe bağlıdır.
+/// tekrarlayabilmek için gereken en az teknik bağlam taşınır; iletişim e-postası
+/// isteğe bağlıdır.
 struct FeedbackReport: Sendable, Equatable {
     let kind: FeedbackKind
     let message: String
@@ -46,7 +46,6 @@ struct FeedbackReport: Sendable, Equatable {
     let appVersion: String
     let systemVersion: String
     let deviceModel: String
-    let locale: String
     let createdAt: Date
 
     static let minimumMessageLength = 10
@@ -72,13 +71,13 @@ struct FeedbackReport: Sendable, Equatable {
             appVersion: "\(version) (\(build))",
             systemVersion: "iOS \(UIDevice.current.systemVersion)",
             deviceModel: Self.hardwareIdentifier,
-            locale: Locale.current.identifier,
             createdAt: now
         )
     }
 
     /// `UIDevice.model` yalnızca "iPhone" döndürür; hangi modelde olduğunu bilmek
     /// hata ayıklamada belirleyici olduğu için donanım tanımlayıcısını okuyoruz.
+    @MainActor
     private static var hardwareIdentifier: String {
         var systemInfo = utsname()
         uname(&systemInfo)
@@ -95,7 +94,7 @@ struct FeedbackReport: Sendable, Equatable {
 
         ---
         \(kind.title)
-        \(appVersion) · \(systemVersion) · \(deviceModel) · \(locale)
+        \(appVersion) · \(systemVersion) · \(deviceModel)
         """
     }
 }

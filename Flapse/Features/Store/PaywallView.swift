@@ -158,7 +158,7 @@ struct PaywallView: View {
 
     private var legalText: some View {
         VStack(spacing: 10) {
-            Text("Abonelikler 7 günlük ücretsiz denemeyle başlar; deneme bitmeden en az 24 saat önce iptal etmezsen abonelik otomatik başlar ve dönem sonunda yenilenir. Ücret Apple Kimliği hesabından tahsil edilir. Ömür boyu seçenek tek seferlik bir satın alımdır. Aboneliğini App Store hesap ayarlarından yönetebilir veya iptal edebilirsin.")
+            Text(legalDisclosure)
                 .font(.caption2)
                 .foregroundStyle(.white.opacity(0.6))
                 .multilineTextAlignment(.center)
@@ -175,6 +175,17 @@ struct PaywallView: View {
 
     private var errorBinding: Binding<Bool> {
         Binding(get: { viewModel.errorMessage != nil }, set: { if !$0 { viewModel.errorMessage = nil } })
+    }
+
+    private var legalDisclosure: LocalizedStringKey {
+        let selected = viewModel.packages.first { $0.id == selectedPackageID }
+        if selected?.id == StoreProduct.lifetime.rawValue {
+            return "Ömür boyu erişim tek seferlik bir satın alımdır; yinelenen ücret yoktur."
+        }
+        if selected?.hasTrial == true {
+            return "Abonelikler 7 günlük ücretsiz denemeyle başlar; deneme bitmeden en az 24 saat önce iptal etmezsen abonelik otomatik başlar ve dönem sonunda yenilenir. Ücret Apple Kimliği hesabından tahsil edilir. Ömür boyu seçenek tek seferlik bir satın alımdır. Aboneliğini App Store hesap ayarlarından yönetebilir veya iptal edebilirsin."
+        }
+        return "Abonelik otomatik yenilenir; istediğin zaman Ayarlar’dan iptal edebilirsin."
     }
 }
 

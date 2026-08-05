@@ -5,6 +5,11 @@ import SwiftData
 /// uygulama için (CloudKit'e senkron), biri test ve önizleme için (bellek içi).
 enum AppModelContainer {
 
+    struct ProductionResult {
+        let container: ModelContainer
+        let failureDescription: String?
+    }
+
     /// Hangi modellerin saklanacağını tanımlayan şema. Yeni @Model eklersek
     /// buraya da eklemeyi unutmamamız gerekir.
     private static let schema = Schema([Project.self, Entry.self, SavedTimelapse.self])
@@ -24,7 +29,7 @@ enum AppModelContainer {
     /// Üretim: yerel diskte saklar. Kullanıcı iCloud yedeklemeyi (Pro) açtıysa ayrıca
     /// kişisel iCloud'una (CloudKit) otomatik senkron eder. CloudKit kurulamazsa uygulama
     /// çökmez; yerel-only depoya düşer.
-    static func makeProduction() -> ModelContainer {
+    static func makeProduction() -> ProductionResult {
         if iCloudBackupEnabled {
             let cloudConfiguration = ModelConfiguration(
                 schema: schema,
@@ -33,7 +38,7 @@ enum AppModelContainer {
             )
             if let container = try? ModelContainer(for: schema, configurations: [cloudConfiguration]) {
                 UserDefaults.standard.set(true, forKey: iCloudBackupActiveKey)
-                return container
+                return ProductionResult(container: container, failureDescription: nil)
             }
         }
         UserDefaults.standard.set(false, forKey: iCloudBackupActiveKey)
@@ -44,9 +49,15 @@ enum AppModelContainer {
             cloudKitDatabase: .none
         )
         do {
-            return try ModelContainer(for: schema, configurations: [localConfiguration])
+            return ProductionResult(
+                container: try ModelContainer(for: schema, configurations: [localConfiguration]),
+                failureDescription: nil
+            )
         } catch {
-            fatalError("Üretim ModelContainer'ı oluşturulamadı: \(error)")
+            return ProductionResult(
+                container: makeInMemory(),
+                failureDescription: error.localizedDescription
+            )
         }
     }
 

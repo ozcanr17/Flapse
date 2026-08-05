@@ -16,33 +16,15 @@ protocol StoreServiceProtocol: AnyObject {
 @Observable
 final class StoreService: StoreServiceProtocol {
 
-    private enum OverrideKey {
-        static let debug = "override.debugPro"   // gizli test arka kapısı
-        static let admin = "override.adminPro"   // Apple ile giriş yapan admin
-    }
-
     private(set) var packages: [StorePackage] = []
 
     /// StoreKit'ten türetilen gerçek satın alma durumu.
     private(set) var entitlementActive = false
 
-    /// Gizli geliştirici arka kapısı: ödeme yapmadan Pro'yu açar/kapar.
-    private(set) var debugUnlocked = UserDefaults.standard.bool(forKey: OverrideKey.debug)
-
-    /// Admin (Apple ile giriş) Pro kilidi.
-    private(set) var adminUnlocked = UserDefaults.standard.bool(forKey: OverrideKey.admin)
-
     /// Uygulamanın her yerinde okunan tek doğruluk kaynağı.
     ///
-    /// YAYIN (Release/App Store) sürümünde Pro gerçek satın alma VEYA admin (Apple ile
-    /// giriş yapan, listedeki e-posta) ile açılır. Test arka kapısı SADECE DEBUG'dadır.
-    var isPro: Bool {
-        #if DEBUG
-        entitlementActive || debugUnlocked || adminUnlocked
-        #else
-        entitlementActive || adminUnlocked
-        #endif
-    }
+    /// Yayın sürümünde Pro yalnızca doğrulanmış StoreKit yetkisiyle açılır.
+    var isPro: Bool { entitlementActive }
 
     private var storeProducts: [Product] = []   // satın alma için Product'ları içeride tutuyoruz
     @ObservationIgnored nonisolated(unsafe) private var updatesTask: Task<Void, Never>?
@@ -55,18 +37,6 @@ final class StoreService: StoreServiceProtocol {
                 await self?.handle(update)
             }
         }
-    }
-
-    /// Test arka kapısı — Ayarlar'daki gizli Geliştirici bölümünden açılır.
-    func setDebugUnlocked(_ unlocked: Bool) {
-        debugUnlocked = unlocked
-        UserDefaults.standard.set(unlocked, forKey: OverrideKey.debug)
-    }
-
-    /// Admin kilidi — Apple ile giriş yapan yetkili kullanıcıya Pro verir.
-    func setAdminUnlocked(_ unlocked: Bool) {
-        adminUnlocked = unlocked
-        UserDefaults.standard.set(unlocked, forKey: OverrideKey.admin)
     }
 
     deinit { updatesTask?.cancel() }

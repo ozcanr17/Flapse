@@ -20,7 +20,7 @@ xcodebuild build -scheme Flapse -destination 'platform=iOS Simulator,name=iPhone
 xcodebuild test -scheme Flapse -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:FlapseTests
 ```
 
-Use iPhone 17 because the iPhone 16 destination can match multiple runtimes. Trust `xcodebuild`, not SourceKit diagnostics from the IDE harness. The suite currently contains 112 unit tests.
+Use iPhone 17 because the iPhone 16 destination can match multiple runtimes. Trust `xcodebuild`, not SourceKit diagnostics from the IDE harness. The suite currently contains 186 unit tests. The 2026-08-05 release audit also validated 31 UI-test runs: 30 in the full pass and the corrected camera case in isolation.
 
 ## Architecture
 
@@ -53,7 +53,7 @@ Free users get one active project and 14 visible frames. Smart alignment is free
 | `com.ridvan.timelapse.pro.yearly` | Auto-renewable, one year | $4.99 |
 | `com.ridvan.timelapse.pro.lifetime` | Non-consumable | $9.99 |
 
-Both subscriptions promise a seven-day free trial, which must be configured identically in App Store Connect. Release entitlements come only from verified StoreKit purchases; the admin grant remains an intentional UserDefaults/iCloud KVS mechanism.
+Both subscriptions promise a seven-day free trial, which must be configured identically in App Store Connect. Pro entitlement comes only from verified StoreKit purchases; there is no developer or account-based override.
 
 ## Current release state
 

@@ -139,6 +139,8 @@ struct MusicPickerSheet: View {
                     .foregroundStyle(theme.accent)
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text(preview.playingID == id ? "Duraklat" : "Dinle"))
+            .accessibilityHint(Text(title))
 
             Text(title)
                 .foregroundStyle(theme.ink)

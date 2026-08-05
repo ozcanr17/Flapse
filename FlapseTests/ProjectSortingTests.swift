@@ -7,17 +7,7 @@ import SwiftData
 @MainActor
 final class ProjectSortingTests: XCTestCase {
 
-    private var container: ModelContainer!
-
-    override func setUp() {
-        super.setUp()
-        container = AppModelContainer.makeInMemory()
-    }
-
-    override func tearDown() {
-        container = nil
-        super.tearDown()
-    }
+    private let container = AppModelContainer.makeInMemory()
 
     private func date(_ year: Int, _ month: Int, _ day: Int) -> Date {
         var calendar = Calendar(identifier: .gregorian)

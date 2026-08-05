@@ -657,6 +657,7 @@ private struct MediaPreviewCover: View {
                             .frame(width: 40, height: 40)
                             .liquidGlassBarCircle()
                     }
+                    .accessibilityLabel(Text("Kapat"))
                     .padding(.trailing, 16)
                     .padding(.top, 8)
                 }

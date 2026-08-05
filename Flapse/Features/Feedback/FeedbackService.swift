@@ -48,7 +48,6 @@ struct CloudKitFeedbackService: FeedbackSubmitting {
         record["appVersion"] = report.appVersion as CKRecordValue
         record["systemVersion"] = report.systemVersion as CKRecordValue
         record["deviceModel"] = report.deviceModel as CKRecordValue
-        record["locale"] = report.locale as CKRecordValue
         record["createdAt"] = report.createdAt as CKRecordValue
         if !report.contactEmail.isEmpty {
             record["contactEmail"] = report.contactEmail as CKRecordValue
@@ -62,7 +61,7 @@ enum FeedbackMailer {
 
     /// App Store'da da yayımlanan destek adresi. CloudKit'e ulaşılamazsa bulgu
     /// buraya hazır doldurulmuş bir e-postayla gönderilir.
-    static let supportEmail = "ozc1905@gmail.com"
+    static let supportEmail = "ridvanozcan7@gmail.com"
 
     static func mailURL(for report: FeedbackReport) -> URL? {
         var components = URLComponents()

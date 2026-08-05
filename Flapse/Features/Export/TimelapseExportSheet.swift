@@ -14,7 +14,9 @@ struct TimelapseExportSheet: View {
         self.project = project
         let viewModel = TimelapseRenderService.shared.viewModel(for: project)
         self.viewModel = viewModel
-        let smartOn = UserDefaults.standard.object(forKey: PremiumFeature.smartAlignment.preferenceKey!) as? Bool ?? true
+        let smartOn = UserDefaults.standard.object(
+            forKey: PremiumFeature.smartAlignmentPreferenceKey
+        ) as? Bool ?? true
         _alignMode = State(initialValue: smartOn ? .smart : .off)
         if case .finished(let url) = viewModel.phase {
             _lastRenderedURL = State(initialValue: url)
@@ -1002,12 +1004,19 @@ private struct ThirdsReticle: View {
 struct SpinningLogo: View {
     let size: CGFloat
     @State private var spinning = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         // Dıştaki yuvarlatılmış kare sabit; yalnızca içteki objektif sürekli döner.
-        LogoMark(size: size, innerRotation: .degrees(spinning ? 360 : 0))
-            .animation(.linear(duration: 1.8).repeatForever(autoreverses: false), value: spinning)
-            .onAppear { spinning = true }
+        LogoMark(size: size, innerRotation: .degrees(spinning && !reduceMotion ? 360 : 0))
+            .animation(
+                reduceMotion ? nil : .linear(duration: 1.8).repeatForever(autoreverses: false),
+                value: spinning
+            )
+            .onAppear { spinning = !reduceMotion }
+            .onChange(of: reduceMotion) { _, isReduced in
+                spinning = !isReduced
+            }
     }
 }
 

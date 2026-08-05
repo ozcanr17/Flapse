@@ -33,18 +33,18 @@ enum PhotoImportPlan {
             for index in ordered.indices {
                 dates[index] = now.addingTimeInterval(-Double(last - index) * fallbackInterval)
             }
-            return zip(ordered, dates).map { ResolvedImport(assetIdentifier: $0.assetIdentifier, date: $1!) }
+            return zip(ordered, dates).compactMap { item, date in
+                date.map { ResolvedImport(assetIdentifier: item.assetIdentifier, date: $0) }
+            }
         }
 
-        if let first = datedIndices.first, first > 0 {
-            let anchor = dates[first]!
+        if let first = datedIndices.first, first > 0, let anchor = dates[first] {
             for index in 0..<first {
                 dates[index] = anchor.addingTimeInterval(-Double(first - index) * fallbackInterval)
             }
         }
 
-        if let last = datedIndices.last, last < ordered.count - 1 {
-            let anchor = dates[last]!
+        if let last = datedIndices.last, last < ordered.count - 1, let anchor = dates[last] {
             for index in (last + 1)..<ordered.count {
                 dates[index] = anchor.addingTimeInterval(Double(index - last) * fallbackInterval)
             }
@@ -54,8 +54,7 @@ enum PhotoImportPlan {
             let (start, end) = pair
             let gap = end - start
             guard gap > 1 else { continue }
-            let startDate = dates[start]!
-            let endDate = dates[end]!
+            guard let startDate = dates[start], let endDate = dates[end] else { continue }
             let step = (endDate.timeIntervalSince(startDate)) / Double(gap)
             for offset in 1..<gap {
                 dates[start + offset] = startDate.addingTimeInterval(step * Double(offset))
@@ -63,7 +62,9 @@ enum PhotoImportPlan {
         }
 
         return zip(ordered, dates)
-            .map { ResolvedImport(assetIdentifier: $0.assetIdentifier, date: $1!) }
+            .compactMap { item, date in
+                date.map { ResolvedImport(assetIdentifier: item.assetIdentifier, date: $0) }
+            }
             .sorted { $0.date < $1.date }
     }
 }

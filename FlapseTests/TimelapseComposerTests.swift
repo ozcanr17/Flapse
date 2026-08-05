@@ -129,7 +129,7 @@ final class TimelapseComposerTests: XCTestCase {
         let generator = AVAssetImageGenerator(asset: asset)
         generator.requestedTimeToleranceBefore = .zero
         generator.requestedTimeToleranceAfter = .zero
-        let time = CMTime(seconds: duration.seconds - 0.2, preferredTimescale: 30)
+        let time = CMTime(seconds: duration.seconds - 0.2, preferredTimescale: 600)
         let cgImage = try await generator.image(at: time).image
 
         let corner = try XCTUnwrap(pixel(in: cgImage, x: 4, y: 4))

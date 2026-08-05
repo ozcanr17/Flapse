@@ -335,7 +335,7 @@ struct VideoClipComposer: TimelapseComposing {
                 .foregroundColor: UIColor.white.withAlphaComponent(0.9)
             ])
             layer.frame = CGRect(origin: origin, size: textSize)
-            layer.contentsScale = UIScreen.main.scale
+            layer.contentsScale = 3
             layer.shadowColor = UIColor.black.cgColor
             layer.shadowOpacity = 0.6
             layer.shadowRadius = 4
@@ -380,7 +380,7 @@ struct VideoClipComposer: TimelapseComposing {
                 width: textSize.width,
                 height: textSize.height
             )
-            markLayer.contentsScale = UIScreen.main.scale
+            markLayer.contentsScale = 3
             markLayer.shadowColor = UIColor.black.cgColor
             markLayer.shadowOpacity = 0.6
             markLayer.shadowRadius = 4

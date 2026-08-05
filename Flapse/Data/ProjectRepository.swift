@@ -150,14 +150,17 @@ final class ProjectRepository: ProjectRepositoryProtocol {
     }
 
     func permanentlyDeleteEntry(_ entry: Entry) throws {
+        let videoURL = entry.videoFileURL
         if let project = entry.project, project.isCollaborative {
             markPurged(entry.id, in: project)
         }
         context.delete(entry)
         try saveIfNeeded()
+        if let videoURL { try? FileManager.default.removeItem(at: videoURL) }
     }
 
     func permanentlyDeleteEntries(_ entries: [Entry]) throws {
+        let videoURLs = entries.compactMap(\.videoFileURL)
         for entry in entries {
             if let project = entry.project, project.isCollaborative {
                 markPurged(entry.id, in: project)
@@ -165,13 +168,14 @@ final class ProjectRepository: ProjectRepositoryProtocol {
             context.delete(entry)
         }
         try saveIfNeeded()
+        for videoURL in videoURLs { try? FileManager.default.removeItem(at: videoURL) }
     }
 
     func deleteProject(_ project: Project) throws {
-        for entry in project.entries ?? [] {
-            context.delete(entry)
-        }
+        let videoURLs = (project.entries ?? []).compactMap(\.videoFileURL)
         context.delete(project)
+        try saveIfNeeded()
+        for videoURL in videoURLs { try? FileManager.default.removeItem(at: videoURL) }
     }
 
     /// Projeyi çöp kutusuna taşır: veri silinmez, yalnızca silinme anı işaretlenir.

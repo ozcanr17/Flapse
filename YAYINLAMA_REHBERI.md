@@ -7,12 +7,14 @@ depoda hazır. Kalan adımların tamamı Apple hesabı gerektiren, insan eliyle 
 
 ---
 
-## 1. Apple Developer Program üyeliği — ✅ TAMAMLANDI (2026-07-18)
+## 1. Apple Developer Program üyeliği — ✅ TAMAMLANDI (2026-08-05 doğrulandı)
 
 Üyelik aktif ve doğrulandı: `xcodebuild archive -allowProvisioningUpdates` ile gerçek bir
 App Store arşivi alındı; Xcode her iki hedef için (`rozcan.Flapse`, `rozcan.Flapse.Widgets`)
-profilleri otomatik oluşturdu ve imzalı pakette Sign in with Apple, iCloud/CloudKit,
-aps-environment ve App Groups entitlement'ları doğrulandı (Team `5ZYCHZ39QV`).
+profilleri otomatik oluşturdu. 2026-08-05'te App Store Connect yöntemiyle 8.8 MB IPA
+dışa aktarıldı; Apple Distribution imzası, `aps-environment = production`, Production
+CloudKit, Sign in with Apple ve App Groups entitlement'ları paketin içinden doğrulandı
+(Team `5ZYCHZ39QV`).
 
 **Small Business Program**: başvuru yapıldı, onay bekleniyor. Bu, yayını **beklemez** —
 uygulamayı gönderebilirsin; onaylandığı andan itibaren komisyon %30 yerine %15 uygulanır.
@@ -34,15 +36,16 @@ App Store Connect'e yazılacak adresler bunlardır.
 Not: Sayfa içerikleri `docs/privacy/index.html` ve `docs/support/index.html` dosyalarından
 sunulur; düzenledikten sonra main'e push yeterlidir (Pages 1-2 dakikada yeniden yayınlar).
 
-## 3. Sertifikalar ve imzalama — ✅ TAMAMLANDI (2026-07-18)
+## 3. Sertifikalar ve imzalama — ✅ TAMAMLANDI (2026-08-05 doğrulandı)
 
 Otomatik imzalama çalışıyor; arşiv başarıyla alındı (bkz. 1. adım). Yapılacak tek şey:
 gerçek iPhone'da **Release** yapılandırmasıyla bir kez çalıştırıp son bir duman testi yapmak
 (Product → Scheme → Edit Scheme → Run → Build Configuration: Release).
 
-Not: Arşiv "Apple Development" kimliğiyle imzalanır; App Store'a yüklerken Xcode
-Organizer (veya `-exportArchive`) dağıtım imzasına otomatik çevirir. CLI ile paket çıkarmak
-istersen repo kökünde hazır `ExportOptions.plist` var:
+Not: Arşiv önce Apple Development kimliğiyle üretilebilir; Organizer veya
+`-exportArchive` App Store paketini Apple Distribution kimliğiyle yeniden imzalar.
+Bu akış bu makinede uçtan uca doğrulandı. CLI ile paket çıkarmak istersen repo kökünde
+hazır `ExportOptions.plist` var:
 
 ```sh
 xcodebuild archive -scheme Flapse -destination 'generic/platform=iOS' \
@@ -55,7 +58,7 @@ xcodebuild -exportArchive -archivePath build/Flapse.xcarchive \
 
 1. [appstoreconnect.apple.com](https://appstoreconnect.apple.com) → **My Apps → + → New App**.
 2. Platform: iOS · Name: **Flapse** · Primary language: Turkish ·
-   Bundle ID: **rozcan.Flapse** · SKU: `flapse-ios`.
+   Bundle ID: **rozcan.Flapse** · SKU: `flapse-ios` · Primary category: **Photo & Video**.
 3. Bundle ID listede yoksa: [developer.apple.com/account/resources/identifiers](https://developer.apple.com/account/resources/identifiers)
    → App IDs → `rozcan.Flapse`'ı kaydet.
 
@@ -71,14 +74,14 @@ Sonra App Store Connect → uygulama → **Monetization → Subscriptions / In-A
 2. Grup içine iki otomatik yenilenen abonelik — Product ID'ler koddakiyle **birebir** aynı olmalı:
    - `com.ridvan.timelapse.pro.monthly` (1 ay)
    - `com.ridvan.timelapse.pro.yearly` (1 yıl)
-3. Her ikisine **Introductory Offer**: 1 hafta, **Free trial**
-   (paywall "7 günlük ücretsiz deneme" vaat ediyor — birebir uyuşmalı).
+3. Her ikisine **Introductory Offer**: 1 hafta, **Free trial**. Paywall bu metni yalnızca
+   StoreKit kullanıcının denemeye uygun olduğunu bildirdiğinde gösterir.
 4. **Non-Consumable** ürün: `com.ridvan.timelapse.pro.lifetime`.
 5. Her ürüne Türkçe + İngilizce ad/açıklama ve fiyat gir; "Review Information" kısmına
    paywall ekran görüntüsü ekle.
 6. IAP'ler ilk sürümle **birlikte** incelemeye girer — sürüm sayfasında üçünü de sürüme iliştir.
 
-**Yayın öncesi cihazsız test:** depodaki `Products.storekit` dosyası Timelapse şemasına
+**Yayın öncesi cihazsız test:** depodaki `Products.storekit` dosyası Flapse şemasına
 zaten bağlı — Xcode'dan çalıştırınca satın alma akışı sahte mağazayla uçtan uca denenebilir
 (fiyatlar App Store Connect'e girilecek değerlerle aynı tutuluyor). Gerçek sandbox testi
 için: App Store Connect → Users and Access → **Sandbox Testers**'dan test hesabı aç.
@@ -92,12 +95,16 @@ için: App Store Connect → Users and Access → **Sandbox Testers**'dan test h
    (`docs/AppStoreListing.md` taslak metinleri içerir.)
 3. **Support URL**: `https://ozcanr17.github.io/Flapse/support`
    **Privacy Policy URL**: `https://ozcanr17.github.io/Flapse/privacy`
-4. **App Privacy** anketi: **"Data Not Collected"** — üçüncü taraf sunucu, analiz veya takip yok.
-   (Birlikte Çekim ve isteğe bağlı yedekleme kullanıcının kendi iCloud/CloudKit hesabını kullanır;
-   geliştirici bu verilere erişmez.)
+4. **App Privacy** anketi: **Data Collected** seç. "Bildir" özelliği için
+   **Other User Content**, isteğe bağlı iletişim alanı için **Email Address** ve uygulama/iOS
+   sürümü ile cihaz modeli için **Other Diagnostic Data** beyan et. Üçünde de Linked: Evet,
+   Tracking: Hayır, Purpose: App Functionality. Birlikte Çekim ve isteğe bağlı yedekleme
+   kullanıcının private iCloud/CloudKit hesabını kullanır; geliştirici bu içeriklere erişmez.
 5. **Age rating**: tüm sorulara "None" → 4+.
 6. **App Review Information → Notes** (İngilizce öneri):
-   > All data stays on device; no accounts or servers. Sign in with Apple is optional
+   > Photos and projects stay on device unless the user enables an iCloud feature.
+   > Optional feedback is stored in the developer's public CloudKit database as disclosed
+   > in App Privacy. Sign in with Apple is optional
    > (there is a "Continue without signing in" option). Account deletion is under
    > Settings → Hesap → Hesabı sil. Pro features can be tested with the free trial
    > or the provided sandbox account.

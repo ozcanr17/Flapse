@@ -2072,7 +2072,6 @@
       }
     },
     "Abonelik otomatik yenilenir; istediğin zaman Ayarlar’dan iptal edebilirsin." : {
-      "extractionState" : "stale",
       "localizations" : {
         "ar" : {
           "stringUnit" : {
@@ -2138,6 +2137,76 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "订阅会自动续订；你可以随时在设置中取消。"
+          }
+        }
+      }
+    },
+    "Ömür boyu erişim tek seferlik bir satın alımdır; yinelenen ücret yoktur." : {
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الوصول مدى الحياة هو شراء لمرة واحدة؛ لا توجد رسوم متكررة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der lebenslange Zugriff ist ein Einmalkauf; es fallen keine wiederkehrenden Gebühren an."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lifetime access is a one-time purchase with no recurring charge."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El acceso de por vida es una compra única, sin cargos recurrentes."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’accès à vie est un achat unique, sans frais récurrents."
+          }
+        },
+        "hi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "लाइफ़टाइम एक्सेस एक बार की खरीद है; कोई आवर्ती शुल्क नहीं है।"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライフタイムアクセスは1回限りの購入で、継続課金はありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "평생 이용권은 일회성 구매이며 반복 결제가 없습니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O acesso vitalício é uma compra única, sem cobranças recorrentes."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пожизненный доступ приобретается один раз, без регулярных списаний."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "终身访问权限为一次性购买，不会重复收费。"
           }
         }
       }
@@ -2278,148 +2347,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "开"
-          }
-        }
-      }
-    },
-    "Admin — Pro etkin" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مشرف — Pro مفعّل"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin — Pro aktiv"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin — Pro active"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin — Pro activo"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin — Pro actif"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एडमिन — Pro सक्रिय"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "管理者 — Pro 有効"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "관리자 — Pro 활성"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Admin — Pro ativo"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Админ — Pro активен"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "管理员 — Pro 已启用"
-          }
-        }
-      }
-    },
-    "Admin olarak giriş yapıldı — Pro açıldı. 👑" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم تسجيل الدخول كمشرف — تم فتح Pro. 👑"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Als Admin angemeldet — Pro freigeschaltet. 👑"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signed in as admin — Pro unlocked. 👑"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sesión iniciada como admin — Pro desbloqueado. 👑"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connecté en admin — Pro débloqué. 👑"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "एडमिन के रूप में साइन इन — Pro अनलॉक हुआ। 👑"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "管理者としてサインインしました — Pro が解除されました。👑"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "관리자로 로그인됨 — Pro가 해제되었습니다. 👑"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Conectado como admin — Pro desbloqueado. 👑"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вход как администратор — Pro разблокирован. 👑"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已以管理员身份登录 — Pro 已解锁。👑"
           }
         }
       }
@@ -3337,143 +3264,72 @@
         }
       }
     },
-    "Apple ile giriş kaydın bu cihazdan ve iCloud'dan kaldırılır. Projelerin ve fotoğrafların cihazında kalır." : {
+    "Apple ile giriş kaydın bu cihazdan kaldırılır. Projelerin ve fotoğrafların cihazında kalır." : {
       "localizations" : {
         "ar" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "سيُزال تسجيل الدخول بـ Apple من هذا الجهاز ومن iCloud. تبقى مشاريعك وصورك على جهازك."
+            "value" : "سيُزال تسجيل الدخول بـ Apple من هذا الجهاز. تبقى مشاريعك وصورك على جهازك."
           }
         },
         "de" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Deine Anmeldung mit Apple wird von diesem Gerät und aus iCloud entfernt. Deine Projekte und Fotos bleiben auf dem Gerät."
+            "value" : "Deine Anmeldung mit Apple wird von diesem Gerät entfernt. Deine Projekte und Fotos bleiben auf dem Gerät."
           }
         },
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Your Sign in with Apple record is removed from this device and iCloud. Your projects and photos stay on your device."
+            "value" : "Your Sign in with Apple record is removed from this device. Your projects and photos stay on your device."
           }
         },
         "es" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Tu registro de inicio de sesión con Apple se elimina de este dispositivo y de iCloud. Tus proyectos y fotos permanecen en tu dispositivo."
+            "value" : "Tu registro de inicio de sesión con Apple se elimina de este dispositivo. Tus proyectos y fotos permanecen en tu dispositivo."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ton enregistrement Connexion avec Apple est supprimé de cet appareil et d'iCloud. Tes projets et photos restent sur ton appareil."
+            "value" : "Ton enregistrement Connexion avec Apple est supprimé de cet appareil. Tes projets et photos restent sur ton appareil."
           }
         },
         "hi" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "आपका Apple साइन-इन रिकॉर्ड इस डिवाइस और iCloud से हटा दिया जाएगा। आपके प्रोजेक्ट और फ़ोटो डिवाइस पर रहेंगे।"
+            "value" : "आपका Apple साइन-इन रिकॉर्ड इस डिवाइस से हटा दिया जाएगा। आपके प्रोजेक्ट और फ़ोटो डिवाइस पर रहेंगे।"
           }
         },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Appleでサインインの記録がこのデバイスとiCloudから削除されます。プロジェクトと写真はデバイスに残ります。"
+            "value" : "Appleでサインインの記録がこのデバイスから削除されます。プロジェクトと写真はデバイスに残ります。"
           }
         },
         "ko" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Apple 로그인 기록이 이 기기와 iCloud에서 제거됩니다. 프로젝트와 사진은 기기에 남습니다."
+            "value" : "Apple 로그인 기록이 이 기기에서 제거됩니다. 프로젝트와 사진은 기기에 남습니다."
           }
         },
         "pt" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Seu registro de Iniciar sessão com a Apple é removido deste dispositivo e do iCloud. Seus projetos e fotos permanecem no dispositivo."
+            "value" : "Seu registro de Iniciar sessão com a Apple é removido deste dispositivo. Seus projetos e fotos permanecem no dispositivo."
           }
         },
         "ru" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Запись входа через Apple будет удалена с этого устройства и из iCloud. Проекты и фотографии останутся на устройстве."
+            "value" : "Запись входа через Apple будет удалена с этого устройства. Проекты и фотографии останутся на устройстве."
           }
         },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "你的 Apple 登录记录将从此设备和 iCloud 中移除。你的项目和照片会保留在设备上。"
-          }
-        }
-      }
-    },
-    "Apple ile giriş şu an kullanılamıyor (ücretli Apple Developer hesabı gerekir). Test için sürüm numarasına 7 kez dokunup geliştirici arka kapısını kullan." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تسجيل الدخول باستخدام Apple غير متاح حاليًا (يلزم حساب Apple Developer مدفوع). للاختبار، اضغط على رقم الإصدار 7 مرات واستخدم وضع المطور."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Anmelden mit Apple ist derzeit nicht verfügbar (kostenpflichtiges Apple-Developer-Konto erforderlich). Zum Testen 7-mal auf die Versionsnummer tippen und die Entwickler-Hintertür verwenden."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sign in with Apple is unavailable (a paid Apple Developer account is required). To test, tap the version number 7 times and use the developer backdoor."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Iniciar sesión con Apple no está disponible (se requiere una cuenta de pago de Apple Developer). Para probar, toca 7 veces el número de versión y usa la puerta trasera de desarrollador."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "La connexion avec Apple est indisponible (compte Apple Developer payant requis). Pour tester, touche 7 fois le numéro de version et utilise la porte dérobée développeur."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Apple से साइन इन अभी उपलब्ध नहीं है (सशुल्क Apple Developer खाता आवश्यक है)। परीक्षण के लिए संस्करण संख्या पर 7 बार टैप करें और डेवलपर मोड का उपयोग करें।"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Appleでサインインは現在利用できません（有料のApple Developerアカウントが必要です）。テストするにはバージョン番号を7回タップして開発者モードを使用してください。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "현재 Apple로 로그인할 수 없습니다(유료 Apple Developer 계정 필요). 테스트하려면 버전 번호를 7번 탭한 후 개발자 모드를 사용하세요."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Iniciar sessão com a Apple não está disponível neste momento (é necessária uma conta Apple Developer paga). Para testar, toque 7 vezes no número da versão e use o modo de programador."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вход с Apple сейчас недоступен (требуется платная учётная запись Apple Developer). Для тестирования нажмите на номер версии 7 раз и используйте режим разработчика."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "“通过 Apple 登录”当前不可用（需要付费 Apple Developer 帐户）。如需测试，请连续轻点版本号 7 次并使用开发者模式。"
+            "value" : "你的 Apple 登录记录将从此设备中移除。你的项目和照片会保留在设备上。"
           }
         }
       }
@@ -12458,77 +12314,6 @@
         }
       }
     },
-    "Geliştirici" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "المطوّر"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Entwickler"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Developer"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desarrollador"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Développeur"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "डेवलपर"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "デベロッパ"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "개발자"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desenvolvedor"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Разработчик"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "开发者"
-          }
-        }
-      }
-    },
     "Geri Al" : {
       "localizations" : {
         "ar" : {
@@ -13030,77 +12815,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "登录未完成，请重试。"
-          }
-        }
-      }
-    },
-    "Giriş yapıldı. Bu hesap admin değil; Pro açılmadı." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تم تسجيل الدخول. هذا الحساب ليس حساب مشرف، لذلك لم يتم تفعيل Pro."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Angemeldet. Dieses Konto ist kein Admin; Pro wurde nicht freigeschaltet."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signed in. This account isn't an admin; Pro was not unlocked."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sesión iniciada. Esta cuenta no es admin; Pro no se desbloqueó."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Connecté. Ce compte n'est pas admin ; Pro n'a pas été débloqué."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "साइन इन हो गया। यह एडमिन खाता नहीं है, इसलिए Pro चालू नहीं हुआ।"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "サインインしました。このアカウントは管理者ではないため、Proは有効になりませんでした。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "로그인했습니다. 관리자 계정이 아니므로 Pro가 활성화되지 않았습니다."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Sessão iniciada. Esta não é uma conta de administrador, por isso o Pro não foi ativado."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Вход выполнен. Это не учётная запись администратора, поэтому Pro не активирован."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "已登录。此帐户不是管理员帐户，因此 Pro 未启用。"
           }
         }
       }
@@ -26295,77 +26009,6 @@
         }
       }
     },
-    "Pro'yu Test Et (ödeme yok)" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "تجربة Pro (بدون دفع)"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro testen (keine Zahlung)"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Test Pro (No Charge)"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Probar Pro (sin pago)"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tester Pro (sans paiement)"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro टेस्ट करें (कोई भुगतान नहीं)"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Proをテスト（課金なし）"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pro 테스트 (결제 없음)"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Testar o Pro (sem cobrança)"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тест Pro (без оплаты)"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "测试 Pro（免付款）"
-          }
-        }
-      }
-    },
     "Proje" : {
       "localizations" : {
         "ar" : {
@@ -32622,77 +32265,6 @@
         }
       }
     },
-    "Tüm Pro özelliklerini satın almadan aç" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "فتح جميع ميزات Pro بدون شراء"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Alle Pro-Funktionen ohne Kauf freischalten"
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Unlock all Pro features without purchasing"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desbloquea todas las funciones Pro sin comprar"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Débloque toutes les fonctionnalités Pro sans achat"
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "सभी Pro सुविधाएं बिना खरीदे अनलॉक करें"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "すべてのPro機能を購入なしで解除"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "모든 Pro 기능을 구매 없이 잠금 해제"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Desbloqueie todos os recursos Pro sem comprar"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Открыть все функции Pro без покупки"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "无需购买即可解锁所有 Pro 功能"
-          }
-        }
-      }
-    },
     "Tümü" : {
       "localizations" : {
         "ar" : {
@@ -34952,77 +34524,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "缩放"
-          }
-        }
-      }
-    },
-    "Yalnızca DEBUG derlemesinde görünen test arka kapısı." : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "منفذ اختبار خلفي يظهر فقط في إصدار DEBUG."
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Test-Hintertür, nur im DEBUG-Build sichtbar."
-          }
-        },
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Test backdoor visible only in DEBUG builds."
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Puerta trasera de prueba visible solo en compilaciones DEBUG."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Porte dérobée de test visible uniquement dans les builds DEBUG."
-          }
-        },
-        "hi" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "टेस्ट बैकडोर, जो सिर्फ़ DEBUG बिल्ड में दिखता है।"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DEBUGビルドでのみ表示されるテスト用バックドア。"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "DEBUG 빌드에서만 보이는 테스트용 백도어예요."
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Atalho de teste visível apenas em builds DEBUG."
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Тестовый бэкдор, видимый только в DEBUG-сборке."
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "仅在 DEBUG 构建中显示的测试后门。"
           }
         }
       }

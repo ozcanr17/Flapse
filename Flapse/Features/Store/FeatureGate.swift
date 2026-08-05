@@ -3,6 +3,10 @@ import Foundation
 
 /// Uygulamanın premium özellikleri. Hangi özelliğin ücretli olduğunu tek listede toplar.
 enum PremiumFeature {
+    static let smartAlignmentPreferenceKey = "feature.smartAlignment.enabled"
+    static let coupleModePreferenceKey = "feature.coupleMode.enabled"
+    static let cloudBackupPreferenceKey = "feature.cloudBackup.enabled"
+
     case unlimitedProjects
     case smartAlignment
     case cloudBackup
@@ -44,9 +48,9 @@ enum PremiumFeature {
     /// Yalnızca kalıcı tercih tutan özelliklerin bir anahtarı vardır.
     var preferenceKey: String? {
         switch self {
-        case .smartAlignment: "feature.smartAlignment.enabled"
-        case .coupleMode:     "feature.coupleMode.enabled"
-        case .cloudBackup:    "feature.cloudBackup.enabled"
+        case .smartAlignment: Self.smartAlignmentPreferenceKey
+        case .coupleMode:     Self.coupleModePreferenceKey
+        case .cloudBackup:    Self.cloudBackupPreferenceKey
         default:              nil
         }
     }

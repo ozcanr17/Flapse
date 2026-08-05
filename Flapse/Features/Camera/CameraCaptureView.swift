@@ -527,7 +527,9 @@ private struct CameraSessionView: View {
         guard viewModel.canRecordVideo else { return }
         Task { await viewModel.prepareMicrophoneForHold() }
         holdTimer = Timer.scheduledTimer(withTimeInterval: Self.holdThreshold, repeats: false) { _ in
-            beginRecording()
+            Task { @MainActor in
+                beginRecording()
+            }
         }
     }
 
@@ -562,15 +564,8 @@ private struct CameraSessionView: View {
         let start = Date()
         let maxDuration = CameraCaptureViewModel.maxVideoDuration
         elapsedTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { _ in
-            let elapsed = Date().timeIntervalSince(start)
-            recordingElapsed = Int(elapsed)
-            recordingProgress = min(elapsed / maxDuration, 1)
-            // Donanımın azami süreye ulaşıp kendiliğinden kesmesinden hemen önce
-            // uygulama tarafında güvenli biçimde durdur (yarış durumunu önler).
-            if elapsed >= maxDuration - 0.3 {
-                elapsedTimer?.invalidate()
-                elapsedTimer = nil
-                Task { await finishRecording() }
+            Task { @MainActor in
+                updateRecordingProgress(startedAt: start, maxDuration: maxDuration)
             }
         }
         Task {
@@ -582,6 +577,17 @@ private struct CameraSessionView: View {
                 recordingElapsed = 0
                 recordingProgress = 0
             }
+        }
+    }
+
+    private func updateRecordingProgress(startedAt start: Date, maxDuration: TimeInterval) {
+        let elapsed = Date().timeIntervalSince(start)
+        recordingElapsed = Int(elapsed)
+        recordingProgress = min(elapsed / maxDuration, 1)
+        if elapsed >= maxDuration - 0.3 {
+            elapsedTimer?.invalidate()
+            elapsedTimer = nil
+            Task { await finishRecording() }
         }
     }
 
@@ -724,4 +730,3 @@ private struct CameraPreview: UIViewRepresentable {
         CameraPreviewHost.shared.setMirrored(position == .front)
     }
 }
-

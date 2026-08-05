@@ -52,7 +52,7 @@ Tap *Create Timelapse* and the studio opens with a live preview that resizes to 
 | **Speed** | slider 0.25×–3× |
 | **Zoom** | slider 0.5×–2×, scaled around center |
 | **Aspect** | 3:4 · 9:16 · 9:18 · 1:1 · 4:3 · 16:9 |
-| **Music** | off · 5 bundled royalty-free moods (Calm, Joyful, Upbeat, Melancholic, Cinematic) · any audio file from Files (Pro) |
+| **Music** | off · 8 bundled royalty-free moods · any audio file from Files (Pro) |
 | **Beat sync** | exactly one photo cut lands on each beat; bundled tracks use exact grids, while imported songs use onset detection with tempo-estimation fallback |
 | **Transition** | cut · smooth eased crossfade · **Fluid (AI, Pro)** — Vision optical-flow morphing that warps faces and scenes between frames |
 | **Alignment** | **Smart is on by default for everyone** (eye-locked face tracking, torso pose for fitness/outfit, belly for pregnancy, group for couples, saliency fallback) · off · **Manual per-photo (Pro)** — page through every frame, drag / pinch-zoom / two-finger-rotate each one, or Apply to All |

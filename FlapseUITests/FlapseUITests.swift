@@ -116,7 +116,7 @@ final class FlapseUITests: XCTestCase {
     @MainActor
     func testInviteButtonDoesNotCrash() throws {
         let app = XCUIApplication()
-        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-override.debugPro", "YES", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
         app.launchEnvironment["FLAPSE_UI_TESTS"] = "1"
         app.launch()
 
@@ -156,7 +156,7 @@ final class FlapseUITests: XCTestCase {
     @MainActor
     func testPhotoImportPanelIsEdgeAttached() throws {
         let app = XCUIApplication()
-        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-override.debugPro", "YES", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
         app.launchEnvironment["FLAPSE_UI_TESTS"] = "1"
         app.launch()
 
@@ -230,7 +230,7 @@ final class FlapseUITests: XCTestCase {
     @MainActor
     func testCameraOpenAndShutterTiming() throws {
         let app = XCUIApplication()
-        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-override.debugPro", "YES", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
         app.launchEnvironment["FLAPSE_UI_TESTS"] = "1"
         app.launch()
 
@@ -261,6 +261,12 @@ final class FlapseUITests: XCTestCase {
 
         NSLog("TIMING_TEST: tapping homeCaptureButton at \(Date())")
         captureButton.tap()
+        let quickPickProject = app.buttons.matching(
+            NSPredicate(format: "label CONTAINS %@", "Zamanlama")
+        ).firstMatch
+        if quickPickProject.waitForExistence(timeout: 2), quickPickProject.isHittable {
+            quickPickProject.tap()
+        }
         attachScreenshot(of: app, named: "camera-launch-transition")
 
         // Kamera hazır ya da hata ekranı — hangisi önce gelirse. Simülatörde donanım

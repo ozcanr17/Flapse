@@ -102,4 +102,4 @@ final class LanguageOverrideBundle: Bundle, @unchecked Sendable {
     }
 }
 
-private var associationKey: UInt8 = 0
+nonisolated(unsafe) private var associationKey: UInt8 = 0

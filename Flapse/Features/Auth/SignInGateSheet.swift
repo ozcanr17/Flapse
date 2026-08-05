@@ -71,9 +71,7 @@ struct SignInGateSheet: View {
     private func handle(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
-            if auth.handle(authorization) {
-                store.setAdminUnlocked(true)
-            }
+            auth.handle(authorization)
             if store.isPro {
                 CloudBackupPreference.setEnabled(true)
             }

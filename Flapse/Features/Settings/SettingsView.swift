@@ -23,8 +23,8 @@ struct SettingsView: View {
     @AppStorage(AppLanguage.storageKey) private var languageID = AppLanguage.system.rawValue
     @AppStorage(ReminderScheduler.enabledKey) private var remindersEnabled = false
     @AppStorage(ReminderScheduler.hourKey) private var reminderHour = 19
-    @AppStorage(PremiumFeature.smartAlignment.preferenceKey!) private var smartAlignmentEnabled = true
-    @AppStorage(PremiumFeature.cloudBackup.preferenceKey!) private var cloudBackupEnabled = false
+    @AppStorage(PremiumFeature.smartAlignmentPreferenceKey) private var smartAlignmentEnabled = true
+    @AppStorage(PremiumFeature.cloudBackupPreferenceKey) private var cloudBackupEnabled = false
 
     @State private var auth = AuthService()
     @State private var showPaywall = false
@@ -32,8 +32,7 @@ struct SettingsView: View {
     @State private var cloudAccountAvailable: Bool?
     @State private var showWelcome = false
     @State private var shouldReturnHomeAfterWelcome = false
-    @State private var devTapCount = 0
-    @State private var adminSignInMessage: String?
+    @State private var signInMessage: String?
     @State private var isConfirmingAccountDeletion = false
     @State private var cloudRestartRequired = UserDefaults.standard.bool(forKey: CloudBackupPreference.restartRequiredKey)
     @State private var isImportingArchive = false
@@ -106,8 +105,8 @@ struct SettingsView: View {
             } header: {
                 Text("Hesap")
             } footer: {
-                if let adminSignInMessage {
-                    Text(adminSignInMessage)
+                if let signInMessage {
+                    Text(signInMessage)
                         .foregroundStyle(theme.accent)
                 }
             }
@@ -280,33 +279,6 @@ struct SettingsView: View {
                 .foregroundStyle(theme.ink)
             }
 
-            #if DEBUG
-            if isDeveloperUnlocked {
-                Section {
-                    Toggle(isOn: developerProBinding) {
-                        Label {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Pro'yu Test Et (ödeme yok)")
-                                    .font(Theme.headline(15))
-                                    .foregroundStyle(theme.ink)
-                                Text("Tüm Pro özelliklerini satın almadan aç")
-                                    .font(Theme.caption(12))
-                                    .foregroundStyle(theme.inkMuted)
-                            }
-                        } icon: {
-                            Image(systemName: "ladybug.fill")
-                                .foregroundStyle(theme.accent)
-                        }
-                    }
-                    .tint(theme.accent)
-                } header: {
-                    Text("Geliştirici")
-                } footer: {
-                    Text("Yalnızca DEBUG derlemesinde görünen test arka kapısı.")
-                }
-            }
-            #endif
-
             Section {
                 VStack(spacing: 10) {
                     LogoMark(size: 56)
@@ -316,8 +288,6 @@ struct SettingsView: View {
                     Text("Sürüm \(appVersion)")
                         .font(Theme.caption(12))
                         .foregroundStyle(theme.inkMuted)
-                        .contentShape(Rectangle())
-                        .onTapGesture { revealDeveloperIfNeeded() }
                 }
                 .frame(maxWidth: .infinity)
                 .listRowBackground(Color.clear)
@@ -402,12 +372,11 @@ struct SettingsView: View {
         ) {
             Button("Hesabı sil", role: .destructive) {
                 auth.deleteAccountData()
-                store.setAdminUnlocked(false)
-                adminSignInMessage = nil
+                signInMessage = nil
             }
             Button("Vazgeç", role: .cancel) {}
         } message: {
-            Text("Apple ile giriş kaydın bu cihazdan ve iCloud'dan kaldırılır. Projelerin ve fotoğrafların cihazında kalır.")
+            Text("Apple ile giriş kaydın bu cihazdan kaldırılır. Projelerin ve fotoğrafların cihazında kalır.")
         }
     }
 
@@ -484,16 +453,22 @@ struct SettingsView: View {
     /// ve yeni bir proje olarak ekler (mevcut hiçbir veriyi değiştirmez). `url`
     /// güvenlik kapsamlı olabileceğinden erişim, okuma bitene kadar açık tutulur.
     private func importProjectArchive(from url: URL) {
+        let maximumEntryCount = store.isPro ? nil : FeatureGate.freeEntryLimit
         Task {
             let accessed = url.startAccessingSecurityScopedResource()
             defer { if accessed { url.stopAccessingSecurityScopedResource() } }
             do {
                 let imported = try await Task.detached(priority: .userInitiated) {
-                    try ProjectArchive.read(packageAt: url)
+                    try ProjectArchive.read(packageAt: url, maximumEntryCount: maximumEntryCount)
                 }.value
-                let project = try ProjectArchive.materialize(imported, into: settingsContext)
+                let project = try await ProjectArchive.materialize(
+                    imported,
+                    into: settingsContext.container
+                )
                 importedArchiveTitle = project.title
                 refreshStatistics()
+            } catch ProjectArchive.ArchiveError.requiresPro {
+                showPaywall = true
             } catch {
                 importArchiveError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
@@ -558,8 +533,7 @@ struct SettingsView: View {
             }
             Button("Çıkış yap") {
                 auth.signOut()
-                store.setAdminUnlocked(false)
-                adminSignInMessage = nil
+                signInMessage = nil
             }
             .font(Theme.body(15))
             .foregroundStyle(theme.secondary)
@@ -583,40 +557,15 @@ struct SettingsView: View {
     private func handleSignIn(_ result: Result<ASAuthorization, Error>) {
         switch result {
         case .success(let authorization):
-            adminSignInMessage = nil
-            if auth.handle(authorization) {
-                store.setAdminUnlocked(true)
-            }
+            signInMessage = nil
+            auth.handle(authorization)
             if store.isPro, !CloudBackupPreference.isEnabled {
                 CloudBackupPreference.setEnabled(true)
-                adminSignInMessage = String(localized: "iCloud yedekleme açıldı. Projelerinin eşitlenmesi için uygulamayı kapatıp yeniden aç.", bundle: .appLanguage)
+                signInMessage = String(localized: "iCloud yedekleme açıldı. Projelerinin eşitlenmesi için uygulamayı kapatıp yeniden aç.", bundle: .appLanguage)
             }
         case .failure:
-            adminSignInMessage = String(localized: "Giriş tamamlanamadı. Tekrar dene.", bundle: .appLanguage)
+            signInMessage = String(localized: "Giriş tamamlanamadı. Tekrar dene.", bundle: .appLanguage)
         }
-    }
-
-    #if DEBUG
-    private var isDeveloperUnlocked: Bool {
-        devTapCount >= 17 || store.debugUnlocked
-    }
-
-    private var developerProBinding: Binding<Bool> {
-        Binding(
-            get: { store.debugUnlocked },
-            set: { store.setDebugUnlocked($0) }
-        )
-    }
-    #endif
-
-    private func revealDeveloperIfNeeded() {
-        #if DEBUG
-        guard devTapCount < 17 else { return }
-        devTapCount += 1
-        if devTapCount >= 17 {
-            UINotificationFeedbackGenerator().notificationOccurred(.success)
-        }
-        #endif
     }
 
     private var iCloudActive: Bool {

@@ -321,7 +321,7 @@ final class CameraService: NSObject, CameraServiceProtocol, @unchecked Sendable 
         }
     }
 
-    private func onSessionQueue(_ work: @escaping () throws -> Void) async throws {
+    private func onSessionQueue(_ work: @escaping @Sendable () throws -> Void) async throws {
         try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
             self.sessionQueue.async {
                 do {

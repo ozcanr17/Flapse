@@ -12,7 +12,7 @@ Copy-paste-ready metadata. Character limits noted per field. Fill both localizat
 ## Subtitle (30 chars max)
 
 - EN: `Progress videos, one photo/day`  *(29)*
-- TR: `Günde bir kare, değişim videosu` *(30)*
+- TR: `Günde bir kare, değişim filmi` *(29)*
 
 ## Promotional Text (170 chars, editable without review)
 
@@ -39,7 +39,7 @@ CREATE CINEMATIC VIDEOS
 • Fluid AI transitions: optical-flow morphing melts one frame into the next
 • Smart alignment locks faces by the eyes, torsos by pose, bellies for pregnancy
 • Per-photo manual alignment: drag, pinch and rotate every single frame
-• Music: five built-in moods or any song from Files — with beat-synced cuts that land every photo on the beat
+• Music: eight built-in moods or any song from Files — with beat-synced cuts that land every photo on the beat
 • Any format: 9:16 for Stories, 1:1, 16:9 and more — bars filled with content-aware extension, never black
 • Speed and zoom sliders, date stamps, notes, and a signature outro
 
@@ -59,7 +59,7 @@ PRIVACY FIRST
 Your photos stay on your device unless you enable iCloud backup. No ads, no tracking, no third-party analytics. AI runs on-device.
 
 FLAPSE PRO
-Unlimited projects and frames, smart & per-photo alignment, fluid AI transitions, music and beat sync, Capture Together, iCloud backup, auto-sorting and watermark-free 4K export. Subscriptions start with a 7-day free trial; a one-time lifetime unlock is also available.
+Unlimited projects and frames, per-photo alignment, fluid AI transitions, music and beat sync, Capture Together, iCloud backup, auto-sorting and watermark-free 4K export. Eligible new subscribers can start with a 7-day free trial; a one-time lifetime unlock is also available.
 
 Terms of Use: https://www.apple.com/legal/internet-services/itunes/dev/stdeula/
 Privacy Policy: https://ozcanr17.github.io/Flapse/privacy
@@ -83,7 +83,7 @@ SİNEMATİK VİDEOLAR
 • Akışkan AI geçişler: optik akış, kareleri birbirine eritir
 • Akıllı hizalama gözlerden, gövdeden ya da karından kilitler
 • Kare kare manuel hizalama: her fotoğrafı sürükle, yakınlaştır, döndür
-• Müzik: beş hazır ruh hali ya da Dosyalar'dan kendi şarkın — kesimler ritmin vuruşlarına oturur
+• Müzik: sekiz hazır ruh hali ya da Dosyalar'dan kendi şarkın — kesimler ritmin vuruşlarına oturur
 • Her format: hikayeler için 9:16, 1:1, 16:9… bantlar içerik-duyarlı dolgu ile dolar
 • Hız ve yakınlaştırma kaydırıcıları, tarih damgası, not ve imza niteliğinde kapanış
 
@@ -103,7 +103,7 @@ BİRLİKTE VE HER YERDE
 Fotoğrafların, iCloud yedeklemeyi açmadıkça cihazında kalır. Reklam yok, takip yok, üçüncü taraf analitik yok. Yapay zeka cihazda çalışır.
 
 FLAPSE PRO
-Sınırsız proje ve kare, akıllı & kare kare hizalama, akışkan AI geçişler, müzik ve ritim senkronu, Birlikte Çekim, iCloud yedekleme, otomatik ayırma ve filigransız 4K dışa aktarma. Abonelikler 7 günlük ücretsiz denemeyle başlar; tek seferlik ömür boyu seçeneği de vardır.
+Sınırsız proje ve kare, kare kare hizalama, akışkan AI geçişler, müzik ve ritim senkronu, Birlikte Çekim, iCloud yedekleme, otomatik ayırma ve filigransız 4K dışa aktarma. Uygun yeni aboneler 7 günlük ücretsiz denemeyle başlayabilir; tek seferlik ömür boyu seçeneği de vardır.
 ```
 
 ## Keywords (100 chars, comma-separated, no spaces)
@@ -137,17 +137,17 @@ Localized IAP display names: Pro (Aylık/Monthly), Pro (Yıllık/Yearly), Pro (�
 
 ## App Privacy (Nutrition Labels)
 
-- **Data Not Collected.** Nothing is transmitted to the developer or third parties: photos, location tags and the Sign in with Apple ID stay on device (or in the user's own private iCloud/CloudKit, which the developer cannot access). There is no networking code, no analytics, no third-party SDK.
-- Tracking: **No**. Privacy manifests declare UserDefaults (CA92.1, 1C8F.1) only.
+- **Data collected:** Other User Content (feedback text), Email Address (optional feedback contact), and Other Diagnostic Data (app version, iOS version, device model). Conservatively declare all three as linked to identity because they can coexist in one feedback record and CloudKit assigns the record to a stable user identifier. They are used only for App Functionality and never for tracking. Photos, location tags and Sign in with Apple data stay on device or in the user's private iCloud/CloudKit, which the developer cannot access.
+- Tracking: **No**. There is no analytics, advertising SDK or third-party runtime dependency. The privacy manifest also declares UserDefaults required-reason APIs (CA92.1, 1C8F.1).
 
 ## App Review Notes (paste into the Notes field)
 
 ```
 Flapse is a daily-photo timelapse app. No account is required: Sign in with Apple is optional (a "Continue without signing in" option is offered) and only links projects to the user's own iCloud. Account deletion is available in Settings → Hesap → Hesabı sil.
 
-• Pro paywall: tap + on the home screen after one project exists, or Settings → Upgrade. Subscriptions include a 7-day free trial; a sandbox account can complete the flow.
+• Pro paywall: tap + on the home screen after one project exists, or Settings → Upgrade. Eligible new subscribers receive a 7-day free trial; a sandbox account can complete the flow.
 • Capture Together requires an iCloud account; without one the app falls back to a plain text invite. Testing needs two iCloud accounts (owner shares a link, invitee joins).
-• Music: 5 bundled tracks are original synthesized compositions (we own all rights). Users may also import their own audio files; content responsibility lies with the user, files never leave the device except inside their own exported video.
+• Music: 8 bundled tracks are included. Users may also import their own audio files; content responsibility lies with the user, and files never leave the device except inside the user's own exported video. Distribution rights for all bundled tracks must be confirmed before submission.
 • AI features (fluid transitions, captions) run fully on-device via Apple frameworks (Vision, Foundation Models). No server component exists.
 ```
 

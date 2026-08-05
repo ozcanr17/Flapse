@@ -1,31 +1,32 @@
 # Flapse — App Store Release Checklist
 
-Son doğrulama: **2026-08-02**. "Doğrulandı" yazan maddeler bu tarihte gerçekten
+Son doğrulama: **2026-08-05**. "Doğrulandı" yazan maddeler bu tarihte gerçekten
 ölçüldü; ölçülemeyenler açıkça öyle işaretlendi.
 
 ## Code & build
 
 - [x] Release configuration: whole-module optimization, `-O`, `VALIDATE_PRODUCT=YES`
-- [x] **Release'de sıfır uyarı** — 2026-08-02'de ölçüldü (`xcodebuild -configuration Release build`).
-      Bu tarihte iki uyarı düzeltildi: `FileDocument`'ın Sendable ihlali ve
-      beyan edilip karşılığı olmayan `CFBundleDocumentTypes` girdisi.
+- [x] **Swift 6 + strict concurrency** tüm hedeflerde açık; Release'de Swift ve C/ObjC
+      uyarıları hata kabul ediliyor.
+- [x] **Release build ve static analyze başarılı** — 2026-08-05'te sıfır derleyici
+      uyarısıyla ölçüldü.
 - [x] 1024px app icon alfa kanalı içermiyor — `sips` ile doğrulandı (1024×1024, hasAlpha: no)
 - [x] Privacy manifest'ler app **ve** widget uzantısında (UserDefaults, CA92.1 + 1C8F.1)
 - [x] `ITSAppUsesNonExemptEncryption = NO` (export-compliance sorusunu atlar)
 - [x] Tüm izin metinleri mevcut ve 12 dile çevrili (`InfoPlist.xcstrings`)
 - [x] Üçüncü taraf bağımlılık yok, analytics yok
-- [x] Kullanıcıya görünen tüm dizeler 12 dilde — 2026-08-02'de tamamlandı
-      (`Localizable.xcstrings` 522 anahtar, çevrilmemiş kalan yok)
+- [x] Kullanıcıya görünen dizeler 12 dilde; biçim/oran anahtarları çevrilmez olarak
+      işaretli. Güvenlik denetiminde kaldırılan gizli geliştirici metinleri Release
+      kaynaklarında bulunmuyor.
 - [ ] **CI GitHub'da koşmuyor.** `.github/workflows/` `.gitignore`'da (commit `23f57c7`:
       token'da `workflow` yetkisi olmadığı için push engelleniyordu), yani workflow
       dosyası repoda yok ve Actions hiç çalışmadı. Ayrıca yerel dosya hâlâ eski proje
       adı `Timelapse` şemasını gösteriyordu; 2026-08-02'de `Flapse`/`FlapseTests`
       olarak düzeltildi ama bu düzeltme de yalnızca yerelde duruyor. CI istiyorsan
       token'a `workflow` yetkisi ver, `.gitignore:25`'i kaldır ve dosyayı commit'le.
-- [x] **Unit testler yeşil — 2026-08-02'de koşuldu: 184 test, 0 hata, ~31 sn.**
-      Üç oturumdur "takılan" testlerin sebebi test kodu ya da uygulama değil,
-      kilitlenmiş bir `CoreSimulatorService`'ti. Tekrarlarsa çözümü HANDOFF.md'deki
-      "The test hang" bölümünde.
+- [x] **Unit testler yeşil — 2026-08-05: 186 test, 0 hata, ~16 sn.**
+- [x] **UI testleri doğrulandı** — tam pakette 31 koşunun 30'u geçti; kamera testindeki
+      görünmez seçici tıklaması düzeltildikten sonra o test tek başına da geçti.
 
 ## Gizlilik beyanı — DİKKAT
 
@@ -34,33 +35,29 @@ Bu bölümün önceki hâli yanlıştı ve "Data Not Collected" diyordu. Uygulam
 `iCloud.rozcan.Flapse` kabının **public** veritabanına yazıyor ve bu kayıtlar
 CloudKit Dashboard'dan geliştirici tarafından okunabiliyor. Kayıt şunları taşır:
 serbest metin mesaj, isteğe bağlı iletişim e-postası, uygulama sürümü, iOS sürümü,
-donanım modeli, dil.
+donanım modeli. Dil/locale artık gönderilmiyor.
 
 App Store Connect gizlilik anketi `Flapse/PrivacyInfo.xcprivacy` ile **birebir
 aynı** olmalı, aksi hâlde App Review tutarsızlığı yakalar:
 
-- [ ] **Email Address** — Linked: Hayır, Tracking: Hayır, Amaç: App Functionality
-- [ ] **Other User Content** — Linked: Hayır, Tracking: Hayır, Amaç: App Functionality
+- [ ] **Email Address** — Linked: Evet, Tracking: Hayır, Amaç: App Functionality
+- [ ] **Other User Content** — Linked: Evet, Tracking: Hayır, Amaç: App Functionality
+- [ ] **Other Diagnostic Data** — Linked: Evet, Tracking: Hayır, Amaç: App Functionality
+
+Üç tür aynı geri bildirim kaydında bulunabildiği ve CloudKit kayda kararlı bir kullanıcı
+tanımlayıcısı atadığı için Linked alanında temkinli ve doğru seçim **Evet**'tir.
 
 Not: Projeler, fotoğraflar ve videolar kullanıcının **private** CloudKit
 veritabanında durur; geliştirici erişemez, dolayısıyla "toplanan veri" sayılmaz.
 Beyan edilmesi gereken tek şey geri bildirim akışıdır.
 
-## İmzalama — bu makinede yapılamayanlar
+## İmzalama
 
-2026-08-02 itibarıyla bu Mac'te yalnızca **Apple Development** sertifikası var ve
-**hiç provisioning profile yüklü değil**. App Store arşivi burada üretilemedi,
-dolayısıyla aşağıdakiler ölçülemedi:
-
-- [ ] Dağıtım (Apple Distribution) sertifikası ve App Store provisioning profile kur
-- [ ] **`aps-environment` doğrula.** `Flapse/Flapse.entitlements` içinde değer
-      `development`. App Store derlemesinde `production` olması gerekir. Arşivi
-      aldıktan sonra gömülü değeri şununla oku — tahmin etme:
-      ```sh
-      codesign -d --entitlements - /path/to/Flapse.xcarchive/Products/Applications/Flapse.app
-      ```
-      `development` çıkarsa entitlement'ı Release için `production` yap.
-- [ ] Archive → Organizer'da validate
+- [x] 2026-08-05'te otomatik provisioning ile gerçek cihaz Release arşivi üretildi.
+- [x] Arşiv App Store Connect yöntemiyle dışa aktarıldı: **8.8 MB IPA**,
+      Apple Distribution imzası geçerli, `get-task-allow = false`,
+      `aps-environment = production`, CloudKit environment = Production.
+- [ ] Organizer'da **Validate App** ve ardından Upload işlemini owner tamamlamalı.
 
 ## App ID capabilities (zorunlu)
 
@@ -80,7 +77,7 @@ Entitlement'lar **silinemez**, hepsi gerçekten kullanılıyor:
 
 ## App Store Connect (owner, manuel)
 
-- [ ] App kaydı: bundle ID `rozcan.Flapse`, ad **Flapse**, kategori Productivity
+- [ ] App kaydı: bundle ID `rozcan.Flapse`, ad **Flapse**, kategori **Photo & Video**
 - [ ] `Products.storekit` ile eşleşen IAP'ler: `com.ridvan.timelapse.pro.monthly` / `.yearly` / `.lifetime`
 - [ ] Abonelik grubu + yerelleştirilmiş IAP metinleri; IAP'leri binary ile birlikte gönder
 - [ ] Gizlilik anketi — yukarıdaki "Gizlilik beyanı" bölümüne göre doldur
@@ -91,11 +88,11 @@ Entitlement'lar **silinemez**, hepsi gerçekten kullanılıyor:
       tetiklemek için render nasıl başlatılır
 - [ ] TestFlight internal build önce; cihazda Live Activity, background-retry, QR doğrula
 
-## İsteğe bağlı (yayını bloke etmez)
+## CloudKit Production (owner, zorunlu)
 
-- [ ] CloudKit `Feedback` şemasını Development'tan Production'a taşı. Taşınmazsa
-      "Bildir" **sessizce başarısız olmaz**: `FeedbackViewModel.swift:45` her hatada
-      hazır doldurulmuş e-posta yoluna düşer. Taşımak kullanıcıları o yoldan kurtarır.
+- [ ] `iCloud.rozcan.Flapse` içindeki proje/paylaşım ve `Feedback` record tiplerini
+      Development'tan Production'a deploy et. Feedback deploy edilmezse uygulama
+      e-posta yedeğine düşer; proje senkronu için Production şemasının hazır olması gerekir.
 
 ## Post-approval
 

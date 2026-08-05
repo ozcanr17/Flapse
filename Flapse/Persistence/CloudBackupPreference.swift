@@ -5,7 +5,7 @@ enum CloudBackupPreference {
     static let restartRequiredKey = "icloud.backup.restartRequired"
 
     private static var preferenceKey: String {
-        PremiumFeature.cloudBackup.preferenceKey!
+        PremiumFeature.cloudBackupPreferenceKey
     }
 
     static var isEnabled: Bool {

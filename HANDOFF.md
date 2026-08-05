@@ -1,18 +1,97 @@
 # HANDOFF — Flapse iOS App
 
-Last updated: **2026-08-02 (second session that day — release-prep pass)**.
+Last updated: **2026-08-05 — App Store RC audit**.
 Written for a completely new session with no prior context.
 
-The first 2026-08-02 session (camera review screen, import/export, dead-code
-sweep) is described below and is on `main`. A second session that same day did
-a release-preparation pass; **read "Release-prep pass" first — it corrects two
-factual errors in the older text below.**
+Historical sessions remain below for context. **Read "2026-08-05 App Store RC
+audit" first; it supersedes older test, signing, privacy and release-state claims.**
 
 Read this file first, then:
 
 1. `README.md` for the feature overview.
 2. `YAYINLAMA_REHBERI.md` for the Turkish App Store publishing guide and live checklist.
 3. `project_handoff.md` for older architectural and repository conventions.
+
+## 2026-08-05 App Store RC audit
+
+The attached release brief requested an exhaustive architecture, security,
+privacy, performance, accessibility, localization, build and App Review audit,
+automatic fixes, verification, and an App Store readiness decision.
+
+### Completed
+
+- Upgraded every target to Swift 6 and enabled complete strict concurrency.
+  Release treats Swift and C/ObjC warnings as errors. Release build and static
+  analysis both succeed.
+- Resolved all strict-concurrency findings in camera timers/session work,
+  ActivityKit, AVPlayer looping, UserDefaults, image caching, UIKit association
+  storage and export rendering.
+- Removed the hidden developer/admin Pro entitlement path completely. Pro is
+  now derived only from verified StoreKit transactions. Removed its tests,
+  launch arguments, UI and compiled localization strings.
+- Moved Sign in with Apple user ID, optional e-mail and name from UserDefaults
+  to Keychain, with one-time legacy migration and deletion on sign-out.
+- Hardened `.flapseproject` import against path traversal, symlinks, malformed
+  or oversized manifests/media, unsupported versions and free-tier bypass.
+  Import now saves in batches of 25 on a detached task and cleans up the new
+  project/video files on failure.
+- Permanent deletion of entries/projects now removes associated external video
+  files after the SwiftData deletion is saved.
+- Production SwiftData failure no longer terminates at launch. A blocking,
+  localized support state is shown without accepting edits into an ephemeral
+  store.
+- Corrected feedback privacy disclosure. Developer-readable public CloudKit
+  feedback contains message, optional e-mail, app/iOS version and hardware
+  model. The manifest and App Store docs declare Email Address, Other User
+  Content and Other Diagnostic Data as linked, not tracked, App Functionality.
+  Locale is no longer collected.
+- Paywall trial copy follows StoreKit intro-offer eligibility, and lifetime
+  purchase copy explicitly states that there is no recurring charge.
+- Corrected App Store category to Photo & Video and soundtrack count to eight.
+- Added missing VoiceOver labels and made the render animation respect Reduce
+  Motion. Thumbnail cache is bounded and purged on memory warning.
+- Added archive security/batching tests and video-cleanup regression coverage.
+
+### Verification on 2026-08-05
+
+- Unit tests: **186 passed, 0 failed**, about 16 seconds.
+- UI tests: full package ran 31 configurations/cases; 30 passed. The only
+  failure was a stale test tap on a non-hittable project card. After correcting
+  the test, that camera case passed in isolation.
+- Release simulator build: succeeded with warnings-as-errors.
+- Release static analyzer: succeeded.
+- Signed generic-device archive: succeeded with automatic provisioning.
+- App Store Connect export: succeeded; IPA is **8.8 MB**, Apple Distribution
+  signature verifies, `get-task-allow = false`, `aps-environment = production`,
+  CloudKit environment = Production.
+- Privacy manifests and plist files lint; app and widget signatures verify.
+
+### Remaining manual release work
+
+- Deploy the `iCloud.rozcan.Flapse` CloudKit schema to Production, including
+  project/share types and `Feedback`.
+- Complete or verify agreements, tax/banking, App Store app and IAP records,
+  subscription group and seven-day trial offers.
+- Enter privacy nutrition labels exactly as documented, age rating, export
+  compliance, category, URLs, localized metadata and screenshots.
+- Validate/upload the archive, run a two-account TestFlight smoke test on real
+  devices, verify purchase/restore, permissions, project sharing, background
+  render, Live Activity/Dynamic Island and widgets, then submit with review notes.
+- Confirm distribution rights/licenses for all eight bundled soundtracks.
+- CI is still intentionally absent from GitHub because `.github/workflows/` is
+  ignored after an earlier token lacked workflow scope.
+
+### Do not regress
+
+- Never reintroduce a developer/account-based Pro override or compile hidden
+  feature-unlock text into Release.
+- Never claim “Data Not Collected”; public CloudKit feedback is developer-readable.
+- Never trust archive-provided file names or materialize a large archive in one
+  main-thread context.
+- Never change the source `aps-environment` based only on a Development archive;
+  verify the exported distribution IPA. The verified IPA already has Production.
+- Do not overclaim measured FPS, memory or physical-device accessibility. Use
+  Instruments and TestFlight for those final measurements.
 
 ## Project identity
 

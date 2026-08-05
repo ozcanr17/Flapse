@@ -75,15 +75,31 @@ enum ImageDownsampler {
 }
 
 enum ThumbnailCache {
-    static let shared: NSCache<NSString, UIImage> = {
-        let cache = NSCache<NSString, UIImage>()
+    static let shared = ThumbnailCacheStore()
+}
+
+final class ThumbnailCacheStore: @unchecked Sendable {
+    private let cache = NSCache<NSString, UIImage>()
+
+    init() {
         cache.countLimit = 160
         cache.totalCostLimit = 72 * 1_024 * 1_024
-        MemoryWarningObserver.shared.onMemoryWarning = { [weak cache] in
-            cache?.removeAllObjects()
+        MemoryWarningObserver.shared.onMemoryWarning = { [weak self] in
+            self?.removeAllObjects()
         }
-        return cache
-    }()
+    }
+
+    func object(forKey key: NSString) -> UIImage? {
+        cache.object(forKey: key)
+    }
+
+    func setObject(_ image: UIImage, forKey key: NSString, cost: Int) {
+        cache.setObject(image, forKey: key, cost: cost)
+    }
+
+    func removeAllObjects() {
+        cache.removeAllObjects()
+    }
 }
 
 private actor ThumbnailDecodeCoordinator {

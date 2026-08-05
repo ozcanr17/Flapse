@@ -14,6 +14,12 @@ import UniformTypeIdentifiers
 enum ProjectArchive {
 
     static let packageExtension = "flapseproject"
+    private static let maximumManifestBytes = 5 * 1_024 * 1_024
+    private static let maximumArchiveEntries = 10_000
+    private static let maximumPhotoBytes = 100 * 1_024 * 1_024
+    private static let maximumVideoBytes = 1_024 * 1_024 * 1_024
+    private static let maximumTotalMediaBytes: Int64 = 10 * 1_024 * 1_024 * 1_024
+    private static let importBatchSize = 25
 
     /// `Info.plist`'teki `UTExportedTypeDeclarations` girdisiyle eşleşir.
     static let utType = UTType(exportedAs: "rozcan.flapse.projectarchive")
@@ -56,6 +62,7 @@ enum ProjectArchive {
         case manifestUnreadable
         case unsupportedVersion(Int)
         case videoMissing
+        case requiresPro
 
         var errorDescription: String? {
             switch self {
@@ -67,6 +74,8 @@ enum ProjectArchive {
                 return String(localized: "Bu arşiv (sürüm \(version)) uygulamanın bu sürümüyle desteklenmiyor. Lütfen Flapse'i güncelleyin.")
             case .videoMissing:
                 return String(localized: "Arşivde belirtilen bir video dosyası bulunamadı.")
+            case .requiresPro:
+                return nil
             }
         }
     }
@@ -199,15 +208,21 @@ enum ProjectArchive {
         let entries: [ImportedEntry]
     }
 
+    struct MaterializedProject: Sendable {
+        let id: UUID
+        let title: String
+    }
+
     /// Paketin manifest'ini okur ve video kliplerini `VideoEntryStorage`'a kopyalar.
     /// Fotoğraf baytlarına dokunmaz — onları `materialize` tek tek okur. SwiftData'ya
     /// dokunmadığı için arka planda çalıştırılabilir. Çağıran, `url` güvenlik kapsamlı
     /// bir URL ise erişimi `materialize` bitene kadar açık tutmalıdır.
-    static func read(packageAt url: URL) throws -> ImportedProject {
+    static func read(packageAt url: URL, maximumEntryCount: Int? = nil) throws -> ImportedProject {
         let manifestURL = url.appendingPathComponent("manifest.json")
-        guard FileManager.default.fileExists(atPath: manifestURL.path) else {
+        guard let manifestSize = regularFileSize(at: manifestURL) else {
             throw ArchiveError.manifestMissing
         }
+        guard manifestSize <= maximumManifestBytes else { throw ArchiveError.manifestUnreadable }
         let data: Data
         let manifest: Manifest
         do {
@@ -218,31 +233,58 @@ enum ProjectArchive {
         } catch {
             throw ArchiveError.manifestUnreadable
         }
-        guard manifest.formatVersion <= Manifest.currentFormatVersion else {
+        guard manifest.formatVersion == Manifest.currentFormatVersion else {
             throw ArchiveError.unsupportedVersion(manifest.formatVersion)
+        }
+        guard manifest.entries.count <= maximumArchiveEntries else {
+            throw ArchiveError.manifestUnreadable
+        }
+        if let maximumEntryCount, manifest.entries.count > maximumEntryCount {
+            throw ArchiveError.requiresPro
         }
 
         let photosDir = url.appendingPathComponent("photos", isDirectory: true)
         let videosDir = url.appendingPathComponent("videos", isDirectory: true)
+        if manifest.entries.contains(where: \.hasPhoto), !isSafeDirectory(at: photosDir) {
+            throw ArchiveError.manifestUnreadable
+        }
+        if manifest.entries.contains(where: { $0.videoFileName != nil }), !isSafeDirectory(at: videosDir) {
+            throw ArchiveError.manifestUnreadable
+        }
 
         var entries: [ImportedEntry] = []
         entries.reserveCapacity(manifest.entries.count)
+        var totalMediaBytes: Int64 = 0
 
         do {
             for payload in manifest.entries {
                 var photoFileName: String?
                 if payload.hasPhoto {
                     let name = "\(payload.id.uuidString).jpg"
-                    if FileManager.default.fileExists(atPath: photosDir.appendingPathComponent(name).path) {
+                    let photoURL = photosDir.appendingPathComponent(name)
+                    if let size = regularFileSize(at: photoURL), size <= maximumPhotoBytes {
+                        totalMediaBytes += Int64(size)
+                        guard totalMediaBytes <= maximumTotalMediaBytes else {
+                            throw ArchiveError.manifestUnreadable
+                        }
                         photoFileName = name
+                    } else {
+                        throw ArchiveError.manifestUnreadable
                     }
                 }
 
                 var newVideoFileName: String?
                 if let videoFileName = payload.videoFileName {
+                    guard isSafeVideoFileName(videoFileName) else {
+                        throw ArchiveError.manifestUnreadable
+                    }
                     let sourceURL = videosDir.appendingPathComponent(videoFileName)
-                    guard FileManager.default.fileExists(atPath: sourceURL.path) else {
+                    guard let size = regularFileSize(at: sourceURL), size <= maximumVideoBytes else {
                         throw ArchiveError.videoMissing
+                    }
+                    totalMediaBytes += Int64(size)
+                    guard totalMediaBytes <= maximumTotalMediaBytes else {
+                        throw ArchiveError.manifestUnreadable
                     }
                     let destName = VideoEntryStorage.fileName(for: UUID())
                     try FileManager.default.copyItem(
@@ -274,7 +316,7 @@ enum ProjectArchive {
         }
 
         return ImportedProject(
-            title: manifest.project.title,
+            title: String(manifest.project.title.trimmingCharacters(in: .whitespacesAndNewlines).prefix(120)),
             category: manifest.project.category,
             cadence: manifest.project.cadence,
             createdAt: manifest.project.createdAt,
@@ -286,56 +328,84 @@ enum ProjectArchive {
     /// `read(packageAt:)` sonucundan SwiftData nesnelerini kurar. Mevcut hiçbir
     /// projenin/çekimin üzerine yazmaz — her zaman yeni kimliklerle, ayrı bir proje
     /// olarak eklenir.
-    @MainActor
     @discardableResult
-    static func materialize(_ imported: ImportedProject, into context: ModelContext) throws -> Project {
-        let category = ProjectCategory(rawValue: imported.category) ?? .other
-        let cadence = CaptureCadence(rawValue: imported.cadence) ?? .daily
-        let project = Project(
-            title: imported.title,
-            category: category,
-            cadence: cadence,
-            createdAt: imported.createdAt
-        )
-        context.insert(project)
+    static func materialize(
+        _ imported: ImportedProject,
+        into container: ModelContainer
+    ) async throws -> MaterializedProject {
+        try await Task.detached(priority: .userInitiated) {
+            let category = ProjectCategory(rawValue: imported.category) ?? .other
+            let cadence = CaptureCadence(rawValue: imported.cadence) ?? .daily
+            let projectID = UUID()
 
-        let photosDir = imported.packageURL.appendingPathComponent("photos", isDirectory: true)
-        var inserted: [Entry] = []
-        inserted.reserveCapacity(imported.entries.count)
-        for payload in imported.entries {
-            let imageData = payload.photoFileName.flatMap {
-                try? Data(contentsOf: photosDir.appendingPathComponent($0))
+            do {
+                let projectContext = ModelContext(container)
+                projectContext.autosaveEnabled = false
+                projectContext.insert(Project(
+                    id: projectID,
+                    title: imported.title,
+                    category: category,
+                    cadence: cadence,
+                    createdAt: imported.createdAt
+                ))
+                try projectContext.save()
+
+                let photosDirectory = imported.packageURL
+                    .appendingPathComponent("photos", isDirectory: true)
+                for start in stride(from: 0, to: imported.entries.count, by: importBatchSize) {
+                    try Task.checkCancellation()
+                    let end = min(start + importBatchSize, imported.entries.count)
+                    let context = ModelContext(container)
+                    context.autosaveEnabled = false
+                    let descriptor = FetchDescriptor<Project>(
+                        predicate: #Predicate { $0.id == projectID }
+                    )
+                    guard let project = try context.fetch(descriptor).first else {
+                        throw ArchiveError.manifestUnreadable
+                    }
+                    for payload in imported.entries[start..<end] {
+                        let imageData: Data?
+                        if let photoFileName = payload.photoFileName {
+                            imageData = try Data(
+                                contentsOf: photosDirectory.appendingPathComponent(photoFileName),
+                                options: .mappedIfSafe
+                            )
+                        } else {
+                            imageData = nil
+                        }
+                        let entry = Entry(
+                            capturedAt: payload.capturedAt,
+                            imageData: imageData,
+                            anchorX: payload.anchorX,
+                            anchorY: payload.anchorY,
+                            subjectKindRaw: payload.subjectKindRaw,
+                            videoFileName: payload.videoFileName,
+                            videoDuration: payload.videoDuration
+                        )
+                        entry.latitude = payload.latitude
+                        entry.longitude = payload.longitude
+                        entry.placeName = payload.placeName
+                        entry.project = project
+                        context.insert(entry)
+                    }
+                    try context.save()
+                }
+
+                return MaterializedProject(id: projectID, title: imported.title)
+            } catch {
+                let cleanupContext = ModelContext(container)
+                cleanupContext.autosaveEnabled = false
+                let descriptor = FetchDescriptor<Project>(
+                    predicate: #Predicate { $0.id == projectID }
+                )
+                if let project = try? cleanupContext.fetch(descriptor).first {
+                    cleanupContext.delete(project)
+                    try? cleanupContext.save()
+                }
+                discardCopiedVideos(in: imported.entries)
+                throw error
             }
-            let entry = Entry(
-                capturedAt: payload.capturedAt,
-                imageData: imageData,
-                anchorX: payload.anchorX,
-                anchorY: payload.anchorY,
-                subjectKindRaw: payload.subjectKindRaw,
-                videoFileName: payload.videoFileName,
-                videoDuration: payload.videoDuration
-            )
-            entry.latitude = payload.latitude
-            entry.longitude = payload.longitude
-            entry.placeName = payload.placeName
-            entry.project = project
-            context.insert(entry)
-            inserted.append(entry)
-        }
-
-        do {
-            try context.save()
-        } catch {
-            // Kayıt başarısızsa `read` sırasında kopyalanan klipleri kimse sahiplenmez.
-            // Bağlam uygulamanın ana bağlamı olduğu için `rollback()` yerine yalnızca
-            // kendi eklediklerimizi geri alıyoruz; başkasının bekleyen değişikliği varsa
-            // ona dokunmuyoruz.
-            for entry in inserted { context.delete(entry) }
-            context.delete(project)
-            discardCopiedVideos(in: imported.entries)
-            throw error
-        }
-        return project
+        }.value
     }
 
     /// İçe aktarma yarıda kaldığında `VideoEntryStorage`'a kopyalanmış klipleri siler.
@@ -345,6 +415,31 @@ enum ProjectArchive {
                 at: VideoEntryStorage.directory.appendingPathComponent(name)
             )
         }
+    }
+
+    private static func regularFileSize(at url: URL) -> Int? {
+        guard let values = try? url.resourceValues(forKeys: [
+            .isRegularFileKey,
+            .isSymbolicLinkKey,
+            .fileSizeKey
+        ]), values.isRegularFile == true, values.isSymbolicLink != true else { return nil }
+        return values.fileSize
+    }
+
+    private static func isSafeDirectory(at url: URL) -> Bool {
+        guard let values = try? url.resourceValues(forKeys: [
+            .isDirectoryKey,
+            .isSymbolicLinkKey
+        ]) else { return false }
+        return values.isDirectory == true && values.isSymbolicLink != true
+    }
+
+    private static func isSafeVideoFileName(_ name: String) -> Bool {
+        guard name == URL(fileURLWithPath: name).lastPathComponent,
+              !name.contains("/"), !name.contains("\\") else { return false }
+        let url = URL(fileURLWithPath: name)
+        return url.pathExtension.lowercased() == "mp4"
+            && UUID(uuidString: url.deletingPathExtension().lastPathComponent) != nil
     }
 
     /// `.fileExporter`'a önerilen dosya adı olarak verilir (uzantısız — `contentType`

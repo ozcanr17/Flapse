@@ -7,15 +7,21 @@ struct FlapseApp: App {
     @UIApplicationDelegateAdaptor(FlapseAppDelegate.self) private var appDelegate
 
     let container: ModelContainer
+    let storageFailureDescription: String?
 
     init() {
         LanguageOverrideBundle.activate()
         CloudBackupPreference.prepareForLaunch()
         let isUITesting = ProcessInfo.processInfo.arguments.contains("--uitests")
             || ProcessInfo.processInfo.environment["FLAPSE_UI_TESTS"] == "1"
-        container = isUITesting
-            ? AppModelContainer.makeInMemory()
-            : AppModelContainer.makeProduction()
+        if isUITesting {
+            container = AppModelContainer.makeInMemory()
+            storageFailureDescription = nil
+        } else {
+            let result = AppModelContainer.makeProduction()
+            container = result.container
+            storageFailureDescription = result.failureDescription
+        }
     }
 
     @State private var store = StoreService()
@@ -23,9 +29,16 @@ struct FlapseApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if let storageFailureDescription {
+                    StorageFailureView(errorDescription: storageFailureDescription)
+                } else {
+                    ContentView()
+                }
+            }
                 .environment(store)
                 .task {
+                    guard storageFailureDescription == nil else { return }
                     await store.loadProducts()
                     await store.refreshEntitlements()
                 }
@@ -42,4 +55,21 @@ struct FlapseApp: App {
         }
     }
 
+}
+
+private struct StorageFailureView: View {
+    let errorDescription: String
+
+    var body: some View {
+        ContentUnavailableView {
+            Label("Hata", systemImage: "externaldrive.badge.exclamationmark")
+        } description: {
+            Text("Beklenmeyen bir hata oluştu: \(errorDescription)")
+        } actions: {
+            Link(destination: LegalLinks.support) {
+                Label("Bildir", systemImage: "questionmark.bubble")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
 }

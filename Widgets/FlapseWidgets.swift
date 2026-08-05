@@ -65,7 +65,9 @@ struct FlapseProvider: TimelineProvider {
 }
 
 enum WidgetStore {
-    static let suite = UserDefaults(suiteName: "group.rozcan.Flapse")
+    static var suite: UserDefaults? {
+        UserDefaults(suiteName: "group.rozcan.Flapse")
+    }
 
     private static var directory: URL? {
         FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: "group.rozcan.Flapse")?
