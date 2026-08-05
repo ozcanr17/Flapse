@@ -18,7 +18,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 45
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Select Xcode
         run: sudo xcode-select -s /Applications/Xcode_26.6.app
       - name: Release build
@@ -43,5 +43,4 @@ jobs:
           xcodebuild test -project Flapse.xcodeproj \
             -scheme Flapse \
             -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
-            -only-testing:FlapseTests \
-            CODE_SIGNING_ALLOWED=NO | tail -120
+            -only-testing:FlapseTests | tail -120
