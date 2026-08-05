@@ -521,12 +521,12 @@ struct ProjectDetailView: View {
         .onTapGesture { if atLimit { activeSheet = .paywall } }
     }
 
-    private func exportProjectArchive() {
+    private func exportProjectArchive(format: ProjectArchive.ExportFormat) {
         isExportingArchive = true
         Task {
             defer { isExportingArchive = false }
             do {
-                let url = try await ProjectArchive.write(project: project)
+                let url = try await ProjectArchive.write(project: project, format: format)
                 archiveTempURL = url
                 archiveExportItem = ArchiveExportItem(url: url)
             } catch {
@@ -538,8 +538,12 @@ struct ProjectDetailView: View {
     private func performPendingShareAction() {
         guard let action = pendingShareAction else { return }
         pendingShareAction = nil
-        if action == .archive {
-            exportProjectArchive()
+        if action == .archiveFolder {
+            exportProjectArchive(format: .folder)
+            return
+        }
+        if action == .archiveSingleFile {
+            exportProjectArchive(format: .singleFile)
             return
         }
         isRenderingShareCard = true
@@ -553,7 +557,7 @@ struct ProjectDetailView: View {
                 url = await renderCompareCard()
             case .story:
                 url = await renderStoryCard()
-            case .archive:
+            case .archiveFolder, .archiveSingleFile:
                 url = nil
             }
             guard let url else {

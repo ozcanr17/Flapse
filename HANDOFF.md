@@ -6,6 +6,26 @@ Written for a completely new session with no prior context.
 Historical sessions remain below for context. **Read "2026-08-05 App Store RC
 audit" first; it supersedes older test, signing, privacy and release-state claims.**
 
+## 2026-08-05 follow-up — selectable folder / single-file project export
+
+The project share sheet now offers two lossless archive formats:
+
+- **Klasör Olarak** creates a normal, extensionless `Project - Flapse` folder.
+  Files can browse `manifest.json`, `photos/` and `videos/` directly.
+- **Tek Dosya Olarak** keeps the compressed `.flapseproject` transport format.
+
+Both formats are produced by the same entry-by-entry writer and preserve the same
+photo/video bytes and metadata. Import already detects regular files versus folders,
+so Settings can import either format and continues to accept legacy folder packages.
+The share UI includes descriptions and translations in all supported languages via
+the dedicated `Flapse/ArchiveExport.xcstrings` catalog; the pre-existing dirty
+`Localizable.xcstrings` was not touched by this follow-up.
+
+Verification: Debug and Release simulator builds succeeded. `ProjectArchiveTests` passed **9/9**;
+the new test creates a project containing both photo and video bytes, confirms they
+are visible under the exported `photos/` and `videos/` directories, and reads the
+folder back through the production importer.
+
 ## 2026-08-05 late session — performance log + real single-file archives
 
 User supplied a 1,216-line physical-device Debug log and reported that exported

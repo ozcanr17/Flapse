@@ -4,7 +4,8 @@ enum ProjectShareAction: Equatable {
     case streak
     case compare
     case story
-    case archive
+    case archiveFolder
+    case archiveSingleFile
 }
 
 struct ProjectShareOptionsSheet: View {
@@ -18,14 +19,44 @@ struct ProjectShareOptionsSheet: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    option("Seri Kartı", icon: "flame.fill", action: .streak)
+                    option(
+                        String(localized: "Seri Kartı", bundle: .appLanguage),
+                        icon: "flame.fill",
+                        action: .streak
+                    )
 
                     if canCreateComparison {
-                        option("Önce & Sonra Kartı", icon: "rectangle.split.2x1.fill", action: .compare)
-                        option("Hikaye Kartı (9:16)", icon: "rectangle.portrait.fill", action: .story)
+                        option(
+                            String(localized: "Önce & Sonra Kartı", bundle: .appLanguage),
+                            icon: "rectangle.split.2x1.fill",
+                            action: .compare
+                        )
+                        option(
+                            String(localized: "Hikaye Kartı (9:16)", bundle: .appLanguage),
+                            icon: "rectangle.portrait.fill",
+                            action: .story
+                        )
                     }
 
-                    option("Proje Arşivi (Tüm Kareler)", icon: "archivebox.fill", action: .archive)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Proje Arşivi (Tüm Kareler)")
+                            .font(Theme.caption(13))
+                            .foregroundStyle(theme.inkMuted)
+                            .padding(.horizontal, 4)
+
+                        option(
+                            String(localized: "Klasör Olarak", table: "ArchiveExport", bundle: .appLanguage),
+                            subtitle: String(localized: "Fotoğraf ve videolar Dosyalar'da ayrı ayrı görünür", table: "ArchiveExport", bundle: .appLanguage),
+                            icon: "folder.fill",
+                            action: .archiveFolder
+                        )
+                        option(
+                            String(localized: "Tek Dosya Olarak", table: "ArchiveExport", bundle: .appLanguage),
+                            subtitle: String(localized: "Göndermek için sıkıştırılmış .flapseproject", table: "ArchiveExport", bundle: .appLanguage),
+                            icon: "archivebox.fill",
+                            action: .archiveSingleFile
+                        )
+                    }
                 }
                 .padding(16)
             }
@@ -38,12 +69,17 @@ struct ProjectShareOptionsSheet: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
         .presentationDragIndicator(.visible)
         .presentationBackground(theme.canvas)
     }
 
-    private func option(_ title: LocalizedStringKey, icon: String, action: ProjectShareAction) -> some View {
+    private func option(
+        _ title: String,
+        subtitle: String? = nil,
+        icon: String,
+        action: ProjectShareAction
+    ) -> some View {
         Button {
             onSelect(action)
             dismiss()
@@ -55,10 +91,18 @@ struct ProjectShareOptionsSheet: View {
                     .frame(width: 44, height: 44)
                     .background(theme.accent.opacity(0.12), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
 
-                Text(title)
-                    .font(Theme.body(16))
-                    .fontWeight(.semibold)
-                    .foregroundStyle(theme.ink)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(verbatim: title)
+                        .font(Theme.body(16))
+                        .fontWeight(.semibold)
+                        .foregroundStyle(theme.ink)
+                    if let subtitle {
+                        Text(verbatim: subtitle)
+                            .font(Theme.caption(12))
+                            .foregroundStyle(theme.inkMuted)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
 
                 Spacer()
 

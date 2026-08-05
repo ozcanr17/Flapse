@@ -4,10 +4,9 @@ import SwiftData
 import System
 import UniformTypeIdentifiers
 
-/// Bir projeyi kayıpsız şekilde sıkıştırılmış, tek bir `.flapseproject` dosyasına
-/// aktarır ve aynı formattan geri okur. Önceki sürümlerin oluşturduğu dizin paketleri
-/// de içe aktarılabilir; yeni biçim Dosyalar'ın doğru boyut göstermesini ve Mail,
-/// Mesajlar/AirDrop gibi hedeflerin arşivi eksiksiz taşımasını sağlar.
+/// Bir projeyi kayıpsız şekilde, kullanıcının seçimine göre Dosyalar'da gezilebilir
+/// bir klasöre veya sıkıştırılmış tek bir `.flapseproject` dosyasına aktarır. İçe
+/// aktarma iki biçimi de otomatik tanır.
 enum ProjectArchive {
 
     static let packageExtension = "flapseproject"
@@ -20,6 +19,13 @@ enum ProjectArchive {
 
     /// `Info.plist`'teki `UTExportedTypeDeclarations` girdisiyle eşleşir.
     static let utType = UTType(exportedAs: "rozcan.flapse.projectarchive")
+
+    enum ExportFormat: Sendable, Equatable {
+        /// `manifest.json`, `photos/` ve `videos/` Dosyalar'da doğrudan görülebilir.
+        case folder
+        /// AirDrop/Mail/Mesajlar için tek, sıkıştırılmış `.flapseproject` dosyası.
+        case singleFile
+    }
 
     // MARK: - Manifest
 
@@ -85,24 +91,44 @@ enum ProjectArchive {
     /// çözünürlükte saklandığı için bu, yüzlerce kareli bir projede yüz megabaytları
     /// aynı anda ana aktöre çekiyordu (bkz. HANDOFF'taki `imageData` kuralı).
     @MainActor
-    static func write(project: Project) async throws -> URL {
+    static func write(project: Project, format: ExportFormat = .singleFile) async throws -> URL {
         let safeTitle = sanitizedFileName(project.title.isEmpty ? "Proje" : project.title)
         let stagingDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("flapse-export-\(UUID().uuidString)", isDirectory: true)
-        let payloadDirectory = stagingDirectory
-            .appendingPathComponent("payload", isDirectory: true)
-        let outputURL = stagingDirectory
-            .appendingPathComponent(safeTitle, isDirectory: true)
-            .appendingPathExtension(packageExtension)
+        let outputURL: URL
+        switch format {
+        case .folder:
+            // Özel uzantı kullanırsak Files klasörü yeniden belge/paket gibi
+            // gösterebilir. Uzantısız klasör, medya alt klasörlerinin gezilmesini sağlar.
+            outputURL = stagingDirectory
+                .appendingPathComponent("\(safeTitle) - Flapse", isDirectory: true)
+        case .singleFile:
+            outputURL = stagingDirectory
+                .appendingPathComponent(safeTitle, isDirectory: false)
+                .appendingPathExtension(packageExtension)
+        }
         do {
-            try await writeContents(of: project, to: payloadDirectory)
-            try await Task.detached(priority: .userInitiated) {
-                try compress(directory: payloadDirectory, to: outputURL)
-                guard let size = regularFileSize(at: outputURL), size > 0 else {
+            switch format {
+            case .folder:
+                try await writeContents(of: project, to: outputURL)
+            case .singleFile:
+                let payloadDirectory = stagingDirectory
+                    .appendingPathComponent("payload", isDirectory: true)
+                try await writeContents(of: project, to: payloadDirectory)
+                try await Task.detached(priority: .userInitiated) {
+                    try compress(directory: payloadDirectory, to: outputURL)
+                    guard let size = regularFileSize(at: outputURL), size > 0 else {
+                        throw ArchiveError.manifestUnreadable
+                    }
+                    try FileManager.default.removeItem(at: payloadDirectory)
+                }.value
+            }
+            if format == .folder {
+                let manifestURL = outputURL.appendingPathComponent("manifest.json")
+                guard regularFileSize(at: manifestURL) != nil else {
                     throw ArchiveError.manifestUnreadable
                 }
-                try FileManager.default.removeItem(at: payloadDirectory)
-            }.value
+            }
         } catch {
             // Yarım kalan paketi burada silmezsek geçici dizinde kalıcı olur: dışa
             // aktarma sayfası hiç açılmadığından çağıranın temizlik yolu da işlemez.

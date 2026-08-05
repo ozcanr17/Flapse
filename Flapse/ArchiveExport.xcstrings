@@ -1,0 +1,66 @@
+{
+  "sourceLanguage" : "tr",
+  "strings" : {
+    "Fotoğraf ve videolar Dosyalar'da ayrı ayrı görünür" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "تظهر الصور ومقاطع الفيديو بشكل منفصل في تطبيق الملفات" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Fotos und Videos werden in „Dateien“ einzeln angezeigt" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Photos and videos appear separately in Files" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Las fotos y los vídeos aparecen por separado en Archivos" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Les photos et vidéos apparaissent séparément dans Fichiers" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "फ़ोटो और वीडियो Files में अलग-अलग दिखाई देते हैं" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "写真とビデオが「ファイル」に個別に表示されます" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "사진과 비디오가 파일 앱에 각각 표시됩니다" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : "As fotos e os vídeos aparecem separadamente em Arquivos" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Фото и видео отображаются отдельно в приложении «Файлы»" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "照片和视频会分别显示在“文件”中" } }
+      }
+    },
+    "Göndermek için sıkıştırılmış .flapseproject" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "ملف .flapseproject مضغوط للإرسال" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Komprimierte .flapseproject-Datei zum Teilen" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "Compressed .flapseproject for sharing" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : ".flapseproject comprimido para compartir" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Fichier .flapseproject compressé à partager" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "शेयर करने के लिए संपीड़ित .flapseproject" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "共有用に圧縮された.flapseproject" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "공유용으로 압축된 .flapseproject" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : ".flapseproject comprimido para compartilhar" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Сжатый файл .flapseproject для отправки" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "用于分享的压缩 .flapseproject 文件" } }
+      }
+    },
+    "Klasör Olarak" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "كمجلد" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Als Ordner" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "As Folder" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Como carpeta" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comme dossier" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "फ़ोल्डर के रूप में" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "フォルダとして" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "폴더로" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : "Como pasta" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Как папку" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "导出为文件夹" } }
+      }
+    },
+    "Tek Dosya Olarak" : {
+      "localizations" : {
+        "ar" : { "stringUnit" : { "state" : "translated", "value" : "كملف واحد" } },
+        "de" : { "stringUnit" : { "state" : "translated", "value" : "Als einzelne Datei" } },
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "As a Single File" } },
+        "es" : { "stringUnit" : { "state" : "translated", "value" : "Como archivo único" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "Comme fichier unique" } },
+        "hi" : { "stringUnit" : { "state" : "translated", "value" : "एक फ़ाइल के रूप में" } },
+        "ja" : { "stringUnit" : { "state" : "translated", "value" : "1つのファイルとして" } },
+        "ko" : { "stringUnit" : { "state" : "translated", "value" : "단일 파일로" } },
+        "pt" : { "stringUnit" : { "state" : "translated", "value" : "Como arquivo único" } },
+        "ru" : { "stringUnit" : { "state" : "translated", "value" : "Одним файлом" } },
+        "zh-Hans" : { "stringUnit" : { "state" : "translated", "value" : "导出为单个文件" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

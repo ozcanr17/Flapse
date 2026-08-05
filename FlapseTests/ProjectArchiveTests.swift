@@ -121,6 +121,59 @@ final class ProjectArchiveTests: XCTestCase {
     }
 
     @MainActor
+    func test_folderExportIsBrowsableAndCanBeImported() async throws {
+        let sourceContainer = AppModelContainer.makeInMemory()
+        let project = Project(title: "Biz", category: .coupleMode, cadence: .daily)
+        let entryID = UUID()
+        let videoFileName = VideoEntryStorage.fileName(for: entryID)
+        let videoURL = VideoEntryStorage.directory.appendingPathComponent(videoFileName)
+        try Data([0x00, 0x01, 0x02]).write(to: videoURL, options: .atomic)
+        defer { try? FileManager.default.removeItem(at: videoURL) }
+        let entry = Entry(
+            id: entryID,
+            imageData: Data([0xFF, 0xD8, 0xFF, 0xD9]),
+            videoFileName: videoFileName,
+            videoDuration: 1.5
+        )
+        entry.project = project
+        sourceContainer.mainContext.insert(project)
+        sourceContainer.mainContext.insert(entry)
+        try sourceContainer.mainContext.save()
+
+        let url = try await ProjectArchive.write(project: project, format: .folder)
+        temporaryURLs.append(url.deletingLastPathComponent())
+
+        XCTAssertEqual(url.lastPathComponent, "Biz - Flapse")
+        let values = try url.resourceValues(forKeys: [.isDirectoryKey])
+        XCTAssertEqual(values.isDirectory, true)
+        let manifestValues = try url.appendingPathComponent("manifest.json")
+            .resourceValues(forKeys: [.isRegularFileKey, .fileSizeKey])
+        XCTAssertEqual(manifestValues.isRegularFile, true)
+        XCTAssertGreaterThan(manifestValues.fileSize ?? 0, 0)
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: url.appendingPathComponent("photos", isDirectory: true).path
+        ))
+        XCTAssertTrue(FileManager.default.fileExists(
+            atPath: url.appendingPathComponent("videos", isDirectory: true).path
+        ))
+        XCTAssertGreaterThan(
+            (try url.appendingPathComponent("photos/\(entryID.uuidString).jpg")
+                .resourceValues(forKeys: [.fileSizeKey])).fileSize ?? 0,
+            0
+        )
+        XCTAssertGreaterThan(
+            (try url.appendingPathComponent("videos/\(entryID.uuidString).mp4")
+                .resourceValues(forKeys: [.fileSizeKey])).fileSize ?? 0,
+            0
+        )
+
+        let imported = try ProjectArchive.read(packageAt: url)
+        XCTAssertEqual(imported.title, "Biz")
+        XCTAssertEqual(imported.entries.count, 1)
+        ProjectArchive.discard(imported)
+    }
+
+    @MainActor
     func test_singleFileArchiveRoundTripsPhotoDateAndLocation() async throws {
         let sourceContainer = AppModelContainer.makeInMemory()
         let project = Project(title: "Aktarım", category: .coupleMode, cadence: .weekly)
