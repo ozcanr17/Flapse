@@ -1,6 +1,6 @@
 # HANDOFF — Flapse iOS App
 
-Last updated: **2026-08-05 — App Store RC audit**.
+Last updated: **2026-08-05 — App Store RC audit and export repair**.
 Written for a completely new session with no prior context.
 
 Historical sessions remain below for context. **Read "2026-08-05 App Store RC
@@ -51,10 +51,18 @@ automatic fixes, verification, and an App Store readiness decision.
 - Added missing VoiceOver labels and made the render animation respect Reduce
   Motion. Thumbnail cache is bounded and purged on memory warning.
 - Added archive security/batching tests and video-cleanup regression coverage.
+- Replaced the package `FileDocument` export path with the system document
+  export picker. The user now chooses a Files/iCloud Drive destination and the
+  temporary package no longer collides with FileWrapper's staging file.
+- Rebuilt the share chooser and the series, before/after and 9:16 story cards.
+  Card rendering now has progress/error feedback, unique temporary outputs and
+  regression tests for the exact 1080×1350 and 1080×1920 dimensions.
+- Added `APP_STORE_YAYIN_DURUMU.md` with the account owner's complete manual
+  Apple Developer, CloudKit, App Store Connect and TestFlight checklist.
 
 ### Verification on 2026-08-05
 
-- Unit tests: **186 passed, 0 failed**, about 16 seconds.
+- Unit tests: **190 passed, 0 failed**, about 6 seconds locally.
 - UI tests: full package ran 31 configurations/cases; 30 passed. The only
   failure was a stale test tap on a non-hittable project card. After correcting
   the test, that camera case passed in isolation.

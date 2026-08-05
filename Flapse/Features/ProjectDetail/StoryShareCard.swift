@@ -1,9 +1,6 @@
 import SwiftUI
 
-/// Reels/TikTok/Story için hazır 9:16 (1080×1920) "Önce → Sonra" kartı: ilk kare
-/// üstte, son kare altta; ortadaki rozet geçen gün sayısını söyler.
 struct StoryShareCard: View {
-
     let title: String
     let firstImage: UIImage
     let lastImage: UIImage
@@ -16,68 +13,95 @@ struct StoryShareCard: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            panel(image: firstImage, label: String(localized: "GÜN 1", bundle: .appLanguage), date: firstDate, alignment: .topLeading)
-            panel(image: lastImage, label: String(localized: "GÜN \(dayCount)", bundle: .appLanguage), date: lastDate, alignment: .bottomLeading)
-        }
-        .overlay {
-            VStack(spacing: 4) {
-                Image(systemName: "arrow.down")
-                    .font(.system(size: 40, weight: .bold))
-                Text("\(dayCount)")
-                    .font(.system(size: 92, weight: .heavy, design: .rounded))
-                    .monospacedDigit()
-                Text("GÜN", bundle: .appLanguage)
-                    .font(.system(size: 26, weight: .bold))
-                    .tracking(6)
-            }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 52)
-            .padding(.vertical, 36)
-            .background(.black.opacity(0.6), in: RoundedRectangle(cornerRadius: 44, style: .continuous))
-        }
-        .overlay(alignment: .bottom) {
-            HStack(spacing: 14) {
-                LogoMark(size: 52)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(title)
-                        .font(.system(size: 30, weight: .bold))
-                        .lineLimit(1)
-                    Text("Made with Flapse")
-                        .font(.system(size: 20, weight: .semibold))
-                        .opacity(0.75)
+        ZStack {
+            LinearGradient(
+                colors: [theme.canvas, theme.accent.opacity(0.22), theme.secondary.opacity(0.32)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+
+            VStack(spacing: 28) {
+                HStack(spacing: 18) {
+                    LogoMark(size: 72)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(title)
+                            .font(.system(size: 42, weight: .bold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                        Text("Flapse")
+                            .font(.system(size: 23, weight: .semibold))
+                            .foregroundStyle(theme.inkMuted)
+                    }
+                    Spacer()
                 }
+                .foregroundStyle(theme.ink)
+
+                panel(image: firstImage, label: String(localized: "GÜN 1", bundle: .appLanguage), date: firstDate)
+
+                HStack(spacing: 22) {
+                    Rectangle()
+                        .fill(theme.inkMuted.opacity(0.3))
+                        .frame(height: 1)
+                    VStack(spacing: 2) {
+                        Text("\(dayCount)")
+                            .font(.system(size: 72, weight: .heavy, design: .rounded))
+                            .monospacedDigit()
+                        Text("GÜN", bundle: .appLanguage)
+                            .font(.system(size: 18, weight: .bold))
+                            .tracking(4)
+                    }
+                    .foregroundStyle(theme.ink)
+                    Rectangle()
+                        .fill(theme.inkMuted.opacity(0.3))
+                        .frame(height: 1)
+                }
+
+                panel(image: lastImage, label: String(localized: "BUGÜN", bundle: .appLanguage), date: lastDate)
+
+                HStack {
+                    Image(systemName: "camera.aperture")
+                    Text("Flapse ile takip ediyorum")
+                    Spacer()
+                    Image(systemName: "arrow.up.right")
+                }
+                .font(.system(size: 21, weight: .semibold))
+                .foregroundStyle(theme.inkMuted)
             }
-            .foregroundStyle(.white)
-            .padding(.horizontal, 30)
-            .padding(.vertical, 20)
-            .background(.black.opacity(0.55), in: Capsule())
-            .padding(.bottom, 100)
+            .padding(.horizontal, 56)
+            .padding(.vertical, 64)
         }
         .frame(width: 1080, height: 1920)
-        .background(Color.black)
+        .clipped()
     }
 
-    private func panel(image: UIImage, label: String, date: Date, alignment: Alignment) -> some View {
+    private func panel(image: UIImage, label: String, date: Date) -> some View {
         Image(uiImage: image)
             .resizable()
             .scaledToFill()
-            .frame(width: 1080, height: 960)
+            .frame(width: 968, height: 650)
             .clipped()
-            .overlay(alignment: alignment) {
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(label)
-                        .font(.system(size: 30, weight: .heavy))
-                        .tracking(2)
-                    Text(date, format: .dateTime.day().month().year().locale(AppLanguage.currentLocale))
-                        .font(.system(size: 22, weight: .semibold))
-                        .opacity(0.85)
+            .overlay(alignment: .bottomLeading) {
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Text(label)
+                            .font(.system(size: 27, weight: .heavy))
+                            .tracking(2)
+                        Text(date, format: .dateTime.day().month(.wide).year().locale(AppLanguage.currentLocale))
+                            .font(.system(size: 20, weight: .semibold))
+                            .opacity(0.86)
+                    }
+                    Spacer()
                 }
                 .foregroundStyle(.white)
-                .padding(.horizontal, 24)
-                .padding(.vertical, 16)
-                .background(.black.opacity(0.5), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                .padding(28)
+                .padding(26)
+                .background(
+                    LinearGradient(colors: [.clear, .black.opacity(0.7)], startPoint: .top, endPoint: .bottom)
+                )
+            }
+            .clipShape(RoundedRectangle(cornerRadius: 42, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: 42, style: .continuous)
+                    .strokeBorder(.white.opacity(0.3), lineWidth: 1)
             }
     }
 }

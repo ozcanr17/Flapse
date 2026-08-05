@@ -104,6 +104,18 @@ final class ProjectArchiveTests: XCTestCase {
         XCTAssertEqual(projects.first?.entries?.count, 31)
     }
 
+    @MainActor
+    func test_exportUsesCleanNameInsideUniqueStagingDirectory() async throws {
+        let project = Project(title: "Biz", category: .coupleMode, cadence: .daily)
+
+        let url = try await ProjectArchive.write(project: project)
+        temporaryURLs.append(url.deletingLastPathComponent())
+
+        XCTAssertEqual(url.lastPathComponent, "Biz.flapseproject")
+        XCTAssertTrue(url.deletingLastPathComponent().lastPathComponent.hasPrefix("flapse-export-"))
+        XCTAssertNoThrow(try ProjectArchive.read(packageAt: url))
+    }
+
     private func makePackage(
         entryCount: Int,
         title: String = "Test",

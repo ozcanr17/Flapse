@@ -1,84 +1,105 @@
 import SwiftUI
 
 struct StreakShareCard: View {
-    let project: Project
+    let title: String
+    let categoryName: String
+    let heroImage: UIImage?
+    let streak: Int
+    let total: Int
+    let daysRunning: Int
     let theme: ThemePalette
-
-    private var dates: [Date] { project.sortedEntries.map(\.capturedAt) }
-    private var streak: Int { ActivitySummary.streak(capturedDates: dates) }
-    private var total: Int { dates.count }
-    private var daysRunning: Int { ActivitySummary.daysRunning(firstCapture: dates.first) }
 
     var body: some View {
         ZStack {
+            background
+
             LinearGradient(
-                colors: [theme.accent, theme.accent.mix(with: .black, by: 0.4)],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+                colors: [.black.opacity(0.08), .black.opacity(0.16), .black.opacity(0.82)],
+                startPoint: .top,
+                endPoint: .bottom
             )
 
             VStack(alignment: .leading, spacing: 0) {
-                LogoMark(size: 56)
-                    .padding(.top, 64)
+                HStack(spacing: 16) {
+                    LogoMark(size: 58)
+                    Text("Flapse")
+                        .font(.system(size: 28, weight: .bold))
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Text(categoryName.uppercased())
+                        .font(.system(size: 15, weight: .bold))
+                        .tracking(2.2)
+                        .foregroundStyle(.white.opacity(0.82))
+                }
 
                 Spacer()
 
-                Text(project.category.displayName.uppercased())
-                    .font(Theme.caption(18))
-                    .tracking(3)
-                    .foregroundStyle(.white.opacity(0.75))
-
-                Text(project.title)
-                    .font(Theme.headline(52))
+                Text(title)
+                    .font(.system(size: 66, weight: .bold))
                     .foregroundStyle(.white)
-                    .padding(.top, 6)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.72)
 
-                HStack(spacing: 40) {
-                    ShareStatColumn(value: "\(streak)", label: "GÜN SERİSİ")
-                    ShareStatColumn(value: "\(total)", label: "TOPLAM KARE")
-                    ShareStatColumn(value: "\(daysRunning)", label: "GÜNDÜR")
+                HStack(alignment: .firstTextBaseline, spacing: 16) {
+                    Text("\(streak)")
+                        .font(.system(size: 142, weight: .heavy, design: .rounded))
+                        .monospacedDigit()
+                    Text("GÜN SERİSİ")
+                        .font(.system(size: 25, weight: .bold))
+                        .tracking(4)
+                        .padding(.bottom, 24)
                 }
-                .padding(.top, 36)
+                .foregroundStyle(.white)
+                .padding(.top, 18)
 
-                Spacer()
-
-                HStack(spacing: 10) {
-                    Image(systemName: "camera.aperture")
-                        .foregroundStyle(.white.opacity(0.85))
-                    Text("Flapse ile takip ediyorum")
-                        .font(.system(size: 16, weight: .medium, design: .default))
-                        .foregroundStyle(.white.opacity(0.85))
+                HStack(spacing: 16) {
+                    stat(value: total, label: "TOPLAM KARE", icon: "photo.stack.fill")
+                    stat(value: daysRunning, label: "GÜNDÜR", icon: "calendar")
                 }
-                .padding(.bottom, 56)
+                .padding(.top, 22)
             }
-            .padding(.horizontal, 64)
+            .padding(64)
         }
         .frame(width: 1080, height: 1350)
+        .clipped()
     }
-}
 
-private struct ShareStatColumn: View {
-    let value: String
-    let label: LocalizedStringKey
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.system(size: 44, weight: .bold, design: .default))
-                .monospacedDigit()
-                .foregroundStyle(.white)
-            Text(label)
-                .font(Theme.caption(13))
-                .tracking(1.5)
-                .foregroundStyle(.white.opacity(0.7))
+    @ViewBuilder
+    private var background: some View {
+        if let heroImage {
+            Image(uiImage: heroImage)
+                .resizable()
+                .scaledToFill()
+                .frame(width: 1080, height: 1350)
+                .clipped()
+        } else {
+            LinearGradient(
+                colors: [theme.accent, theme.secondary, theme.accent.mix(with: .black, by: 0.48)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
         }
     }
-}
 
-#Preview {
-    let project = Project(title: "Sakal", category: .hairAndBeard, cadence: .daily)
-    return StreakShareCard(project: project, theme: AppTheme.cyber.palette)
-        .frame(width: 320, height: 400)
-        .scaleEffect(0.3)
+    private func stat(value: Int, label: LocalizedStringKey, icon: String) -> some View {
+        HStack(spacing: 18) {
+            Image(systemName: icon)
+                .font(.system(size: 30, weight: .semibold))
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(value)")
+                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .monospacedDigit()
+                Text(label)
+                    .font(.system(size: 14, weight: .bold))
+                    .tracking(1.8)
+                    .opacity(0.72)
+            }
+            Spacer()
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 26)
+        .padding(.vertical, 22)
+        .frame(maxWidth: .infinity)
+        .background(.ultraThinMaterial.opacity(0.72), in: RoundedRectangle(cornerRadius: 28, style: .continuous))
+    }
 }

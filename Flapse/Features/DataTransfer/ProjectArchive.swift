@@ -82,9 +82,6 @@ enum ProjectArchive {
 
     // MARK: - Export
 
-    /// Projeyi paketler ve paketin URL'ini döndürür. Çağıran, paylaşım bitince geçici
-    /// dizini silmekten sorumludur.
-    ///
     /// Kareler TEK TEK işlenir: her fotoğrafın baytları okunur, diske yazılır ve bir
     /// sonrakine geçmeden serbest bırakılır. Önce hepsini bir diziye toplayan bir sürüm
     /// vardı; `imageData` `.externalStorage` olduğu ve kameradan gelen JPEG'ler tam
@@ -93,15 +90,17 @@ enum ProjectArchive {
     @MainActor
     static func write(project: Project) async throws -> URL {
         let safeTitle = sanitizedFileName(project.title.isEmpty ? "Proje" : project.title)
-        let root = FileManager.default.temporaryDirectory
-            .appendingPathComponent("\(safeTitle)-\(UUID().uuidString.prefix(8))", isDirectory: true)
+        let stagingDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("flapse-export-\(UUID().uuidString)", isDirectory: true)
+        let root = stagingDirectory
+            .appendingPathComponent(safeTitle, isDirectory: true)
             .appendingPathExtension(packageExtension)
         do {
             try await writeContents(of: project, to: root)
         } catch {
             // Yarım kalan paketi burada silmezsek geçici dizinde kalıcı olur: dışa
             // aktarma sayfası hiç açılmadığından çağıranın temizlik yolu da işlemez.
-            try? FileManager.default.removeItem(at: root)
+            try? FileManager.default.removeItem(at: stagingDirectory)
             throw error
         }
         return root
@@ -440,12 +439,6 @@ enum ProjectArchive {
         let url = URL(fileURLWithPath: name)
         return url.pathExtension.lowercased() == "mp4"
             && UUID(uuidString: url.deletingPathExtension().lastPathComponent) != nil
-    }
-
-    /// `.fileExporter`'a önerilen dosya adı olarak verilir (uzantısız — `contentType`
-    /// zaten `.flapseproject` uzantısını ekler).
-    static func sanitizedExportName(_ title: String) -> String {
-        sanitizedFileName(title)
     }
 
     private static func sanitizedFileName(_ raw: String) -> String {

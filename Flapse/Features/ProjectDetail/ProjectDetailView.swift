@@ -31,11 +31,12 @@ struct ProjectDetailView: View {
     @State private var showsAllTimelineEntries = false
     @State private var isRevealingTimelineEntries = false
     @State private var archiveTempURL: URL?
-    @State private var archiveDocument: ProjectArchiveDocument?
-    @State private var isPresentingArchiveExporter = false
-    @State private var archiveExportFilename = "Proje"
+    @State private var archiveExportItem: ArchiveExportItem?
     @State private var isExportingArchive = false
     @State private var archiveExportError: String?
+    @State private var pendingShareAction: ProjectShareAction?
+    @State private var isRenderingShareCard = false
+    @State private var shareCardCreationFailed = false
 
     private static let initialTimelineEntryCount = 10
     fileprivate static let timelinePreviewPixelSize: CGFloat = 420
@@ -70,6 +71,11 @@ struct ProjectDetailView: View {
             case .viewer(let entry): entry.id.uuidString
             }
         }
+    }
+
+    private struct ArchiveExportItem: Identifiable {
+        let url: URL
+        var id: URL { url }
     }
 
     private var canAddEntry: Bool {
@@ -200,31 +206,12 @@ struct ProjectDetailView: View {
                 .accessibilityLabel(Text("Birlikte çekim daveti"))
             }
         }
-        .confirmationDialog("", isPresented: $isChoosingShareCard) {
-            Button("Seri Kartı") {
-                shareCardURL = renderShareCard()
-                if shareCardURL != nil { activeSheet = .shareCard }
+        .sheet(isPresented: $isChoosingShareCard, onDismiss: performPendingShareAction) {
+            ProjectShareOptionsSheet(canCreateComparison: liveEntries.count >= 2) { action in
+                pendingShareAction = action
             }
-            if liveEntries.count >= 2 {
-                Button("Önce & Sonra Kartı") {
-                    Task {
-                        shareCardURL = await renderCompareCard()
-                        if shareCardURL != nil { activeSheet = .shareCard }
-                    }
-                }
-                Button("Hikaye Kartı (9:16)") {
-                    Task {
-                        shareCardURL = await renderStoryCard()
-                        if shareCardURL != nil { activeSheet = .shareCard }
-                    }
-                }
-            }
-            Button("Proje Arşivi (Tüm Kareler)") {
-                exportProjectArchive()
-            }
-            Button("Vazgeç", role: .cancel) {}
         }
-        .sheet(item: $activeSheet) { sheet in
+        .sheet(item: $activeSheet, onDismiss: cleanupShareCard) { sheet in
             switch sheet {
             case .export:
                 TimelapseExportSheet(project: project)
@@ -270,20 +257,21 @@ struct ProjectDetailView: View {
                 .presentationDetents([.medium, .large])
             }
         }
-        .fileExporter(
-            isPresented: $isPresentingArchiveExporter,
-            document: archiveDocument,
-            contentType: ProjectArchive.utType,
-            defaultFilename: archiveExportFilename
-        ) { result in
-            if case .failure(let error) = result {
-                archiveExportError = error.localizedDescription
+        .sheet(item: $archiveExportItem, onDismiss: cleanupArchiveExport) { item in
+            ProjectArchiveExportPicker(sourceURL: item.url)
+                .ignoresSafeArea()
+        }
+        .overlay {
+            if isRenderingShareCard {
+                ZStack {
+                    Color.black.opacity(0.2).ignoresSafeArea()
+                    ProgressView()
+                        .tint(.white)
+                        .padding(22)
+                        .liquidGlassBarCapsule()
+                }
+                .transition(.opacity)
             }
-            if let archiveTempURL {
-                try? FileManager.default.removeItem(at: archiveTempURL)
-            }
-            archiveTempURL = nil
-            archiveDocument = nil
         }
         .overlay {
             if isExportingArchive {
@@ -301,6 +289,16 @@ struct ProjectDetailView: View {
                 }
                 .transition(.opacity)
             }
+        }
+        .alert("Paylaş", isPresented: $shareCardCreationFailed) {
+            Button("Tamam", role: .cancel) {}
+        } message: {
+            Text(
+                String(
+                    format: String(localized: "Beklenmeyen bir hata oluştu: %@", bundle: .appLanguage),
+                    String(localized: "Paylaş", bundle: .appLanguage)
+                )
+            )
         }
         .alert("Arşiv oluşturulamadı", isPresented: Binding(
             get: { archiveExportError != nil },
@@ -330,6 +328,21 @@ struct ProjectDetailView: View {
                 onFinished: { _ in isShowingPhotoImport = false }
             )
         }
+    }
+
+    private func cleanupArchiveExport() {
+        if let archiveTempURL {
+            try? FileManager.default.removeItem(at: archiveTempURL.deletingLastPathComponent())
+        }
+        archiveTempURL = nil
+        archiveExportItem = nil
+    }
+
+    private func cleanupShareCard() {
+        if let shareCardURL {
+            try? FileManager.default.removeItem(at: shareCardURL)
+        }
+        shareCardURL = nil
     }
 
     /// Bugünün karesini çekmek için ana çağrı — kamerayı prim konumda, büyük bir
@@ -508,36 +521,83 @@ struct ProjectDetailView: View {
         .onTapGesture { if atLimit { activeSheet = .paywall } }
     }
 
-    /// Projeyi kayıpsız bir paket (`.flapseproject`) olarak dışa aktarır ve sistem
-    /// paylaşım sayfasını açar. SwiftData'dan okunan düz veriler (`snapshot`) hızlıdır;
-    /// asıl disk yazımı (fotoğraf/video kopyalama) arka planda çalışır, bu yüzden
-    /// video ağırlıklı büyük projelerde bile arayüz kilitlenmez.
     private func exportProjectArchive() {
         isExportingArchive = true
-        let filename = ProjectArchive.sanitizedExportName(project.title)
         Task {
             defer { isExportingArchive = false }
             do {
                 let url = try await ProjectArchive.write(project: project)
                 archiveTempURL = url
-                archiveDocument = ProjectArchiveDocument(packageURL: url)
-                archiveExportFilename = filename
-                isPresentingArchiveExporter = true
+                archiveExportItem = ArchiveExportItem(url: url)
             } catch {
                 archiveExportError = (error as? LocalizedError)?.errorDescription ?? error.localizedDescription
             }
         }
     }
 
-    private func renderShareCard() -> URL? {
+    private func performPendingShareAction() {
+        guard let action = pendingShareAction else { return }
+        pendingShareAction = nil
+        if action == .archive {
+            exportProjectArchive()
+            return
+        }
+        isRenderingShareCard = true
+        Task {
+            defer { isRenderingShareCard = false }
+            let url: URL?
+            switch action {
+            case .streak:
+                url = await renderShareCard()
+            case .compare:
+                url = await renderCompareCard()
+            case .story:
+                url = await renderStoryCard()
+            case .archive:
+                url = nil
+            }
+            guard let url else {
+                shareCardCreationFailed = true
+                return
+            }
+            shareCardURL = url
+            activeSheet = .shareCard
+        }
+    }
+
+    private func renderShareCard() async -> URL? {
         guard !liveEntries.isEmpty else { return nil }
-        let renderer = ImageRenderer(content: StreakShareCard(project: project, theme: theme))
+        let heroEntry = liveEntries.reversed().first { $0.imageData != nil }
+        let heroImage: UIImage?
+        if let heroEntry {
+            heroImage = await ImageDownsampler.cachedImage(
+                key: "streak-\(heroEntry.imageCacheKey)",
+                maxPixelSize: 1_400,
+                load: { heroEntry.imageData }
+            )
+        } else {
+            heroImage = nil
+        }
+        let dates = liveEntries.map(\.capturedAt)
+        let renderer = ImageRenderer(content: StreakShareCard(
+            title: project.title,
+            categoryName: project.category.displayName,
+            heroImage: heroImage,
+            streak: ActivitySummary.streak(capturedDates: dates),
+            total: dates.count,
+            daysRunning: ActivitySummary.daysRunning(firstCapture: dates.first),
+            theme: theme
+        ))
         renderer.scale = 1
         guard let uiImage = renderer.uiImage, let data = uiImage.pngData() else { return nil }
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("timelapse-share-\(project.id.uuidString)")
+            .appendingPathComponent("flapse-series-\(UUID().uuidString)")
             .appendingPathExtension("png")
-        try? data.write(to: url)
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            return nil
+        }
         return url
     }
 
@@ -559,9 +619,13 @@ struct ProjectDetailView: View {
         renderer.scale = 1
         guard let uiImage = renderer.uiImage, let data = uiImage.pngData() else { return nil }
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("flapse-compare-\(project.id.uuidString)")
+            .appendingPathComponent("flapse-compare-\(UUID().uuidString)")
             .appendingPathExtension("png")
-        try? data.write(to: url)
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            return nil
+        }
         return url
     }
 
@@ -583,9 +647,13 @@ struct ProjectDetailView: View {
         renderer.scale = 1
         guard let uiImage = renderer.uiImage, let data = uiImage.pngData() else { return nil }
         let url = FileManager.default.temporaryDirectory
-            .appendingPathComponent("flapse-story-\(project.id.uuidString)")
+            .appendingPathComponent("flapse-story-\(UUID().uuidString)")
             .appendingPathExtension("png")
-        try? data.write(to: url)
+        do {
+            try data.write(to: url, options: .atomic)
+        } catch {
+            return nil
+        }
         return url
     }
 
