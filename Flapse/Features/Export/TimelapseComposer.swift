@@ -375,7 +375,7 @@ struct TimelapseComposer: TimelapseComposing {
             ? FrameAligner.coupleMirrorFlags(for: frames.map(\.imageData))
             : Array(repeating: false, count: frames.count)
         let useGeometricAlignment = useSmart && settings.alignmentSubject != .group
-        let anchors: [FrameAnchor?] = useGeometricAlignment
+        let rawAnchors: [FrameAnchor?] = useGeometricAlignment
             ? frames.map { frame in
                 guard let anchor = FrameAligner.anchor(in: frame.imageData, subject: settings.alignmentSubject) else {
                     return nil
@@ -383,15 +383,24 @@ struct TimelapseComposer: TimelapseComposing {
                 return anchor
             }
             : Array(repeating: nil, count: frames.count)
-        let reference = anchors.compactMap { $0 }.first
+        let recoveredAnchors = settings.alignmentSubject == .animal
+            ? FrameAligner.recoveredAnimalAnchors(rawAnchors, frames: frames.map(\.imageData))
+            : rawAnchors
+        let anchors = FrameAligner.stabilized(recoveredAnchors)
+        let reference = FrameAligner.bestReference(in: anchors)
 
-        let offsets: [CGSize?]
-        if useGeometricAlignment, reference == nil, let referenceData = frames.first?.imageData {
-            offsets = frames.enumerated().map { index, frame in
-                index == 0 ? .zero : FrameAligner.translationOffset(targetData: frame.imageData, referenceData: referenceData)
+        let sceneTransforms: [CGAffineTransform?]
+        if useGeometricAlignment, settings.alignmentSubject == .scene {
+            sceneTransforms = FrameAligner.sceneTransforms(for: frames.map(\.imageData))
+        } else if useGeometricAlignment, let referenceData = frames.first?.imageData {
+            sceneTransforms = frames.enumerated().map { index, frame in
+                guard anchors[index] == nil else { return nil }
+                return index == 0
+                    ? .identity
+                    : FrameAligner.sceneTransform(targetData: frame.imageData, referenceData: referenceData)
             }
         } else {
-            offsets = Array(repeating: nil, count: frames.count)
+            sceneTransforms = Array(repeating: nil, count: frames.count)
         }
 
         // Sabit 30 fps çıktı; her fotoğraf `holdFrames` kadar tutulur (hız bunu belirler).
@@ -441,7 +450,7 @@ struct TimelapseComposer: TimelapseComposing {
                 date: frames[index].capturedAt,
                 anchor: anchors[index],
                 reference: reference,
-                offset: offsets[index],
+                sceneTransform: sceneTransforms[index],
                 settings: frameSettings
             ) else { throw TimelapseComposerError.frameDecodingFailed }
             return composed
@@ -579,7 +588,7 @@ struct TimelapseComposer: TimelapseComposing {
         date: Date,
         anchor: FrameAnchor?,
         reference: FrameAnchor?,
-        offset: CGSize?,
+        sceneTransform: CGAffineTransform?,
         settings: TimelapseExportSettings
     ) -> CGImage? {
         let size = settings.renderSize
@@ -616,8 +625,8 @@ struct TimelapseComposer: TimelapseComposing {
                 image.draw(in: TimelapseFrameLayout.aspectFitRect(for: image.size, canvas: size))
             } else if settings.smartAlignment, let anchor, let reference {
                 drawAligned(image, anchor: anchor, reference: reference, canvas: size, context: context.cgContext)
-            } else if settings.smartAlignment, let offset {
-                image.draw(in: aspectFillRect(for: image, canvas: size, offset: offset))
+            } else if settings.smartAlignment, let sceneTransform {
+                drawSceneAligned(image, transform: sceneTransform, canvas: size, context: context.cgContext)
             } else {
                 image.draw(in: aspectFillRect(for: image, canvas: size))
             }
@@ -701,6 +710,22 @@ struct TimelapseComposer: TimelapseComposing {
             width: drawSize.width,
             height: drawSize.height
         )
+    }
+
+    /// Normalize (0…1) tuval koordinatlarındaki görsel kayıt dönüşümünü gerçek çıktı
+    /// boyutuna taşır. X/Y ölçekleri farklı tuval oranlarında ayrıca dönüştürülür;
+    /// böylece 9:16 fotoğraf 16:9 videoya yazılırken hizalama büyüyüp kaymaz.
+    private static func drawSceneAligned(
+        _ image: UIImage,
+        transform: CGAffineTransform,
+        canvas: CGSize,
+        context: CGContext
+    ) {
+        let pixelTransform = FrameAligner.canvasTransform(from: transform, canvas: canvas)
+        context.saveGState()
+        context.concatenate(pixelTransform)
+        image.draw(in: aspectFillRect(for: image, canvas: canvas))
+        context.restoreGState()
     }
 
     /// Manuel hizalama: seçilen özne noktasını tuval ortasına getirip zoom uygular.
@@ -862,7 +887,13 @@ struct TimelapseComposer: TimelapseComposing {
         context: CGContext
     ) {
         let subjectHeightPoints = max(anchor.height * image.size.height, 1)
-        let scale = (alignTargetHeight * canvas.height) / subjectHeightPoints
+        let desiredScale = (alignTargetHeight * canvas.height) / subjectHeightPoints
+        let fitScale = min(canvas.width / max(image.size.width, 1), canvas.height / max(image.size.height, 1))
+        let fillScale = max(canvas.width / max(image.size.width, 1), canvas.height / max(image.size.height, 1))
+        // Hatalı/küçük bir tespit tüm kareyi agresif biçimde yakınlaştırmasın. Alt
+        // sınır fotoğrafı tamamen görünür tutar; üst sınır normal aspect-fill'in
+        // yalnızca %25 üzerine izin verir.
+        let scale = min(max(desiredScale, fitScale), max(fillScale * 1.25, fitScale))
         let target = CGPoint(x: alignTargetCenter.x * canvas.width, y: alignTargetCenter.y * canvas.height)
         let subjectInImage = CGPoint(x: anchor.center.x * image.size.width, y: anchor.center.y * image.size.height)
 

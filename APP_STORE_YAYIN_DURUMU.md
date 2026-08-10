@@ -1,12 +1,23 @@
 # Flapse App Store Yayın Durumu
 
-Son güncelleme: 5 Ağustos 2026
+Son güncelleme: 11 Ağustos 2026
 
 ## Kısa sonuç
 
 Flapse'ın kod, Release derleme, güvenlik, gizlilik manifesti ve otomatik test tarafındaki hazırlıkları tamamlanmıştır. Uygulama henüz App Store'a gönderilmiş değildir. Yayın öncesinde Apple Developer Portal ve App Store Connect üzerinde yalnızca hesap sahibi tarafından tamamlanabilecek işlemler bulunmaktadır.
 
-Kod tarafındaki mevcut durum: **Apple Developer işlemleri tamamlandıktan sonra yayına hazır.**
+Kod tarafındaki mevcut durum: **1.0 (1) yayın adayı hazır; Apple hesabındaki manuel adımlar tamamlandıktan sonra yüklenebilir.**
+
+## 11 Ağustos 2026 yayın adayı doğrulaması
+
+- Release build ve static analyzer başarılı.
+- 198 uygun birim testi geçti; CloudKit entitlement gerektiren testler simülatör paketinden ayrı tutuldu.
+- 13 inç iPad üzerinde tam UI yolculuğu testi geçti.
+- Arşiv: `build/Flapse-1.0-1-20260811.xcarchive`
+- App Store IPA: `build/export-20260811/Flapse.ipa` (9,1 MB)
+- IPA, Apple Distribution sertifikasıyla imzalı; `get-task-allow = false`, Push ve CloudKit ortamı Production.
+- iPhone 6.9 inç ve iPad 13 inç Türkçe ekran görüntüsü setleri `AppStoreScreenshots/` altında hazır.
+- Uygulama 20 arayüz dili içeriyor.
 
 ## Tamamlanan teknik çalışmalar
 
@@ -68,7 +79,9 @@ Production veritabanındaki kullanıcı verilerini test amacıyla topluca silme.
 3. Birincil kategori olarak `Photo & Video` seç.
 4. Uygulama adı, alt başlık, açıklama, anahtar kelimeler, destek URL'si ve gizlilik politikası URL'sini gir.
 5. Güncel metinler için `docs/AppStoreListing.md` dosyasını kullan.
-6. iPhone ve desteklenen iPad ekran boyutları için güncel ekran görüntülerini yükle.
+6. `AppStoreScreenshots/6.9-inch/tr` içindeki iPhone ve `AppStoreScreenshots/13-inch/tr`
+   içindeki iPad ekran görüntülerini yükle. Uygulama iPad'i desteklediği için 13 inç
+   iPad alanına en az bir ekran görüntüsü gerekir.
 7. Yaş derecelendirme sorularını uygulamanın gerçek özelliklerine göre yanıtla.
 8. Export Compliance bölümünde uygulamanın yalnızca Apple'ın standart şifreleme altyapısını kullanıp kullanmadığını doğru şekilde beyan et.
 

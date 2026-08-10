@@ -7,11 +7,11 @@ depoda hazır. Kalan adımların tamamı Apple hesabı gerektiren, insan eliyle 
 
 ---
 
-## 1. Apple Developer Program üyeliği — ✅ TAMAMLANDI (2026-08-05 doğrulandı)
+## 1. Apple Developer Program üyeliği — ✅ TAMAMLANDI (2026-08-11 doğrulandı)
 
 Üyelik aktif ve doğrulandı: `xcodebuild archive -allowProvisioningUpdates` ile gerçek bir
 App Store arşivi alındı; Xcode her iki hedef için (`rozcan.Flapse`, `rozcan.Flapse.Widgets`)
-profilleri otomatik oluşturdu. 2026-08-05'te App Store Connect yöntemiyle 8.8 MB IPA
+profilleri otomatik oluşturdu. 2026-08-11'de App Store Connect yöntemiyle 9.1 MB IPA
 dışa aktarıldı; Apple Distribution imzası, `aps-environment = production`, Production
 CloudKit, Sign in with Apple ve App Groups entitlement'ları paketin içinden doğrulandı
 (Team `5ZYCHZ39QV`).
@@ -36,7 +36,7 @@ App Store Connect'e yazılacak adresler bunlardır.
 Not: Sayfa içerikleri `docs/privacy/index.html` ve `docs/support/index.html` dosyalarından
 sunulur; düzenledikten sonra main'e push yeterlidir (Pages 1-2 dakikada yeniden yayınlar).
 
-## 3. Sertifikalar ve imzalama — ✅ TAMAMLANDI (2026-08-05 doğrulandı)
+## 3. Sertifikalar ve imzalama — ✅ TAMAMLANDI (2026-08-11 doğrulandı)
 
 Otomatik imzalama çalışıyor; arşiv başarıyla alındı (bkz. 1. adım). Yapılacak tek şey:
 gerçek iPhone'da **Release** yapılandırmasıyla bir kez çalıştırıp son bir duman testi yapmak
@@ -88,9 +88,11 @@ için: App Store Connect → Users and Access → **Sandbox Testers**'dan test h
 
 ## 6. Sürüm sayfasını doldur
 
-1. **Ekran görüntüleri**: 6.9" (iPhone 17 Pro Max) zorunlu. Önerilen kareler: Ana sayfa,
-   kamera (ghost overlay), proje detayı, export stüdyosu, Kaydedilenler, paywall.
-   Simülatörde `Cmd+S` ile alınır.
+1. **Ekran görüntüleri**: iPhone için 6.9" seti hazırdır. Uygulama iPad'i de
+   desteklediği için 13" iPad alanına da en az bir ekran görüntüsü yüklenmelidir;
+   her iki Türkçe set `AppStoreScreenshots/` altındadır. Apple aynı cihaz ailesinde
+   6.5" ve 6.9" setlerinden yalnızca birini zorunlu tutar. Kamera/ghost overlay karesi
+   pazarlama açısından önerilir fakat zorunlu değildir.
 2. **Description / Keywords / Promotional Text**: Türkçe + istenen diğer diller.
    (`docs/AppStoreListing.md` taslak metinleri içerir.)
 3. **Support URL**: `https://ozcanr17.github.io/Flapse/support`

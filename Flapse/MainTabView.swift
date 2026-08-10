@@ -217,6 +217,10 @@ struct MainTabView: View {
     @ViewBuilder
     private var tabBar: some View {
         tabBarContent
+            // Sekmeler uygulamanın sabit uzamsal navigasyonudur. Arapça metinler
+            // RTL akmaya devam ederken barın görsel sırası, sürükleme koordinatları
+            // ve Liquid Glass vurgusu ters dönmemeli.
+            .environment(\.layoutDirection, .leftToRight)
             .padding(.horizontal, 24)
             .padding(.top, 4)
             .offset(y: 12)

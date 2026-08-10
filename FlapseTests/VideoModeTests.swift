@@ -24,4 +24,9 @@ final class VideoModeTests: XCTestCase {
         let entry = Entry(imageData: Data([0x01]))
         XCTAssertFalse(entry.isVideo)
     }
+
+    func test_mekanDekorasyonKategorisiKaliciRawDegereSahip() {
+        XCTAssertEqual(ProjectCategory.interiorDecor.rawValue, "interior_decor")
+        XCTAssertFalse(ProjectCategory.interiorDecor.isVideoMode)
+    }
 }

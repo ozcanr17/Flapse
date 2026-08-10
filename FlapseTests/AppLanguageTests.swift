@@ -17,6 +17,12 @@ final class AppLanguageTests: XCTestCase {
 
         LanguageOverrideBundle.apply(.japanese)
         XCTAssertEqual(String(localized: "Ayarlar", bundle: .appLanguage), "設定")
+
+        LanguageOverrideBundle.apply(.thai)
+        XCTAssertEqual(String(localized: "Ayarlar", bundle: .appLanguage), "การตั้งค่า")
+
+        LanguageOverrideBundle.apply(.traditionalChinese)
+        XCTAssertEqual(String(localized: "Ayarlar", bundle: .appLanguage), "設定")
     }
 
     func test_sistemDili_anaPaketeDoner() {

@@ -718,6 +718,9 @@ struct TimelapseExportSheet: View {
         switch project.category {
         case .fitness, .outfit: return .body
         case .pregnancy:        return .belly
+        case .pet:              return .animal
+        case .plant:            return .foreground
+        case .interiorDecor:    return .scene
         default:                return .auto
         }
     }

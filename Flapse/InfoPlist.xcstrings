@@ -92,6 +92,54 @@
             "state" : "translated",
             "value" : "Flapse 项目归档"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flapse 項目檔案"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archivio Progetto Flapse"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flapse Projectarchief"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "แฟลปส์ โปรเจกต์ อาร์ไคฟ์"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arsip Proyek Flapse"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kho lưu trữ Dự án Flapse"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Flapse projektarkiv"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Archiwum Projektu Flapse"
+          }
         }
       }
     },
@@ -168,6 +216,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "需要访问相机来拍摄你的进度照片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要相機存取權以拍攝您的進度照片。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È necessario l'accesso alla fotocamera per scattare le foto del progresso."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Camera-toegang is nodig om je voortgangsfoto's te maken."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ต้องการเข้าถึงกล้องเพื่อถ่ายภาพความคืบหน้าของคุณ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akses kamera diperlukan untuk mengambil foto kemajuan Anda."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập camera để chụp ảnh tiến trình của bạn."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kameratillgång behövs för att ta dina framstegsfoton."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dostęp do aparatu jest potrzebny, aby robić zdjęcia postępów."
           }
         }
       }
@@ -246,6 +342,54 @@
             "state" : "translated",
             "value" : "面容 ID 用于打开隐藏的项目和延时摄影。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID 用於開啟隱藏的項目和縮時影片。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID è utilizzato per aprire progetti nascosti e timelapse."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID wordt gebruikt om verborgen projecten en timelapses te openen."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้ Face ID เพื่อเปิดโปรเจกต์ที่ซ่อนอยู่และไทม์แลปส์"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID digunakan untuk membuka proyek dan timelapse yang tersembunyi."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID được sử dụng để mở các dự án và timelapse ẩn."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID används för att öppna dolda projekt och timelapses."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Face ID jest używane do otwierania ukrytych projektów i timelapsów."
+          }
         }
       }
     },
@@ -322,6 +466,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你的位置用于为照片标注拍摄地点。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "您的位置用於標記捕捉到的照片地點。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua posizione è utilizzata per etichettare le tue catture con il luogo in cui sono state scattate."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je locatie wordt gebruikt om je opnames te taggen met de plaats waar ze zijn gemaakt."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ใช้ตำแหน่งของคุณเพื่อปักหมุดภาพที่คุณถ่าย"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lokasi Anda digunakan untuk menandai tangkapan dengan tempat di mana mereka diambil."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vị trí của bạn được sử dụng để gắn thẻ các ảnh chụp với nơi chúng được chụp."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Din plats används för att märka dina bilder med platsen de togs på."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twoja lokalizacja jest używana do oznaczania Twoich zdjęć miejscem ich wykonania."
           }
         }
       }
@@ -400,6 +592,54 @@
             "state" : "translated",
             "value" : "拍摄视频时需要访问麦克风以录制声音。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要麥克風存取權以在錄製影片時錄音。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È necessario l'accesso al microfono per registrare il suono durante la ripresa dei video."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Microfoon-toegang is nodig om geluid op te nemen tijdens het filmen van video."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ต้องการเข้าถึงไมโครโฟนเพื่อบันทึกเสียงขณะถ่ายวิดีโอ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akses mikrofon diperlukan untuk merekam suara saat merekam video."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập micro để ghi âm khi quay video."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mikrofontillgång behövs för att spela in ljud medan du filmar video."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dostęp do mikrofonu jest potrzebny, aby nagrywać dźwięk podczas filmowania wideo."
+          }
         }
       }
     },
@@ -477,6 +717,54 @@
             "state" : "translated",
             "value" : "需要访问权限以将照片和延时视频存储到你的照片图库。"
           }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "需要存取權以將您的影格和縮時影片保存到相簿中。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È necessario l'accesso per salvare i tuoi fotogrammi e video timelapse nella tua libreria fotografica."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toegang is nodig om je frames en timelapse-video's op te slaan in je fotobibliotheek."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ต้องการเข้าถึงเพื่อบันทึกเฟรมและวิดีโอไทม์แลปส์ของคุณไปยังคลังภาพ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akses diperlukan untuk menyimpan frame dan video timelapse Anda ke perpustakaan foto Anda."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập để lưu các khung hình và video timelapse vào thư viện ảnh của bạn."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillgång behövs för att spara dina ramar och timelapse-videor till ditt fotobibliotek."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dostęp jest potrzebny, aby zapisywać klatki i filmy timelapse w bibliotece zdjęć."
+          }
         }
       }
     },
@@ -553,6 +841,54 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "导入照片时，需要访问权限以读取拍摄日期和位置信息。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "導入照片時，需要存取權以讀取拍攝日期和地點。"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "È necessario l'accesso per leggere le date e le posizioni di cattura durante l'importazione delle foto."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toegang is nodig om opnamegegevens en locaties te lezen bij het importeren van foto's."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ต้องการเข้าถึงเพื่ออ่านวันที่และสถานที่ถ่ายภาพเมื่อทำการนำเข้ารูปภาพ"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Akses diperlukan untuk membaca tanggal dan lokasi tangkapan saat mengimpor foto."
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cần quyền truy cập để đọc ngày và vị trí chụp khi nhập ảnh."
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tillgång behövs för att läsa in fångstdatum och platser när du importerar foton."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dostęp jest potrzebny do odczytywania dat i miejsc wykonania zdjęć podczas importowania zdjęć."
           }
         }
       }

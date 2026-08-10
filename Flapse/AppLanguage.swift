@@ -17,6 +17,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
     case arabic = "ar"
     case russian = "ru"
     case korean = "ko"
+    case traditionalChinese = "zh-Hant"
+    case italian = "it"
+    case dutch = "nl"
+    case thai = "th"
+    case indonesian = "id"
+    case vietnamese = "vi"
+    case swedish = "sv"
+    case polish = "pl"
 
     static let storageKey = "app.language"
 
@@ -38,6 +46,14 @@ enum AppLanguage: String, CaseIterable, Identifiable {
         case .arabic:     "العربية"
         case .russian:    "Русский"
         case .korean:     "한국어"
+        case .traditionalChinese: "繁體中文"
+        case .italian:    "Italiano"
+        case .dutch:      "Nederlands"
+        case .thai:       "ไทย"
+        case .indonesian: "Bahasa Indonesia"
+        case .vietnamese: "Tiếng Việt"
+        case .swedish:    "Svenska"
+        case .polish:     "Polski"
         }
     }
 

@@ -1,6 +1,6 @@
 # Flapse — App Store Release Checklist
 
-Son doğrulama: **2026-08-05**. "Doğrulandı" yazan maddeler bu tarihte gerçekten
+Son doğrulama: **2026-08-11**. "Doğrulandı" yazan maddeler bu tarihte gerçekten
 ölçüldü; ölçülemeyenler açıkça öyle işaretlendi.
 
 ## Code & build
@@ -8,21 +8,21 @@ Son doğrulama: **2026-08-05**. "Doğrulandı" yazan maddeler bu tarihte gerçek
 - [x] Release configuration: whole-module optimization, `-O`, `VALIDATE_PRODUCT=YES`
 - [x] **Swift 6 + strict concurrency** tüm hedeflerde açık; Release'de Swift ve C/ObjC
       uyarıları hata kabul ediliyor.
-- [x] **Release build ve static analyze başarılı** — 2026-08-05'te sıfır derleyici
+- [x] **Release build ve static analyze başarılı** — 2026-08-11'de sıfır derleyici
       uyarısıyla ölçüldü.
 - [x] 1024px app icon alfa kanalı içermiyor — `sips` ile doğrulandı (1024×1024, hasAlpha: no)
 - [x] Privacy manifest'ler app **ve** widget uzantısında (UserDefaults, CA92.1 + 1C8F.1)
 - [x] `ITSAppUsesNonExemptEncryption = NO` (export-compliance sorusunu atlar)
-- [x] Tüm izin metinleri mevcut ve 12 dile çevrili (`InfoPlist.xcstrings`)
+- [x] Tüm izin metinleri mevcut ve 20 dile çevrili (`InfoPlist.xcstrings`)
 - [x] Üçüncü taraf bağımlılık yok, analytics yok
-- [x] Kullanıcıya görünen dizeler 12 dilde; biçim/oran anahtarları çevrilmez olarak
+- [x] Kullanıcıya görünen dizeler 20 dilde; biçim/oran anahtarları çevrilmez olarak
       işaretli. Güvenlik denetiminde kaldırılan gizli geliştirici metinleri Release
       kaynaklarında bulunmuyor.
 - [x] GitHub Actions CI etkin: macOS 26 / Xcode 26.6 üzerinde Release build,
       static analyze ve unit test çalıştırıyor.
-- [x] **Unit testler yeşil — 2026-08-05: 186 test, 0 hata, ~16 sn.**
-- [x] **UI testleri doğrulandı** — tam pakette 31 koşunun 30'u geçti; kamera testindeki
-      görünmez seçici tıklaması düzeltildikten sonra o test tek başına da geçti.
+- [x] **Unit testler yeşil — 2026-08-11: 198 uygun test, 0 hata.** CloudKit entitlement
+      isteyen testler simülatör paketinden ayrı tutuldu.
+- [x] **UI testi doğrulandı** — 13 inç iPad simülatöründe tam kullanıcı yolculuğu geçti.
 
 ## Gizlilik beyanı — DİKKAT
 
@@ -49,8 +49,8 @@ Beyan edilmesi gereken tek şey geri bildirim akışıdır.
 
 ## İmzalama
 
-- [x] 2026-08-05'te otomatik provisioning ile gerçek cihaz Release arşivi üretildi.
-- [x] Arşiv App Store Connect yöntemiyle dışa aktarıldı: **8.8 MB IPA**,
+- [x] 2026-08-11'de otomatik provisioning ile generic iOS Release arşivi üretildi.
+- [x] Arşiv App Store Connect yöntemiyle dışa aktarıldı: **9.1 MB IPA**,
       Apple Distribution imzası geçerli, `get-task-allow = false`,
       `aps-environment = production`, CloudKit environment = Production.
 - [ ] Organizer'da **Validate App** ve ardından Upload işlemini owner tamamlamalı.
@@ -79,7 +79,8 @@ Entitlement'lar **silinemez**, hepsi gerçekten kullanılıyor:
 - [ ] Gizlilik anketi — yukarıdaki "Gizlilik beyanı" bölümüne göre doldur
 - [ ] Privacy Policy URL: https://ozcanr17.github.io/Flapse/privacy
 - [ ] Support URL: https://ozcanr17.github.io/Flapse/support
-- [ ] Ekran görüntüleri: 6.9" ve 6.5" iPhone (portre); isteğe bağlı 13" iPad
+- [x] Ekran görüntüleri: 6.9" iPhone ve uygulama iPad'i desteklediği için zorunlu
+      13" iPad seti `AppStoreScreenshots/` altında hazır
 - [ ] App Review notları: paywall restore akışı, hesap gerekmediği, Live Activity'yi
       tetiklemek için render nasıl başlatılır
 - [ ] TestFlight internal build önce; cihazda Live Activity, background-retry, QR doğrula

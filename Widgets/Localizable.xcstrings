@@ -48,6 +48,18 @@
             "value" : "गतिविधि"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivitas"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Attività"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -58,6 +70,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "활동"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activiteit"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktywność"
           }
         },
         "pt" : {
@@ -72,10 +96,34 @@
             "value" : "Активность"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aktivitet"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กิจกรรม"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hoạt động"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "活动"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "活動"
           }
         }
       }
@@ -118,6 +166,18 @@
             "value" : "आज %lld फ़ोटो"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld untuk menangkap hari ini"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld da catturare oggi"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -128,6 +188,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오늘 촬영 %lld건"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld om vandaag vast te leggen"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld do uchwycenia dzisiaj"
           }
         },
         "pt" : {
@@ -142,10 +214,34 @@
             "value" : "Сегодня %lld съёмок"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld att fånga idag"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ที่จะบันทึกวันนี้"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld để ghi lại hôm nay"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日 %lld 个拍摄"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld 今天要捕捉的內容"
           }
         }
       }
@@ -188,6 +284,18 @@
             "value" : "आज की फ़ोटो ले ली गई"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ditangkap hari ini"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Catturato oggi"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -198,6 +306,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오늘 촬영 완료"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vandaag vastgelegd"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uchwycone dzisiaj"
           }
         },
         "pt" : {
@@ -212,10 +332,34 @@
             "value" : "Сегодня снято"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fångat idag"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "บันทึกวันนี้"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đã ghi lại hôm nay"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "今日已拍摄"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天已捕捉"
           }
         }
       }
@@ -258,6 +402,18 @@
             "value" : "आज के लिए हो गया"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Semua siap untuk hari ini"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutto pronto per oggi"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -268,6 +424,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "오늘은 끝"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Alles klaar voor vandaag"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wszystko gotowe na dziś"
           }
         },
         "pt" : {
@@ -282,10 +450,34 @@
             "value" : "На сегодня всё"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allt klart för idag"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "พร้อมทั้งหมดสำหรับวันนี้"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mọi thứ đã sẵn sàng cho hôm nay"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "今天已完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今天全部完成"
           }
         }
       }
@@ -331,6 +523,18 @@
             "value" : "आपकी दिन की स्ट्रीक और आज की फ़ोटो स्थिति।"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Status keberlanjutan harian dan tangkapan hari ini."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La tua serie di giorni e lo stato di cattura di oggi."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -341,6 +545,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "연속 기록과 오늘의 촬영 상태."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Je dagstreak en de vastleggingsstatus van vandaag."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Twoja seria dni i status dzisiejszego uchwycenia."
           }
         },
         "pt" : {
@@ -355,10 +571,34 @@
             "value" : "Ваша серия дней и статус съёмки на сегодня."
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Din dagliga serie och dagens fångststatus."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "สถิติการทำต่อเนื่องรายวันของคุณและสถานะการบันทึกวันนี้"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chuỗi ngày của bạn và trạng thái ghi lại hôm nay."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "你的连续天数和今日拍摄状态。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你的連續天數及今天的捕捉狀態。"
           }
         }
       }
@@ -401,6 +641,18 @@
             "value" : "दिन की स्ट्रीक"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "berkelanjutan harian"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "serie di giorni"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -411,6 +663,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "연속 기록"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "dagstreak"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "seria dni"
           }
         },
         "pt" : {
@@ -425,10 +689,34 @@
             "value" : "серия дней"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "daglig serie"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "สถิติวันต่อเนื่อง"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "chuỗi ngày"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "连续天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連續天數"
           }
         }
       }
@@ -472,6 +760,18 @@
             "value" : "दिन की स्ट्रीक"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "BERKELANJUTAN HARIAN"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SERIE DI GIORNI"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -482,6 +782,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "연속 기록"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DAGSTREAK"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "SERIA DNI"
           }
         },
         "pt" : {
@@ -496,10 +808,93 @@
             "value" : "СЕРИЯ ДНЕЙ"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DAGLIG SERIE"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "สถิติวันต่อเนื่อง"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "CHUỖI NGÀY"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "连续天数"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "連續天數"
+          }
+        }
+      }
+    },
+    "Mekân & Dekorasyon" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Space & Decor"
+          }
+        },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruang & Dekorasi"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spazio & Decor"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ruimte & Decor"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Przestrzeń i dekoracja"
+          }
+        },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Utrymme & Dekor"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "พื้นที่ & การตกแต่ง"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Không gian & Trang trí"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "空間與裝飾"
           }
         }
       }
@@ -542,6 +937,18 @@
             "value" : "प्रोजेक्ट"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Proyek"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progetti"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -552,6 +959,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "프로젝트"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projecten"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projekty"
           }
         },
         "pt" : {
@@ -566,10 +985,34 @@
             "value" : "Проекты"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Projekt"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "โครงการ"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dự án"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "项目"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "專案"
           }
         }
       }
@@ -612,6 +1055,18 @@
             "value" : "आपके प्रोजेक्ट की नवीनतम फ़ोटो।"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto terbaru dari proyek Anda."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le ultime foto dei tuoi progetti."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -622,6 +1077,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "프로젝트의 최신 사진."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De nieuwste foto’s van uw projecten."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Najnowsze zdjęcia Twoich projektów."
           }
         },
         "pt" : {
@@ -636,10 +1103,34 @@
             "value" : "Последние кадры ваших проектов."
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "De senaste fotona från dina projekt."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ภาพล่าสุดของโครงการของคุณ"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Những bức ảnh mới nhất về các dự án của bạn."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "你项目的最新照片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你專案的最新照片。"
           }
         }
       }
@@ -683,6 +1174,18 @@
             "value" : "पिछले 5 हफ़्तों की फ़ोटो।"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto dari 5 minggu terakhir."
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto delle ultime 5 settimane."
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -693,6 +1196,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "지난 5주간의 사진."
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foto’s van de laatste 5 weken."
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zdjęcia z ostatnich 5 tygodni."
           }
         },
         "pt" : {
@@ -707,10 +1222,34 @@
             "value" : "Кадры за последние 5 недель."
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foton från de senaste 5 veckorna."
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ภาพถ่ายจาก 5 สัปดาห์ที่ผ่านมา"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ảnh từ 5 tuần gần đây."
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "最近 5 周的照片。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "過去五週的照片。"
           }
         }
       }
@@ -753,6 +1292,18 @@
             "value" : "टाइमलैप्स तैयार"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse siap"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse pronto"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -763,6 +1314,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "타임랩스 완료"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse klaar"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse gotowy"
           }
         },
         "pt" : {
@@ -777,10 +1340,34 @@
             "value" : "Таймлапс готов"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse klar"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "พร้อมสำหรับการทำไทม์แลปส์"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse đã sẵn sàng"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "延时视频已完成"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "縮時攝影準備就緒"
           }
         }
       }
@@ -823,6 +1410,18 @@
             "value" : "टाइमलैप्स बन रहा है"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membuat timelapse"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creazione timelapse"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -833,6 +1432,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "타임랩스 생성 중"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse aan het maken"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tworzenie timelapse"
           }
         },
         "pt" : {
@@ -847,10 +1458,34 @@
             "value" : "Создаётся таймлапс"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skapar timelapse"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กำลังสร้างไทม์แลปส์"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang tạo timelapse"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在生成延时视频"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在建立縮時攝影"
           }
         }
       }
@@ -893,6 +1528,18 @@
             "value" : "टाइमलैप्स बन रहा है…"
           }
         },
+        "id" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membuat timelapse…"
+          }
+        },
+        "it" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creazione timelapse…"
+          }
+        },
         "ja" : {
           "stringUnit" : {
             "state" : "translated",
@@ -903,6 +1550,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "타임랩스 생성 중…"
+          }
+        },
+        "nl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Timelapse wordt gemaakt…"
+          }
+        },
+        "pl" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tworzenie timelapse…"
           }
         },
         "pt" : {
@@ -917,10 +1576,34 @@
             "value" : "Создаётся таймлапс…"
           }
         },
+        "sv" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skapar timelapse…"
+          }
+        },
+        "th" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "กำลังสร้างไทม์แลปส์…"
+          }
+        },
+        "vi" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Đang tạo timelapse…"
+          }
+        },
         "zh-Hans" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "正在生成延时视频…"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "正在建立縮時攝影…"
           }
         }
       }

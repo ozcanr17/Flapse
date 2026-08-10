@@ -184,6 +184,7 @@ enum Theme {
         .pregnancy:    Color(light: "9A5BA6", dark: "C99BD6"),
         .baby:         Color(light: "3E8E9E", dark: "7FC3D1"),
         .outfit:       Color(light: "B0568A", dark: "D98BB8"),
+        .interiorDecor: Color(light: "82715B", dark: "C7B69E"),
         .coupleMode:   Color(light: "C2566B", dark: "F191A6"),
         .video:        Color(light: "5B6B8A", dark: "9AAAD1"),
         .other:        Color(light: "6E675E", dark: "B3ABA0")
@@ -205,6 +206,7 @@ enum Theme {
         case .pregnancy:    "figure.stand"
         case .baby:         "stroller.fill"
         case .outfit:       "tshirt.fill"
+        case .interiorDecor: "sofa.fill"
         case .coupleMode:   "person.2.fill"
         case .video:        "video.fill"
         case .other:        "sparkles"

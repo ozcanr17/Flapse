@@ -1,6 +1,6 @@
 # Flapse — App Store Connect Listing Kit
 
-Copy-paste-ready metadata. Character limits noted per field. Fill both localizations at minimum (Turkish = primary, English = worldwide); the app itself ships 12 languages, so add more listing localizations over time using the same template.
+Copy-paste-ready metadata. Character limits noted per field. Fill both localizations at minimum (Turkish = primary, English = worldwide); the app itself ships 20 languages, so add more listing localizations over time using the same template.
 
 ---
 
@@ -53,7 +53,7 @@ TOGETHER & EVERYWHERE
 • Capture Together: send a link, and a friend joins your project — both of you add frames to one shared story
 • iCloud backup: your projects return on any device you sign into
 • Before & After share cards and on-device AI captions for posting
-• 12 languages, switchable inside the app
+• 20 languages, switchable inside the app
 
 PRIVACY FIRST
 Your photos stay on your device unless you enable iCloud backup. No ads, no tracking, no third-party analytics. AI runs on-device.
@@ -97,7 +97,7 @@ BİRLİKTE VE HER YERDE
 • Birlikte Çekim: bir bağlantı gönder, arkadaşın projene katılsın — aynı hikayeye ikiniz de kare ekleyin
 • iCloud yedekleme: projelerine giriş yaptığın her cihazda kavuş
 • Önce & Sonra kartları ve cihaz üstü AI paylaşım metinleri
-• Uygulama içinden değiştirilebilen 12 dil
+• Uygulama içinden değiştirilebilen 20 dil
 
 ÖNCE GİZLİLİK
 Fotoğrafların, iCloud yedeklemeyi açmadıkça cihazında kalır. Reklam yok, takip yok, üçüncü taraf analitik yok. Yapay zeka cihazda çalışır.
@@ -126,7 +126,7 @@ Sınırsız proje ve kare, kare kare hizalama, akışkan AI geçişler, müzik v
 
 Localized IAP display names: Pro (Aylık/Monthly), Pro (Yıllık/Yearly), Pro (Ömür Boyu/Lifetime).
 
-## Screenshot Plan (6.9" required; reuse for 6.5")
+## Screenshot Plan (6.9" iPhone + 13" iPad)
 
 1. Home with photo cards + fire streak border — “One photo a day”
 2. Camera with ghost overlay — “Perfectly aligned, every time”
@@ -163,5 +163,6 @@ Flapse is a daily-photo timelapse app. No account is required: Sign in with Appl
 - [ ] Small Business Program (başvuruldu, onay bekliyor — yayını BLOKLAMAZ; onaylanınca komisyon %15'e düşer)
 - [ ] 3 IAPs created, priced (TR overrides), trial offers attached, review screenshots uploaded
 - [ ] Terms & Privacy URLs live (update the URLs above to your real pages before submitting)
-- [ ] Screenshots captured (6.9"), TR + EN metadata entered
+- [x] Turkish screenshots captured (6.9" iPhone and 13" iPad)
+- [ ] TR + EN metadata entered in App Store Connect
 - [ ] TestFlight pass on a real device: capture, Akışkan export, imported-song beat sync, per-photo alignment, Capture Together across two devices, widgets
