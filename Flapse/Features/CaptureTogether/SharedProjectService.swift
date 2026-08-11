@@ -14,8 +14,12 @@ final class SharedProjectService {
     /// süreçte CKContainer oluşturmak hata döndürmek yerine SIGTRAP üretebildiği
     /// için CloudKit'e hiç dokunmuyoruz. Normal simülatör ve cihaz davranışı değişmez.
     static var isEnabledForCurrentProcess: Bool {
+        #if DEBUG
         !ProcessInfo.processInfo.arguments.contains("--uitests")
             && ProcessInfo.processInfo.environment["FLAPSE_UI_TESTS"] != "1"
+        #else
+        true
+        #endif
     }
 
     let container = CKContainer(identifier: SharedProjectService.containerIdentifier)

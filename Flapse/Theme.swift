@@ -10,6 +10,14 @@ struct ThemePalette: Equatable {
     let inkMuted: Color
     var isGlass: Bool = false
     var glow: Color? = nil
+
+    /// Vurgu zemini üzerinde daha yüksek kontrast veren sistem metin rengini seçer.
+    var accentForeground: Color {
+        let accentLuminance = UIColor(accent)
+            .resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+            .relativeLuminance
+        return accentLuminance > 0.18 ? .black : .white
+    }
 }
 
 enum AppTheme: String, CaseIterable, Identifiable {
@@ -106,7 +114,8 @@ enum AppTheme: String, CaseIterable, Identifiable {
                 canvas: Color(hex: "EAF6F7"),
                 surface: Color(hex: "FBFFFF"),
                 ink: Color(hex: "14343A"),
-                inkMuted: Color(hex: "627D80")
+                // Açık zemin üzerinde normal boyutlu metin için WCAG AA >= 4.5:1.
+                inkMuted: Color(hex: "587174")
             )
         }
     }
@@ -191,7 +200,7 @@ enum Theme {
     ]
 
     static func accent(for category: ProjectCategory) -> Color {
-        categoryAccents[category] ?? categoryAccents[.other]!
+        categoryAccents[category] ?? Color(light: "6E675E", dark: "B3ABA0")
     }
 
     static func icon(for category: ProjectCategory) -> String {
@@ -214,16 +223,18 @@ enum Theme {
     }
 
     static func headline(_ size: CGFloat = 20) -> Font {
-        .system(size: size, weight: .semibold, design: .default)
+        if size >= 24 { return .title2.weight(.bold) }
+        if size >= 20 { return .title3.weight(.semibold) }
+        return .headline.weight(.semibold)
     }
     static func body(_ size: CGFloat = 16) -> Font {
-        .system(size: size, weight: .regular, design: .default)
+        size <= 15 ? .callout : .body
     }
     static func caption(_ size: CGFloat = 13) -> Font {
-        .system(size: size, weight: .medium, design: .default)
+        size >= 14 ? .footnote.weight(.medium) : .caption.weight(.medium)
     }
     static func stamp(_ size: CGFloat = 15, weight: Font.Weight = .semibold) -> Font {
-        .system(size: size, weight: weight, design: .monospaced)
+        (size >= 17 ? Font.body : Font.callout).monospaced().weight(weight)
     }
 
     static let cornerRadius: CGFloat = 20
@@ -470,8 +481,10 @@ struct PrimaryButtonStyle: ButtonStyle {
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(Theme.headline(17))
-            .foregroundStyle(.white)
+            // Metin boyutu kullanıcının Dynamic Type tercihine uyar; sabit 17 pt
+            // erişilebilirlik denetiminde büyütülemeyen kontrol olarak işaretleniyordu.
+            .font(.headline.weight(.semibold))
+            .foregroundStyle(theme.accentForeground)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 15)
             .liquidGlassStyle(

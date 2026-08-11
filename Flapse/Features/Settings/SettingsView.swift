@@ -49,7 +49,7 @@ struct SettingsView: View {
                 if store.isPro {
                     Label {
                         Text("Flapse Pro aktif")
-                            .font(Theme.headline(15))
+                            .font(.headline)
                             .foregroundStyle(theme.ink)
                     } icon: {
                         Image(systemName: "crown.fill")
@@ -62,12 +62,16 @@ struct SettingsView: View {
                         Label {
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Flapse Pro'ya Geç")
-                                    .font(Theme.headline(15))
+                                    .font(.headline)
                                     .foregroundStyle(theme.ink)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .padding(.horizontal, 1)
                                 Text("Sınırsız proje, 4K filigransız export")
-                                    .font(Theme.caption(12))
+                                    .font(.caption)
                                     .foregroundStyle(theme.inkMuted)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
+                            .accessibilityElement(children: .combine)
                         } icon: {
                             Image(systemName: "crown.fill")
                                 .foregroundStyle(theme.accent)
@@ -77,7 +81,7 @@ struct SettingsView: View {
                 Button("Satın alımları geri yükle") {
                     Task { await store.restore() }
                 }
-                .font(Theme.body(15))
+                .font(.callout)
                 .foregroundStyle(theme.secondary)
             }
 
@@ -88,10 +92,10 @@ struct SettingsView: View {
                     Label {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Bildir")
-                                .font(Theme.headline(15))
+                                .font(.headline)
                                 .foregroundStyle(theme.ink)
                             Text("Hata bildir, özellik veya iyileştirme öner")
-                                .font(Theme.caption(12))
+                                .font(.caption)
                                 .foregroundStyle(theme.inkMuted)
                         }
                     } icon: {
@@ -131,7 +135,7 @@ struct SettingsView: View {
                         Text(iCloudActive
                              ? "iCloud yedekleme etkin."
                              : "iCloud isteği kaydedildi; şu an yerel depoya düşülüyor (ücretli Apple hesabı gerekir).")
-                            .font(Theme.caption(12))
+                            .font(.caption)
                             .foregroundStyle(theme.inkMuted)
                     } icon: {
                         Image(systemName: iCloudActive ? "checkmark.icloud.fill" : "icloud.slash")
@@ -141,7 +145,7 @@ struct SettingsView: View {
                 if cloudRestartRequired {
                     Label {
                         Text("iCloud yedekleme açıldı. Projelerinin eşitlenmesi için uygulamayı kapatıp yeniden aç.")
-                            .font(Theme.caption(12))
+                            .font(.caption)
                             .foregroundStyle(theme.inkMuted)
                     } icon: {
                         Image(systemName: "arrow.clockwise.icloud")
@@ -153,8 +157,12 @@ struct SettingsView: View {
             } footer: {
                 if store.isPro {
                     Text("Çift modu (birlikte çekim) her projede sağ üstteki davet düğmesiyle açılır. iCloud değişikliği uygulama yeniden başlatılınca geçerli olur.")
+                        .font(.footnote)
+                        .fixedSize(horizontal: false, vertical: true)
                 } else {
                     Text("Bu özellikler Flapse Pro ile açılır.")
+                        .font(.footnote)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
@@ -213,7 +221,7 @@ struct SettingsView: View {
                     Picker("Saat", selection: $reminderHour) {
                         ForEach(0..<24, id: \.self) { hour in
                             Text(String(format: "%02d:00", hour))
-                                .font(Theme.body(15)).monospacedDigit()
+                                .font(.callout).monospacedDigit()
                                 .tag(hour)
                         }
                     }
@@ -222,10 +230,10 @@ struct SettingsView: View {
 
             Section("İstatistik") {
                 LabeledContent("Proje") {
-                    Text("\(projectCount)").font(Theme.body(15)).monospacedDigit()
+                    Text("\(projectCount)").font(.callout).monospacedDigit()
                 }
                 LabeledContent("Toplam çekim") {
-                    Text("\(entryCount)").font(Theme.body(15)).monospacedDigit()
+                    Text("\(entryCount)").font(.callout).monospacedDigit()
                 }
             }
 
@@ -287,10 +295,10 @@ struct SettingsView: View {
                 VStack(spacing: 10) {
                     LogoMark(size: 56)
                     Text("Flapse")
-                        .font(Theme.headline(17))
+                        .font(.headline)
                         .foregroundStyle(theme.ink)
                     Text("Sürüm \(appVersion)")
-                        .font(Theme.caption(12))
+                        .font(.caption)
                         .foregroundStyle(theme.inkMuted)
                 }
                 .frame(maxWidth: .infinity)
@@ -420,10 +428,10 @@ struct SettingsView: View {
                     )
                     VStack(alignment: .leading, spacing: 2) {
                         Text("Özel Palet")
-                            .font(Theme.headline(15))
+                            .font(.headline)
                             .foregroundStyle(theme.ink)
                         Text("Kendi renklerini oluştur")
-                            .font(Theme.caption(12))
+                            .font(.caption)
                             .foregroundStyle(theme.inkMuted)
                     }
                     Spacer()
@@ -438,9 +446,9 @@ struct SettingsView: View {
             Divider()
 
             ColorPicker("Birincil renk · Arka plan", selection: primaryColorBinding, supportsOpacity: false)
-                .font(Theme.body(15))
+                .font(.callout)
             ColorPicker("İkincil renk · Butonlar", selection: secondaryColorBinding, supportsOpacity: false)
-                .font(Theme.body(15))
+                .font(.callout)
         }
         .padding(.vertical, 4)
     }
@@ -542,12 +550,14 @@ struct SettingsView: View {
             Label {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(auth.displayName ?? auth.email ?? String(localized: "Apple ID ile girildi", bundle: .appLanguage))
-                        .font(Theme.headline(15))
+                        .font(.headline)
                         .foregroundStyle(theme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
                     if let email = auth.email {
                         Text(email)
-                            .font(Theme.caption(12))
+                            .font(.caption)
                             .foregroundStyle(theme.inkMuted)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
 
                 }
@@ -559,12 +569,12 @@ struct SettingsView: View {
                 auth.signOut()
                 signInMessage = nil
             }
-            .font(Theme.body(15))
+            .font(.callout)
             .foregroundStyle(theme.secondary)
             Button("Hesabı sil", role: .destructive) {
                 isConfirmingAccountDeletion = true
             }
-            .font(Theme.body(15))
+            .font(.callout)
         } else {
             SignInWithAppleButton(.signIn) { request in
                 request.requestedScopes = [.fullName, .email]
@@ -606,7 +616,7 @@ struct SettingsView: View {
                 .fill(on ? Color.green : Color.orange)
                 .frame(width: 8, height: 8)
             Text(on ? onText : offText)
-                .font(Theme.caption(13))
+                .font(.caption)
                 .foregroundStyle(theme.ink)
         }
     }
@@ -651,12 +661,16 @@ private struct ProToggleRow: View {
         Label {
             VStack(alignment: .leading, spacing: 2) {
                 Text(feature.title)
-                    .font(Theme.headline(15))
+                    .font(.headline)
                     .foregroundStyle(isPro ? theme.ink : theme.inkMuted)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 1)
                 Text(feature.subtitle)
-                    .font(Theme.caption(12))
+                    .font(.caption)
                     .foregroundStyle(theme.inkMuted)
+                    .fixedSize(horizontal: false, vertical: true)
             }
+            .accessibilityElement(children: .combine)
         } icon: {
             Image(systemName: isPro ? feature.iconName : "lock.fill")
                 .foregroundStyle(isPro ? theme.accent : theme.inkMuted)
@@ -711,7 +725,7 @@ private struct ThemePresetCard: View {
 
                 HStack(spacing: 5) {
                     Text(appTheme.displayName)
-                        .font(Theme.caption(13))
+                        .font(.caption)
                         .foregroundStyle(theme.ink)
                         .lineLimit(1)
                     Spacer(minLength: 2)

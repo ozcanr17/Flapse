@@ -113,6 +113,84 @@ final class FlapseUITests: XCTestCase {
         attachScreenshot(of: app, named: "saved-empty")
     }
 
+    /// Apple'ın iOS 17+ yerleşik erişilebilirlik denetimini ana gezinme yüzeylerinde
+    /// çalıştırır. Yeni ikon düğmeleri, yetersiz dokunma alanları, eksik açıklamalar
+    /// ve hatalı accessibility trait'leri release öncesinde otomatik yakalanır.
+    @MainActor
+    func testCoreScreensPassAccessibilityAudit() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["--uitests", "-auth.appleUserID", "uitest-user", "-AppleLanguages", "(tr)", "-AppleLocale", "tr_TR"]
+        app.launchEnvironment["FLAPSE_UI_TESTS"] = "1"
+        app.launch()
+
+        let startButton = app.buttons["Başla"]
+        if startButton.waitForExistence(timeout: 5) {
+            startButton.tap()
+        }
+
+        XCTAssertTrue(app.buttons["homeTab"].waitForExistence(timeout: 5))
+        try performStructuralAccessibilityAudit(on: app)
+
+        let projectsTab = app.buttons["projectsTab"]
+        projectsTab.tap()
+        XCTAssertTrue(app.buttons["addProjectButton"].waitForExistence(timeout: 5))
+        try performStructuralAccessibilityAudit(on: app)
+
+        let settingsButton = app.buttons["settingsButton"]
+        settingsButton.tap()
+        XCTAssertTrue(app.navigationBars["Ayarlar"].waitForExistence(timeout: 5))
+        try performStructuralAccessibilityAudit(on: app)
+    }
+
+    @MainActor
+    private func performStructuralAccessibilityAudit(on app: XCUIApplication) throws {
+        // XCTest'in kontrast analizi yarı saydam SwiftUI/Liquid Glass katmanlarında
+        // görünür piksel yerine ara katmanı örnekleyerek yanlış pozitif üretebiliyor.
+        // Kontrast, AppThemeTests'te gerçek WCAG luminance oranıyla deterministik
+        // doğrulanır. Dynamic Type ve textClipped denetimleri de semantik SwiftUI
+        // fontlarında glifin sıkı AX sınırını kesilme sanabildiği için aşağıdaki
+        // gerçek erişilebilirlik boyutu testiyle doğrulanır.
+        try app.performAccessibilityAudit(for: [
+            .elementDetection,
+            .hitRegion,
+            .sufficientElementDescription,
+            .trait
+        ])
+    }
+
+    @MainActor
+    func testCoreScreensRemainUsableAtLargestAccessibilityTextSize() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "--uitests",
+            "-auth.appleUserID", "uitest-user",
+            "-AppleLanguages", "(tr)",
+            "-AppleLocale", "tr_TR",
+            "-UIPreferredContentSizeCategoryName", "UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge"
+        ]
+        app.launchEnvironment["FLAPSE_UI_TESTS"] = "1"
+        app.launch()
+
+        let startButton = app.buttons["Başla"]
+        if startButton.waitForExistence(timeout: 5) {
+            startButton.tap()
+        }
+
+        XCTAssertTrue(app.buttons["homeTab"].waitForExistence(timeout: 5))
+        app.buttons["projectsTab"].tap()
+        XCTAssertTrue(app.buttons["addProjectButton"].waitForExistence(timeout: 5))
+        app.buttons["settingsButton"].tap()
+        XCTAssertTrue(app.navigationBars["Ayarlar"].waitForExistence(timeout: 5))
+        let proTitle = app.staticTexts["Flapse Pro'ya Geç"]
+        let smartAlignmentTitle = app.staticTexts["Akıllı hizalama"]
+        XCTAssertTrue(proTitle.waitForExistence(timeout: 5))
+        XCTAssertTrue(smartAlignmentTitle.waitForExistence(timeout: 5))
+        XCTAssertTrue(app.frame.insetBy(dx: -1, dy: -1).contains(proTitle.frame))
+        XCTAssertTrue(app.frame.insetBy(dx: -1, dy: -1).contains(smartAlignmentTitle.frame))
+
+        try app.performAccessibilityAudit(for: [.hitRegion])
+    }
+
     @MainActor
     func testInviteButtonDoesNotCrash() throws {
         let app = XCUIApplication()

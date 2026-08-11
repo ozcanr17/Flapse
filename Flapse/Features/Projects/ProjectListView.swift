@@ -568,29 +568,37 @@ private struct EmptyProjectsView: View {
                         .font(.system(size: 46, weight: .regular))
                         .foregroundStyle(theme.accent)
                 )
+                .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("İlk hikayeni başlat")
-                    .font(.system(size: 26, weight: .bold, design: .default))
+                    .font(.title2.bold())
                     .foregroundStyle(theme.ink)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text("Günde bir kare çek; zamanla değişimin\nkendiliğinden bir timelapse'e dönüşsün.")
-                    .font(.system(size: 16, weight: .regular, design: .default))
+                    .font(.body)
                     .foregroundStyle(theme.inkMuted)
                     .multilineTextAlignment(.center)
                     .lineSpacing(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Button(action: onCreate) {
                 Label("Yeni Proje", systemImage: "plus")
-                    .font(Theme.headline(17))
+                    .font(.headline.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .buttonStyle(.flapsePrimary)
-            .frame(maxWidth: 260)
+            .frame(maxWidth: 320)
             .padding(.top, 4)
 
             Button(action: onImport) {
                 Label("Fotoğraflardan proje oluştur", systemImage: "photo.on.rectangle.angled")
                     .font(.body.weight(.semibold))
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
             .foregroundStyle(theme.accent)
             .frame(minHeight: 44)

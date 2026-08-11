@@ -11,13 +11,15 @@ Kod tarafındaki mevcut durum: **1.0 (1) yayın adayı hazır; Apple hesabındak
 ## 11 Ağustos 2026 yayın adayı doğrulaması
 
 - Release build ve static analyzer başarılı.
-- 198 uygun birim testi geçti; CloudKit entitlement gerektiren testler simülatör paketinden ayrı tutuldu.
+- 201 uygun birim testi geçti; CloudKit entitlement gerektiren dört entegrasyon testi simülatör paketinden ayrı tutuldu.
+- Ana ekran erişilebilirlik denetimi ve en büyük erişilebilirlik yazı boyutu UI testi geçti.
 - 13 inç iPad üzerinde tam UI yolculuğu testi geçti.
-- Arşiv: `build/Flapse-1.0-1-20260811.xcarchive`
-- App Store IPA: `build/export-20260811/Flapse.ipa` (9,1 MB)
+- Son denetim arşivi: `build/Flapse-1.0-1-20260811-audit.xcarchive`
+- Son App Store IPA: `build/export-20260811-audit/Flapse.ipa` (9.503.979 byte)
 - IPA, Apple Distribution sertifikasıyla imzalı; `get-task-allow = false`, Push ve CloudKit ortamı Production.
 - iPhone 6.9 inç ve iPad 13 inç Türkçe ekran görüntüsü setleri `AppStoreScreenshots/` altında hazır.
 - Uygulama 20 arayüz dili içeriyor.
+- Ayrıntılı teknik denetim ve puanlar: `RELEASE_AUDIT_REPORT.md`.
 
 ## Tamamlanan teknik çalışmalar
 

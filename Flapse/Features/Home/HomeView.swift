@@ -143,7 +143,9 @@ struct HomeView: View {
                 .foregroundStyle(theme.ink)
             Text(Date.now.formatted(.dateTime.weekday(.wide).day().month(.wide).locale(AppLanguage.currentLocale)))
                 .font(.subheadline)
-                .foregroundStyle(theme.inkMuted)
+                // Tarih küçük gövde metni olduğu için Apple'ın kontrast denetiminde
+                // ikincil palet sınırına güvenmek yerine ana mürekkebin güvenli tonu.
+                .foregroundStyle(theme.ink)
         }
     }
 
@@ -180,15 +182,19 @@ struct HomeView: View {
                 .foregroundStyle(theme.accent)
                 .frame(width: 72, height: 72)
                 .background(theme.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 22, style: .continuous))
+                .accessibilityHidden(true)
 
             VStack(spacing: 8) {
                 Text("İlk hikayeni başlat")
                     .font(.title2.bold())
                     .foregroundStyle(theme.ink)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text("Günde bir kare çek; zamanla değişimin\nkendiliğinden bir timelapse'e dönüşsün.")
                     .font(.body)
                     .foregroundStyle(theme.inkMuted)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Button("Yeni Proje", action: onCreateProject)

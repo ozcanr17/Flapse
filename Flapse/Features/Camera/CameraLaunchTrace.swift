@@ -12,15 +12,11 @@ import os
 /// `log stream --predicate 'subsystem == "rozcan.Flapse" AND category == "camera"'`.
 enum CameraLaunchTrace {
 
-    // Yayınlanan derlemede iz yayılmaz; `cameraLog` da orada `OSLog.disabled`'a bağlı.
     #if DEBUG
     private static let signposter = OSSignposter(
         subsystem: "rozcan.Flapse",
         category: "camera.launch"
     )
-    #else
-    private static let signposter = OSSignposter(logHandle: OSLog.disabled)
-    #endif
 
     nonisolated(unsafe) private static var startedAt: CFAbsoluteTime?
     nonisolated(unsafe) private static var lastAt: CFAbsoluteTime?
@@ -55,4 +51,10 @@ enum CameraLaunchTrace {
         startedAt = nil
         lastAt = nil
     }
+    #else
+    // Release paketinde kamera ölçüm state'i ve zaman hesapları bulunmaz.
+    @inline(__always) static func begin(_ source: String) {}
+    @inline(__always) static func mark(_ label: String) {}
+    @inline(__always) static func end(_ label: String) {}
+    #endif
 }

@@ -25,8 +25,12 @@ struct CloudKitFeedbackService: FeedbackSubmitting {
     /// CloudKit'e hiç dokunulmaması gereken süreçler (UI testleri) için: imzasız bir
     /// süreçte CKContainer oluşturmak hata döndürmek yerine SIGTRAP üretebilir.
     static var isEnabledForCurrentProcess: Bool {
+        #if DEBUG
         !ProcessInfo.processInfo.arguments.contains("--uitests")
             && ProcessInfo.processInfo.environment["FLAPSE_UI_TESTS"] != "1"
+        #else
+        true
+        #endif
     }
 
     private let containerIdentifier: String

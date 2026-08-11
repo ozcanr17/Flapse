@@ -20,8 +20,10 @@ Son doğrulama: **2026-08-11**. "Doğrulandı" yazan maddeler bu tarihte gerçek
       kaynaklarında bulunmuyor.
 - [x] GitHub Actions CI etkin: macOS 26 / Xcode 26.6 üzerinde Release build,
       static analyze ve unit test çalıştırıyor.
-- [x] **Unit testler yeşil — 2026-08-11: 198 uygun test, 0 hata.** CloudKit entitlement
-      isteyen testler simülatör paketinden ayrı tutuldu.
+- [x] **Unit testler yeşil — 2026-08-11: 201 uygun test, 0 hata.** CloudKit entitlement
+      isteyen dört entegrasyon testi simülatör paketinden ayrı tutuldu.
+- [x] **Erişilebilirlik testleri yeşil** — ana ekran yapısal audit'i ve en büyük
+      erişilebilirlik yazı boyutunda home → projects → settings akışı geçti.
 - [x] **UI testi doğrulandı** — 13 inç iPad simülatöründe tam kullanıcı yolculuğu geçti.
 
 ## Gizlilik beyanı — DİKKAT
@@ -49,8 +51,9 @@ Beyan edilmesi gereken tek şey geri bildirim akışıdır.
 
 ## İmzalama
 
-- [x] 2026-08-11'de otomatik provisioning ile generic iOS Release arşivi üretildi.
-- [x] Arşiv App Store Connect yöntemiyle dışa aktarıldı: **9.1 MB IPA**,
+- [x] 2026-08-11'de otomatik provisioning ile generic iOS Release arşivi üretildi:
+      `build/Flapse-1.0-1-20260811-audit.xcarchive`.
+- [x] Arşiv App Store Connect yöntemiyle dışa aktarıldı: **9.503.979 byte IPA**,
       Apple Distribution imzası geçerli, `get-task-allow = false`,
       `aps-environment = production`, CloudKit environment = Production.
 - [ ] Organizer'da **Validate App** ve ardından Upload işlemini owner tamamlamalı.

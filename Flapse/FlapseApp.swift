@@ -12,6 +12,7 @@ struct FlapseApp: App {
     init() {
         LanguageOverrideBundle.activate()
         CloudBackupPreference.prepareForLaunch()
+        #if DEBUG
         let isUITesting = ProcessInfo.processInfo.arguments.contains("--uitests")
             || ProcessInfo.processInfo.environment["FLAPSE_UI_TESTS"] == "1"
         if isUITesting {
@@ -22,6 +23,13 @@ struct FlapseApp: App {
             container = result.container
             storageFailureDescription = result.failureDescription
         }
+        #else
+        // Release builds compile only the production store path; UI-test launch
+        // arguments cannot expose an in-memory data-store bypass.
+        let result = AppModelContainer.makeProduction()
+        container = result.container
+        storageFailureDescription = result.failureDescription
+        #endif
     }
 
     @State private var store = StoreService()

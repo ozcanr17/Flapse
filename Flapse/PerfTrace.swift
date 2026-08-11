@@ -12,14 +12,9 @@ import os
 /// `log stream --predicate 'subsystem == "rozcan.Flapse" AND category == "perf"'`
 enum PerfTrace {
 
-    // Yayınlanan derlemede ölçüm tamamen susar; çağrı yerleri değişmeden kalır.
     #if DEBUG
     private static let log = Logger(subsystem: "rozcan.Flapse", category: "perf")
     private static let signposter = OSSignposter(subsystem: "rozcan.Flapse", category: "perf")
-    #else
-    private static let log = Logger(OSLog.disabled)
-    private static let signposter = OSSignposter(logHandle: OSLog.disabled)
-    #endif
 
     private struct Entry {
         let startedAt: CFAbsoluteTime
@@ -72,4 +67,16 @@ enum PerfTrace {
         }
         return try work()
     }
+    #else
+    // Release'te yalnızca logger değil, zaman ölçümü, sözlük ve kilit maliyeti de
+    // tamamen derleme dışı kalır. Çağrı yerleri optimize edilerek no-op olur.
+    @inline(__always) static func begin(_ name: String, detail: String = "") {}
+    @inline(__always) static func mark(_ name: String, _ label: String) {}
+    @inline(__always) static func end(_ name: String, _ label: String = "end") {}
+
+    @discardableResult
+    @inline(__always) static func measure<T>(_ name: String, _ work: () throws -> T) rethrows -> T {
+        try work()
+    }
+    #endif
 }

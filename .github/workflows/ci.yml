@@ -43,4 +43,16 @@ jobs:
           xcodebuild test -project Flapse.xcodeproj \
             -scheme Flapse \
             -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
-            -only-testing:FlapseTests | tail -120
+            -only-testing:FlapseTests \
+            -skip-testing:FlapseTests/CaptureTogetherTests/test_paylasimKoku_paylasimKimligineGoreSecilir \
+            -skip-testing:FlapseTests/CaptureTogetherTests/test_yanlisProjeyeKopyalananKareler_cloudIliskisineGoreTemizlenir \
+            -skip-testing:FlapseTests/CaptureTogetherTests/test_yeniPaylasimlar_projeBasinaAyriZoneKullanir \
+            -skip-testing:FlapseTests/ProjectRepositoryTests/test_ortakProjedeKaliciSilinenCekim_yenidenEsitlenmez | tail -120
+      - name: Accessibility smoke tests
+        run: |
+          set -o pipefail
+          xcodebuild test -project Flapse.xcodeproj \
+            -scheme Flapse \
+            -destination 'platform=iOS Simulator,name=iPhone 17 Pro,OS=latest' \
+            -only-testing:FlapseUITests/FlapseUITests/testCoreScreensPassAccessibilityAudit \
+            -only-testing:FlapseUITests/FlapseUITests/testCoreScreensRemainUsableAtLargestAccessibilityTextSize | tail -120

@@ -45,4 +45,48 @@ final class AppThemeTests: XCTestCase {
         XCTAssertEqual(configuration.palette.canvas.hexRGB, "101820")
         XCTAssertEqual(configuration.palette.accent.hexRGB, "FF6B6B")
     }
+
+    func test_hazirTemalar_metinKontrastiWcagAAEsiginiKarsilar() {
+        for theme in AppTheme.allCases {
+            let palette = theme.palette
+            for background in [palette.canvas, palette.surface] {
+                XCTAssertGreaterThanOrEqual(
+                    contrastRatio(palette.ink, background),
+                    4.5,
+                    "\(theme.rawValue) ana metin kontrastı yetersiz"
+                )
+                XCTAssertGreaterThanOrEqual(
+                    contrastRatio(palette.inkMuted, background),
+                    4.5,
+                    "\(theme.rawValue) ikincil metin kontrastı yetersiz"
+                )
+            }
+            XCTAssertGreaterThanOrEqual(
+                contrastRatio(palette.accentForeground, palette.accent),
+                4.5,
+                "\(theme.rawValue) birincil düğme kontrastı yetersiz"
+            )
+        }
+    }
+
+    private func contrastRatio(_ first: Color, _ second: Color) -> CGFloat {
+        let firstLuminance = luminance(first)
+        let secondLuminance = luminance(second)
+        let lighter = max(firstLuminance, secondLuminance)
+        let darker = min(firstLuminance, secondLuminance)
+        return (lighter + 0.05) / (darker + 0.05)
+    }
+
+    private func luminance(_ color: Color) -> CGFloat {
+        let resolved = UIColor(color).resolvedColor(with: UITraitCollection(userInterfaceStyle: .light))
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+        guard resolved.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else { return 0 }
+        func channel(_ value: CGFloat) -> CGFloat {
+            value <= 0.04045 ? value / 12.92 : pow((value + 0.055) / 1.055, 2.4)
+        }
+        return 0.2126 * channel(red) + 0.7152 * channel(green) + 0.0722 * channel(blue)
+    }
 }
