@@ -184,6 +184,18 @@ Gizli özellik bırakma ve açıklamada uygulamanın yapmadığı bir işlevi va
 - [ ] Review Notes hazır
 - [ ] Build sürüme bağlandı ve incelemeye gönderildi
 
+## Yayın sonrası monetization takibi
+
+1.0 yayın adayı mevcut StoreKit 2 satın alma sistemiyle gönderilecektir. Yayından sonra
+RevenueCat, uygulama binary'sini değiştirmeden App Store Connect ve App Store Server
+Notifications V2 üzerinden yeni satın alma ve abonelik olaylarını takip edecek şekilde
+bağlanabilir. Böylece ilk sürümün satın alma/restore davranışı riske atılmaz.
+
+RevenueCat bağlantısı yapılınca App Store Connect App Privacy formuna Purchase History
+(Analytics + App Functionality, Tracking: Hayır) beyanı eklenmelidir. RevenueCat paywall,
+entitlement veya deney özellikleri istenirse SDK geçişi 1.1'de ayrı regresyon testleriyle
+yapılacaktır. Ayrıntılı kurulum ve güvenlik sınırları: `REVENUECAT_KURULUM_REHBERI.md`.
+
 ## Şu anda yayını engelleyen konular
 
 Kod tarafında bilinen kritik bir yayın engeli yoktur. Kalan engeller Apple hesabı üzerinde yapılacak CloudKit Production deploy, App Store Connect ürün/metadata/privacy işlemleri, içerik lisans kontrolü ve gerçek cihaz TestFlight doğrulamasıdır.

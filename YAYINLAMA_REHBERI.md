@@ -135,6 +135,9 @@ için: App Store Connect → Users and Access → **Sandbox Testers**'dan test h
 ## 9. Yayın sonrası
 
 - Xcode Organizer → Crashes ve App Analytics'i izle.
+- Gelir, abonelik ve müşteri yaşam döngüsü takibi için RevenueCat'i önce kodsuz
+  App Store Server Notifications bağlantısıyla kur. Satın alma katmanını değiştirmeden
+  uygulanacak adımlar `REVENUECAT_KURULUM_REHBERI.md` dosyasındadır.
 - Yeni sürümde `MARKETING_VERSION`'ı artır (1.0 → 1.1); her yüklemede
   `CURRENT_PROJECT_VERSION` da artmalı.
 - `CKShare.publicPermission = .readWrite` bilinçli tercih (linki olan herkes katılabilir) —

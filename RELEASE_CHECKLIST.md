@@ -98,3 +98,11 @@ Entitlement'lar **silinemez**, hepsi gerçekten kullanılıyor:
 
 - [ ] İstenirse `LegalLinks.appSite` QR hedefini App Store bağlantısıyla değiştir
 - [ ] Xcode Organizer'da çökme raporlarını izle
+- [ ] RevenueCat Apple app config oluştur; bundle ID `rozcan.Flapse`
+- [ ] Apple In-App Purchase Key ve App Store Connect API Key'i yalnız RevenueCat paneline yükle
+- [ ] App Store Server Notifications V2 Production + Sandbox URL'lerini RevenueCat'e bağla
+- [ ] `Track new purchases from server-to-server notifications` seçeneğini aç
+- [ ] Üç StoreKit ürününü içe aktar ve sandbox olaylarının dashboard'da göründüğünü doğrula
+- [ ] App Privacy'ye RevenueCat Purchase History beyanını ekle
+- [ ] SDK/paywall/entitlement geçişi istenirse 1.1'de, `REVENUECAT_KURULUM_REHBERI.md`
+      kabul kriterleriyle ayrı değişiklik olarak uygula
